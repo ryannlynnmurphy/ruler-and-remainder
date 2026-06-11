@@ -16,7 +16,7 @@ date: "April 2026"
 
 ## Series Overview
 
-This document compiles the complete Scatter Computing research series: nine papers, three companion essays, and one coda, produced across a single week in April 2026. The series develops an argument about AI infrastructure, alignment, and the case for distributed edge computing — written by a playwright with no prior technical training, using the tools the argument critiques as its primary research instruments.
+This document compiles the complete Scatter Computing research series: seven papers, three companion essays, and one coda, produced across a single week in April 2026. The series develops an argument about AI infrastructure, alignment, and the case for distributed edge computing — written by a playwright with no prior technical training, using the tools the argument critiques as its primary research instruments.
 
 The organizing metric is intelligence per watt. The central claim is that a business model built on data extraction cannot produce aligned AI systems, because extraction is asymmetric and alignment requires symmetry. The research program that follows — constitutional infrastructure — specifies what alignment requires at the institutional level and names the work that remains.
 
