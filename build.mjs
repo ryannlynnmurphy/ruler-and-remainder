@@ -165,7 +165,18 @@ function piece({ title, kicker, md, backHref = "/#corpus", backLabel = "Index", 
 function bookPage(b, md) {
   const { withRefs, block } = footnotes(md);
   const noH1 = withRefs.replace(/^\s*#\s+.+?\n/, "");
-  const html = renderMd(noH1);
+  let html = renderMd(noH1);
+  // editorial drop cap mode: in "chapter" books, the cap lands only on a true
+  // chapter opening — never front-matter (Abstract/Contents) or appendices.
+  // Default books keep a cap on every h2 opener (see styles.css).
+  const capChapter = b.dropcap === "chapter";
+  if (capChapter) {
+    html = html.replace(
+      /(<h2[^>]*>\s*(?:chapter|prologue|epilogue|coda)\b[\s\S]*?<\/h2>\s*)<p>/gi,
+      '$1<p class="chapter-open">'
+    );
+  }
+  const proseClass = "bookprose prose reveal" + (capChapter ? " caps-chapter" : "");
   const author = /with claude/i.test(b.kicker) ? "by claude &amp; ryann" : "by ryann murphy";
   const dl = `read below, or take it with you — <a href="${b.epub}">↓ epub</a>${b.pdf ? ` · <a href="${b.pdf}">↓ pdf</a>` : ""}`;
   return shell({
@@ -182,7 +193,7 @@ function bookPage(b, md) {
     <p class="bookdek">${b.dek}</p>
     <p class="downloads">${dl}</p>
   </header>
-  <div class="bookprose prose reveal">${html}${block}</div>
+  <div class="${proseClass}">${html}${block}</div>
   <div class="foot"><a href="/#books">← all books</a></div>
 </article>`,
   });
@@ -344,6 +355,7 @@ const BOOKS = [
     dek: "Architecture is prior to governance. How systems read intent into action — and where the reading outruns what the architecture can guarantee.",
     pdfFrom: ["book/pdf/Narrative_Intelligence_interior_fixed.pdf", "book/pdf/Narrative_Intelligence.pdf"],
     artbook: false,
+    dropcap: "chapter", // drop cap on chapter openers only, not front-matter/appendices
   },
   {
     slug: "our-relationship",

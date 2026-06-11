@@ -211,6 +211,9 @@ main { padding-left: 36px; }
 .bookprose li { margin-bottom: 0.4rem; text-indent: 0; }
 .bookprose pre { margin: 1.3rem 0; text-indent: 0; }
 .bookprose h2 + p::first-letter, .bookprose > p:first-of-type::first-letter { font-family: var(--display); font-weight: 700; float: left; font-size: 3rem; line-height: 0.78; padding: 0.3rem 0.5rem 0 0; color: var(--measure); }
+/* chapter-mode: cap only true chapter openers, never front-matter/appendices */
+.bookprose.caps-chapter h2 + p::first-letter, .bookprose.caps-chapter > p:first-of-type::first-letter { font: inherit; float: none; padding: 0; color: inherit; }
+.bookprose.caps-chapter p.chapter-open::first-letter { font-family: var(--display); font-weight: 700; float: left; font-size: 3rem; line-height: 0.78; padding: 0.3rem 0.5rem 0 0; color: var(--measure); }
 .bookprose blockquote { text-indent: 0; margin: 1.5rem 0; }
 
 /* ---------- happy face cell ---------- */
