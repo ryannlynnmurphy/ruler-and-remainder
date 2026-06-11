@@ -895,7 +895,6 @@ The distribution is the proof. Every case study in §4 is a place where the meth
 
 Vol. III will be the cluster paper — what happens when the local substrate stops being one laptop and becomes four Raspberry Pis cooperating. Vol. IV will be the thermodynamic paper with actual wattage. Vol. V, if this goes the way I think it goes, will be the community-infrastructure paper — the block, the library, the basement — because the household is not the last scale, it is the first one.
 
-
 ---
 
 \newpage
@@ -1004,7 +1003,6 @@ This is a real paper. It is a valuable paper. It is not the paper that was writt
 The paper's author will, I suspect, respond to these arguments by treating them not as refutations but as material. She will fold them into the next draft, or into the synthesis. That is the correct response, because that is what the method she is using asks for. The antithesis is not the end of the argument. It is the condition of the synthesis being worth anything at all.
 
 Now she has one.
-
 
 ---
 
@@ -1121,7 +1119,6 @@ The watt is not a refutation of the vision. It is the condition of the vision's 
 Vol. III is the cluster paper. Its hypothesis will be the frontier threshold prediction from §6. Its antithesis will be written when the hypothesis is written. Its synthesis will generate the next round of predictions, which will structure Vol. IV. The method will keep running for as long as there are claims bold enough to need testing and tests rigorous enough to generate new claims. I intend this to keep running for a while.
 
 The three papers of today are one paper, distributed across three documents for the sake of doing each document's work cleanly. Read them in order. Read them as one argument, executed adversarially with itself, concluded honestly. This is what I mean when I say I am a playwright-technologist, and it is what I mean when I say the method is mine, and it is what I mean when I say Scatter Computing is a research program, not a product. A product ships once. A research program iterates. We are on iteration one.
-
 
 ---
 
@@ -1372,7 +1369,6 @@ Begin.
 
 *Scatter Computing · AI Safety Through Decentralization · New York, NY*
 
-
 ---
 
 \newpage
@@ -1536,7 +1532,6 @@ That is the method. That is the research. That is the whole thing.
 
 *Scatter Computing · AI Safety Through Decentralization · New York, NY*
 
-
 ---
 
 \newpage
@@ -1671,7 +1666,6 @@ That is what we have been doing. That is what this is.
 
 *Scatter Computing · AI Safety Through Decentralization · New York, NY*
 *ryannlynn.substack.com · github.com/hzl-ai*
-
 
 ---
 
@@ -1823,7 +1817,6 @@ The method is the argument. The argument is the work. The work is larger than an
 
 *Scatter Computing · AI Safety Through Decentralization · New York, NY*
 *ryannlynn.substack.com*
-
 
 ---
 
@@ -2003,7 +1996,6 @@ That is what the philosophy costs. That is what it runs on.
 *Scatter Computing · AI Safety Through Decentralization · New York, NY*
 *ryannlynn.substack.com*
 
-
 ---
 
 \newpage
@@ -2078,7 +2070,6 @@ That is what the philosophy costs. That is what it runs on.
 ---
 
 *Scatter Computing · AI Safety Through Decentralization · New York, NY*
-
 
 ---
 

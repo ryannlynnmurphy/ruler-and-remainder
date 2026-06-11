@@ -722,7 +722,6 @@ The book closes on a question it cannot answer. These are the smaller, more trac
 
 The gate remains open. So does the ledger.
 
-
 # Part VI — The Conservation of Mimesis
 
 *The law beneath the whole book: what a copy carries through, what it cannot, and the engine the present built to test the difference.*

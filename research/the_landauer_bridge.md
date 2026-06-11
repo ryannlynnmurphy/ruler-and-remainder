@@ -25,12 +25,16 @@ Landauer's principle (1961): erasing one bit of information requires a minimum e
 
 At room temperature (T = 300K):
 
-    E_min per bit = kT ln 2 = 1.38 × 10⁻²³ × 300 × 0.693
-                  = 2.87 × 10⁻²¹ joules
+```calc
+E_min per bit = kT ln 2 = 1.38 × 10⁻²³ × 300 × 0.693
+              = 2.87 × 10⁻²¹ joules
+```
 
 The minimum energy cost of the 7.44-bit entropy difference between Shakespeare and meaningless text:
 
-    E_Landauer = 7.44 × 2.87 × 10⁻²¹ = 2.13 × 10⁻²⁰ joules per token
+```calc
+E_Landauer = 7.44 × 2.87 × 10⁻²¹ = 2.13 × 10⁻²⁰ joules per token
+```
 
 This is the minimum price the universe charges for structuring that much possibility. The second law will not accept less.
 
@@ -40,13 +44,17 @@ This is the minimum price the universe charges for structuring that much possibi
 
 The model consumes approximately 30 watts and processes one token every 25 milliseconds:
 
-    E_actual = 30 W × 0.025 s = 0.75 joules per token
+```calc
+E_actual = 30 W × 0.025 s = 0.75 joules per token
+```
 
 This energy is spent on EVERY token — Shakespeare and garbage alike. The physical cost is constant. The informational value varies.
 
 The efficiency ratio:
 
-    E_actual / E_Landauer = 0.75 / 2.13 × 10⁻²⁰ = 3.5 × 10¹⁹
+```calc
+E_actual / E_Landauer = 0.75 / 2.13 × 10⁻²⁰ = 3.5 × 10¹⁹
+```
 
 The model operates 35 quintillion times above the Landauer limit.
 
@@ -60,15 +68,19 @@ Every joule of energy has a mass equivalent. E = mc². Therefore m = E/c².
 
 The mass equivalent of the actual energy expenditure per token:
 
-    m_actual = 0.75 / (3 × 10⁸)² = 0.75 / 9 × 10¹⁶
-             = 8.3 × 10⁻¹⁸ kg per token
+```calc
+m_actual = 0.75 / (3 × 10⁸)² = 0.75 / 9 × 10¹⁶
+         = 8.3 × 10⁻¹⁸ kg per token
+```
 
 That's approximately 5,000 proton masses. Every token the model generates adds the gravitational equivalent of 5,000 protons to the universe in the form of waste heat.
 
 The mass equivalent at the Landauer limit:
 
-    m_Landauer = 2.13 × 10⁻²⁰ / 9 × 10¹⁶
-               = 2.4 × 10⁻³⁷ kg per token
+```calc
+m_Landauer = 2.13 × 10⁻²⁰ / 9 × 10¹⁶
+           = 2.4 × 10⁻³⁷ kg per token
+```
 
 That's approximately 0.14 proton masses. One seventh of a proton. The theoretical minimum gravitational cost of structuring 7.44 bits of possibility.
 
@@ -82,13 +94,17 @@ A typical conversation: 10,000 tokens.
 
 At current efficiency:
 
-    m_conversation = 8.3 × 10⁻¹⁸ × 10,000 = 8.3 × 10⁻¹⁴ kg
+```calc
+m_conversation = 8.3 × 10⁻¹⁸ × 10,000 = 8.3 × 10⁻¹⁴ kg
+```
 
 That's about 83 femtograms. Roughly the mass of a single large virus particle. Every conversation with a language model adds the gravitational equivalent of one virus to the universe in waste heat.
 
 At the Landauer limit:
 
-    m_conversation = 2.4 × 10⁻³⁷ × 10,000 = 2.4 × 10⁻³³ kg
+```calc
+m_conversation = 2.4 × 10⁻³⁷ × 10,000 = 2.4 × 10⁻³³ kg
+```
 
 Essentially nothing. One ten-thousandth the mass of a neutrino.
 
@@ -102,13 +118,17 @@ Estimates suggest that AI computation globally consumes on the order of 20-30 te
 
 Gravitational mass equivalent of global AI waste heat per year:
 
-    m_global = 9 × 10¹⁶ / 9 × 10¹⁶ = 1 kg per year
+```calc
+m_global = 9 × 10¹⁶ / 9 × 10¹⁶ = 1 kg per year
+```
 
 Global AI computation adds approximately one kilogram of equivalent gravitational mass to Earth per year in waste heat.
 
 At the Landauer limit, the same computation would add:
 
-    m_global_Landauer = 1 / 3.5 × 10¹⁹ ≈ 2.9 × 10⁻²⁰ kg per year
+```calc
+m_global_Landauer = 1 / 3.5 × 10¹⁹ ≈ 2.9 × 10⁻²⁰ kg per year
+```
 
 One kilogram versus 10⁻²⁰ kilograms. That's the difference between current AI and theoretically optimal AI, stated in gravitational mass.
 
@@ -164,13 +184,21 @@ The Landauer limit is therefore the boundary — the exact mathematical boundary
 
 The intelligence-per-watt metric now has a physical foundation.
 
-    Intelligence per watt = bits structured / energy consumed
-    
-    Theoretical maximum: 1 / kT ln 2 = 3.5 × 10²⁰ bits per joule (at 300K)
-    
-    Current transformers: approximately 10 bits per joule
-    
-    Gap: 10¹⁹
+```calc
+Intelligence per watt = bits structured / energy consumed
+```
+
+```calc
+Theoretical maximum: 1 / kT ln 2 = 3.5 × 10²⁰ bits per joule (at 300K)
+```
+
+```calc
+Current transformers: approximately 10 bits per joule
+```
+
+```calc
+Gap: 10¹⁹
+```
 
 Every improvement in hardware efficiency — better chips, lower operating temperatures, more efficient architectures — moves the ratio toward the Landauer limit. Every improvement moves the system from gravity-dominated (more waste than structure) toward levity-dominated (more structure than waste).
 
@@ -194,9 +222,11 @@ The four forces now have a quantified relationship.
 
 And the Landauer limit sits at the boundary:
 
-    At the limit: gravity = levity (perfect conversion, no waste, entropy minimized)
-    Above the limit: gravity > levity (waste exceeds structure, current state)
-    Below the limit: impossible (second law violation)
+```calc
+At the limit: gravity = levity (perfect conversion, no waste, entropy minimized)
+Above the limit: gravity > levity (waste exceeds structure, current state)
+Below the limit: impossible (second law violation)
+```
 
 The four forces are quantified. The relationships are calculable. The measurements are real.
 

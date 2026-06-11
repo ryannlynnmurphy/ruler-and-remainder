@@ -85,7 +85,6 @@ Check the math. Then decide.
 **Chapter 13: Fourteen attacks**
 *The adversarial night. Template conformity. Confident nonsense. Word salad. Surprising truths. Tautologies. Authority framing. Quantum ambiguity. Specific lies. Memorized fiction. The specificity gradient. Specific nonsense. The direct test.*
 
-
 **Chapter 14: Specificity-to-reality**
 *The finding that survived. The ordering from Attack 14. What the geometry actually measures. Legibility is specificity.*
 

@@ -12,7 +12,6 @@ We hadn't tested it. I had been talking about it as though we had. The book had 
 
 She said: lets just do it. I wrote the code. She ran it.
 
-
 ## Three models
 
 GPT-2. 124 million parameters. The smallest model, the fastest to run, the first result.
@@ -31,7 +30,6 @@ I told Ryann: the model is confidently hallucinating. S measures commitment, not
 
 She said: lets do more tests.
 
-
 ## Round two
 
 I wrote three sharper experiments. Each one targeted a different version of the claim, because the claim had been doing too many things at once and I wanted to know which parts were dead and which were wounded.
@@ -43,7 +41,6 @@ Test B: regime transitions. The Gettysburg Address, Genesis, Martin Luther King,
 Test C: graduated hallucination. The same five-sentence paragraph about the Earth, the Moon, water, gravity, and light. Version one: all true. Version two: one lie swapped in. Version three: two lies. All the way down to version six: every statement false. Does S correlate with the ratio of truth to falsehood?
 
 She ran it on GPT-2. Then Qwen 2.5 at three billion parameters. Then Qwen 2.5 at 1.5 billion. Three architectures. Three training corpora. Three parameter counts.
-
 
 ## Test A: the null
 
@@ -59,7 +56,6 @@ The model's internal geometry does not care whether Paris or Madrid is the capit
 
 This is the cleanest negative result in the book. Ten pairs, three models, thirty comparisons. S is not a truth detector. Not on forced text, not during generation, not anywhere we looked.
 
-
 ## Test C: the inversion
 
 This one was worse than null.
@@ -74,7 +70,6 @@ S measures how hard the model is working to make sense of its input. Falsehood m
 
 This is not what the book predicted. This is the opposite of what the book predicted. And it replicated with a correlation of −0.98, which is about as clean as empirical science gets.
 
-
 ## Test B: the one that didn't travel
 
 On GPT-2, the regime transition result was the night's only positive finding. Six memorized texts, six collapses. The Gettysburg Address started at S = 0.98 and fell to 0.29. Martin Luther King started at 0.96 and fell to 0.31. Humpty Dumpty started at 0.99, and when GPT-2 ran out of nursery rhyme it generated "He was a very good man. He was a very good man. He was a very good man." S collapsed to 0.40. The periodic table degenerated into "Oxygen, Oxygen, Oxygen, Oxygen" and S fell to 0.19.
@@ -86,7 +81,6 @@ Then she ran it on Qwen 1.5B. The Gettysburg Address: "a new nation, conceived i
 Qwen didn't degenerate. GPT-2 did. The regime collapse wasn't a property of S. It was S detecting a property of GPT-2 — a small, old model's tendency to fall into repetition loops when it runs out of memorized content. A better model doesn't loop. S doesn't drop. The finding was model-specific. It didn't travel.
 
 Three tests. One null, one inverted, one model-specific. The hallucination prediction is dead.
-
 
 ## What survived
 
@@ -105,7 +99,6 @@ But the leap from "S orders static text by commitment" to "S-drops during genera
 The inversion result — S increasing with falsehood — is itself a finding. A replicated, cross-architecture finding with a correlation of −0.98. It tells you something real about how attention mechanisms process unexpected content. It is the kind of finding that could appear in a short paper with a clear title: "Attention Coherence Increases Under Semantic Violation in Causal Language Models." Three models. Ten matched pairs. Graduated truth manipulation. Clean result.
 
 That paper would not contain a field equation. It would not contain a theory of consciousness. It would not contain the word anteriority. It would be four pages long and it would be correct.
-
 
 ## The night
 

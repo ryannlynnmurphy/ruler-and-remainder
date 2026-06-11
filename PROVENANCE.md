@@ -16,12 +16,10 @@ corpus does not depend on or incorporate proprietary work done for anyone else.
 To keep that boundary clean, the following were deliberately **not** included in
 this open repository:
 
-- Engagement-specific go-to-market, positioning, and concept briefs written for a
-  particular company or product.
+- Engagement-specific go-to-market, positioning, and concept briefs written for a particular company or product.
 - A vendor procurement / CISO technical brief written for a specific buyer context.
 - An operational research-workstation system prompt tied to a specific product.
-- Personal infrastructure and setup notes (machine setup, key-rotation checklists)
-  that are operational rather than part of the corpus.
+- Personal infrastructure and setup notes (machine setup, key-rotation checklists) that are operational rather than part of the corpus.
 - A company launch website.
 
 None of these are part of the corpus's argument; they were excluded so that what

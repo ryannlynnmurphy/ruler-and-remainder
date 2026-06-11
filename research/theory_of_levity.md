@@ -56,7 +56,9 @@ The dimensionality of the interior metric is not specified by the axioms and may
 
 **Equation 1:**
 
-    L_ab = κ_L · A_ab
+```calc
+L_ab = κ_L · A_ab
+```
 
 where:
 
@@ -96,8 +98,10 @@ This prediction aligns with and provides theoretical grounding for the empirical
 
 The theory requires an observable — a quantity that can be computed from a real system and that captures the tightness of anteriority. The proposed observable is *specificity*, S, defined as:
 
-    TC = −½ ln det(R)
-    S = 1 − exp(−TC)
+```calc
+TC = −½ ln det(R)
+S = 1 − exp(−TC)
+```
 
 where R is the correlation matrix of a system's internal state vectors. For a transformer, R would be computed from the attention heads at a given layer or across layers.
 

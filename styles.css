@@ -150,13 +150,21 @@ main { padding-left: 36px; }
 .prose h2 { font-family: var(--display); font-weight: 800; font-size: 1.7rem; letter-spacing: -0.01em; margin: 2.8rem 0 0.7rem; }
 .prose h3 { font-family: var(--display); font-weight: 700; font-size: 1.28rem; margin: 2rem 0 0.5rem; }
 .prose p { margin: 0 0 1.25rem; }
+.prose ul, .prose ol { margin: 0 0 1.35rem; padding-left: 1.35rem; }
+.prose li { margin-bottom: 0.5rem; }
+.prose li > p { margin: 0 0 0.35rem; }
 .prose a { color: var(--measure); }
 .prose blockquote { margin: 1.7rem 0; padding-left: 1.3rem; border-left: 4px solid var(--measure); font-style: italic; color: var(--ink-soft); font-size: 1.12rem; }
 /* section break = a small long-division house (the recurring motif) */
 .prose hr { border: none; width: 2.6em; height: 0.5em; margin: 2.8rem 0; border-top: 2px solid var(--measure); position: relative; overflow: visible; }
 .prose hr::before { content: ")"; position: absolute; left: -0.02em; top: -0.7em; color: var(--measure); font-family: var(--display); font-weight: 400; font-size: 1.1em; transform: scaleY(1.45) scaleX(0.78); }
 .prose code { font-family: var(--mono); font-size: 0.82em; background: var(--paper-2); padding: 0.1em 0.35em; }
-.prose pre { font-family: var(--mono); font-size: 0.8rem; line-height: 1.5; background: var(--ink); color: #efe9d8; padding: 1rem 1.2rem; overflow-x: auto; }
+.prose pre { font-family: var(--mono); font-size: 0.8rem; line-height: 1.5; background: var(--ink); color: #efe9d8; padding: 1rem 1.2rem; overflow-x: auto; margin: 1.4rem 0; }
+.prose pre.calc, .bookprose pre.calc {
+  background: var(--paper-2); color: var(--ink-soft); border-left: 3px solid var(--measure);
+  padding: 0.85rem 1.15rem; font-size: 0.84rem; line-height: 1.58; box-shadow: inset 0 0 0 1px var(--rule);
+}
+.prose pre.calc code, .bookprose pre.calc code { background: none; padding: 0; color: inherit; }
 .prose pre code { background: none; padding: 0; }
 .prose table { width: 100%; border-collapse: collapse; font-family: var(--serif); font-size: 0.92rem; margin: 1.7rem 0; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
 .prose th, .prose td { text-align: left; padding: 0.55rem 0.7rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
@@ -177,9 +185,11 @@ main { padding-left: 36px; }
 .doc .head { border-bottom: 1px solid var(--rule); }
 .doc .filemeta { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.03em; color: var(--muted); margin: 0.9rem 0 0; }
 .doc .filemeta::before { content: "▢ "; color: var(--measure); }
-.doc .prose { font-size: 1.12rem; line-height: 1.72; }
+.doc .prose { font-size: 1.12rem; line-height: 1.72; max-width: 36rem; }
 .doc .prose p { margin: 0 0 1.3rem; }
-.doc .prose h2 { margin-top: 2.4rem; }
+.doc .prose h2 { margin-top: 2.6rem; margin-bottom: 0.85rem; }
+.doc .prose h3 { margin-top: 1.8rem; margin-bottom: 0.55rem; font-size: 1.15rem; }
+.doc .prose table { font-size: 0.86rem; display: block; overflow-x: auto; }
 
 /* ---------- book reading mode (beautiful ebook) ---------- */
 .book-wrap { max-width: 33rem; margin: 0 auto; padding: clamp(1.4rem,5vh,3rem) clamp(1.1rem,5vw,2rem) 6rem; }
@@ -197,6 +207,9 @@ main { padding-left: 36px; }
 .bookprose h2 { font-family: var(--display); font-weight: 700; font-size: clamp(1.45rem,4vw,1.95rem); line-height: 1.06; letter-spacing: -0.01em; margin: 4rem 0 1.3rem; }
 .bookprose h3 { font-family: var(--display); font-weight: 600; font-size: 1.12rem; color: var(--ink-soft); margin: 2.2rem 0 0.5rem; }
 .bookprose h1 + p, .bookprose h2 + p, .bookprose h3 + p, .bookprose > p:first-of-type, .bookprose blockquote + p, .bookprose hr + p, .bookprose ul + p, .bookprose ol + p, .bookprose table + p, .bookprose pre + p { text-indent: 0; }
+.bookprose ul, .bookprose ol { margin: 0.5rem 0 1.3rem; padding-left: 1.45rem; text-indent: 0; }
+.bookprose li { margin-bottom: 0.4rem; text-indent: 0; }
+.bookprose pre { margin: 1.3rem 0; text-indent: 0; }
 .bookprose h2 + p::first-letter, .bookprose > p:first-of-type::first-letter { font-family: var(--display); font-weight: 700; float: left; font-size: 3rem; line-height: 0.78; padding: 0.3rem 0.5rem 0 0; color: var(--measure); }
 .bookprose blockquote { text-indent: 0; margin: 1.5rem 0; }
 

@@ -11,6 +11,13 @@ const exists = (p) => fs.existsSync(p);
 
 marked.setOptions({ gfm: true, breaks: false });
 
+// calc fences → styled formula blocks (not terminal-dark code)
+function renderMd(md) {
+  let html = marked.parse(cleanMd(md));
+  html = html.replace(/<pre><code class="language-calc">([\s\S]*?)<\/code><\/pre>/g, '<pre class="calc"><code>$1</code></pre>');
+  return html;
+}
+
 const SITE = "The Ruler and the Remainder";
 const SITE_URL = "https://ruler-and-remainder.vercel.app";
 const DEFAULT_DESC = "Independent research into how systems read the world into legible categories, and who pays for what stays invisible. Books, pamphlets, and a runnable audit by Ryann Murphy.";
@@ -41,7 +48,9 @@ function firstProse(md) {
 const cleanMd = (s) =>
   s.replace(/\\(newpage|clearpage|pagebreak|bigskip|medskip|smallskip|noindent|hfill|par|centering)\b[ \t]*/g, "")
    .replace(/\\vspace\*?\{[^}]*\}/g, "")
-   .replace(/^\s*\\\\\s*$/gm, "");
+   .replace(/^\s*\\\\\s*$/gm, "")
+   .replace(/\u00a0/g, " ")
+   .replace(/[ \t]+$/gm, "");
 
 // footnote apparatus: pull [^n] refs + [^n]: defs into a journal footnotes block
 function footnotes(md) {
@@ -137,7 +146,7 @@ function piece({ title, kicker, md, backHref = "/#corpus", backLabel = "Index", 
   const { withRefs, block } = footnotes(md);
   // strip the leading H1 (we render our own head)
   const noH1 = withRefs.replace(/^\s*#\s+.+?\n/, "");
-  const html = marked.parse(cleanMd(noH1));
+  const html = renderMd(noH1);
   return shell({
     title,
     bodyClass: "reading",
@@ -156,7 +165,7 @@ function piece({ title, kicker, md, backHref = "/#corpus", backLabel = "Index", 
 function bookPage(b, md) {
   const { withRefs, block } = footnotes(md);
   const noH1 = withRefs.replace(/^\s*#\s+.+?\n/, "");
-  const html = marked.parse(cleanMd(noH1));
+  const html = renderMd(noH1);
   const author = /with claude/i.test(b.kicker) ? "by claude &amp; ryann" : "by ryann murphy";
   const dl = `read below, or take it with you — <a href="${b.epub}">↓ epub</a>${b.pdf ? ` · <a href="${b.pdf}">↓ pdf</a>` : ""}`;
   return shell({
@@ -261,7 +270,7 @@ function xhtml(title, body) {
 }
 function makeEpub(b, md) {
   // render body, inject heading ids, collect a nav
-  let html = marked.parse(cleanMd(md));
+  let html = renderMd(md);
   const headings = [];
   let i = 0;
   html = html.replace(/<(h[1-3])>([\s\S]*?)<\/\1>/g, (m, tag, inner) => {

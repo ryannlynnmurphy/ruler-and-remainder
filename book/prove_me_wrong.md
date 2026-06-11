@@ -158,11 +158,15 @@ Nobody working in information geometry asked what Shakespeare looks like in the 
 
 For a transformer with output distribution p(v|h) = softmax(Wh), the Fisher information metric is the covariance matrix of the weight vectors under the output distribution:
 
-    G_ij(h) = Cov_p[w_i, w_j]
+```calc
+G_ij(h) = Cov_p[w_i, w_j]
+```
 
 It follows from standard exponential family theory[3] that the derivative of this metric with respect to the hidden state equals the skewness tensor — the third central moment:
 
-    dG_ij/dh_k = μ_ijk
+```calc
+dG_ij/dh_k = μ_ijk
+```
 
 This is a known mathematical relationship. The softmax distribution is a member of the exponential family, and for exponential families, the n-th derivative of the log-partition function gives the n-th cumulant. The Fisher metric is the second cumulant. Its derivative is the third.
 
@@ -172,7 +176,9 @@ We verified this numerically to 1.4 × 10⁻¹¹ on the specific softmax form. T
 
 By the chain rule along the attention-driven trajectory:
 
-    dG_ij/dτ = Σ_s α_{τ,s} · T^(s)_ij
+```calc
+dG_ij/dτ = Σ_s α_{τ,s} · T^(s)_ij
+```
 
 where T^(s)_ij = Σ_k μ_ijk(Vh_s)_k and α_{τ,s} are the attention weights.
 

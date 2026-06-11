@@ -8,13 +8,9 @@ enough to state on one page and strict enough to change what you're willing to s
 Every substantive claim is sorted into one of three tiers, and the tier is stated,
 not implied.
 
-- **Established.** Checkable now, against a source the reader can pull themselves.
-  If it cannot survive someone going and looking, it is not established.
-- **Exploratory.** Plausible and coherent, but untested at scale or not yet
-  checked. Stated as a bet, with its conditions on the outside: *if* these things
-  hold, *then* this follows.
-- **Speculative.** Offered as geometry — a shape that organizes thinking. Useful
-  for seeing, never load-bearing for a real system.
+- **Established.** Checkable now, against a source the reader can pull themselves. If it cannot survive someone going and looking, it is not established.
+- **Exploratory.** Plausible and coherent, but untested at scale or not yet checked. Stated as a bet, with its conditions on the outside: *if* these things hold, *then* this follows.
+- **Speculative.** Offered as geometry — a shape that organizes thinking. Useful for seeing, never load-bearing for a real system.
 
 The one rule that makes the tiers worth anything: **established and speculative
 never certify each other.** A speculative claim is not promoted because it sounds
@@ -32,10 +28,8 @@ Common drifts to watch for:
 
 - A probabilistic process described in the grammar of a guarantee.
 - One component's property stretched across an entire system.
-- A definite article doing silent work — "*the* layer" turning a control into a
-  system.
-- An unearned superlative — "first," "only," "unbreakable" — that the architecture
-  has not paid for.
+- A definite article doing silent work — "*the* layer" turning a control into a system.
+- An unearned superlative — "first," "only," "unbreakable" — that the architecture has not paid for.
 
 ## Evidence and inference are kept apart
 

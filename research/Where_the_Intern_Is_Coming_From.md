@@ -10,7 +10,6 @@ The first four volumes turn an instrument on the world. They ask how systems rea
 
 This is the provenance volume. Not a statement at the top of a memo, defending where the work came from — a volume, where the standpoint *is* the content. Method at the front of the corpus, the person at the back, the same epistemology holding both ends.
 
-
 ---
 
 # Chapter One — The Room
@@ -30,7 +29,6 @@ What I had was not a stance and it was not against anything. It was a direction.
 This is also the place to be honest about the failure mode, because the discipline of this corpus is that every claim names the way it could be wrong. "Follow the result over the room" is a good rule that becomes a bad rule the instant the result is the thing you wanted. Motivated reasoning wears the exact costume of empiricism: *I'm just following the evidence* is what everyone says, including the person who has quietly arranged the evidence to follow. So the rule needs a guard, and the guard is this — the result has to be something that could have come out the other way and didn't. The code either ran or it threw an error; I didn't get to vote. The model either caught my reasoning mistake or repeated it back to me; I didn't get to choose. What makes the readings in this volume evidence and not wish is that they were falsifiable and survived, not that they were pleasant and I kept them. When I can't point to the way a result could have failed, I downgrade it from finding to hope, and I try to say which one I'm holding.
 
 So the first thing to know about where I'm coming from is that I am not coming from belief. I did not arrive at AI as a convert and I am not defending it as a partisan. I arrived at a discrepancy I couldn't explain away, and I have the kind of temperament that builds something out of a discrepancy instead of arguing it back into the consensus. That temperament is the through-line of everything that follows. Volume One of this corpus argued that knowledge is demonstrated through use rather than asserted as allegiance. This chapter is just that argument turned on its author: I didn't believe my way in. I used my way in. The room was a hypothesis. The work is the result.
-
 
 ---
 
@@ -56,7 +54,6 @@ But that careful claim is not the claim the room makes, and the gap between them
 
 So the discipline of this chapter is narrow and I want to hold it exactly. I am not denying the cost. I am denying the centrality. Real and rising is not the same as causal and central, and the entire argument of the volume lives in that distinction. Take the cost seriously — I do, demonstrably, as the next chapter shows — and precisely because you take it seriously, refuse to let it be inflated into a scapegoat, because the inflation does not protect the planet. It protects the actual driver, by drawing the eyes of the people who care toward the conspicuous newcomer and away from the ambient given that is doing the work.
 
-
 ---
 
 # Chapter Three — The Misdiagnosis Is a Governance Failure
@@ -79,7 +76,6 @@ This is the governance principle the chapter exists to state, and it generalizes
 
 I owe one honest limit, because the discipline requires it. Misdiagnosis is not the *only* reason the real remedies go unbuilt. Even with a perfectly aimed public narrative, the carbon price would still face the fossil lobby, regulatory capture, the genuine hardship of transition, the collective-action trap across nations. I am not claiming that fixing the narrative fixes the climate; that would be its own category error, the mirror image of the one I'm diagnosing. The claim is narrower and I'll hold it to its size: the misaimed narrative is *one* removable obstacle, a self-inflicted one, the kind a culture could correct by thinking more clearly — and removing a self-inflicted obstacle is worth doing even when the structural ones remain. You don't get to skip the easy honest fix just because the hard ones are still there. Diagnose correctly first. Then govern the thing you've correctly diagnosed.
 
-
 ---
 
 # Chapter Four — The Hard Version
@@ -99,7 +95,6 @@ Put the three together and you have a coherent position that is the opposite of 
 This is what earns Chapter Two, and I want to close the loop explicitly, because the two chapters are a single argument split across a credential. When I say the AI energy bill is not the cause of the heat wave, I am not speaking as someone minimizing a cost they never had to reckon with. I am speaking as the person who reckoned with it in hardware — who treated it as real enough to build against — which is precisely what gives me the standing to refuse its inflation into a scapegoat. You only get to call out the false target after you've taken the true cost seriously, or the call-out is just denial in a nicer outfit. I did the serious thing first. The building is the credential, and the credential is what licenses the critique.
 
 And now the honest limit, because every chapter owes one. My builds are small. A few Raspberry Pis, a prototype cluster, a heater that warms one room. I am not claiming to have solved the energy problem of industrial-scale AI, and I'd be committing my own verb-drift if I let *I engineered against the cost* slide into *I have shown how to make AI carbon-neutral at scale.* I haven't. The thing I have shown is smaller and still worth something: that the binary is false, that the third path exists, that a person who takes the cost seriously builds toward efficiency and reuse and legibility rather than abstaining or denying. Existence proof, not solution. But an existence proof is exactly what you need to refuse a false binary — you only have to show the third path is real, not that you've already walked all of it.
-
 
 ---
 
@@ -121,7 +116,6 @@ Now the part I have to keep honest, because it's the part most easily inflated, 
 
 The honest limit here cuts the other way from the others, so I'll name it plainly: a lowered barrier to crossing domains is not only a gift, it's a hazard, and the hazard has a name — the confident amateur who crosses shallowly, mistakes fluency for understanding, and produces the very slop the room was right to fear. The lowered cost of crossing is also the lowered cost of *crossing badly*. I don't get to wave that away by pointing at the corpus, because the corpus could itself be shallow in ways I can't see from inside it. What guards against it is not my confidence but the discipline the corpus runs on — the tiering of claims into what's established and what's speculative, the deliberate seeking of expert correction, the refusal to let the speculative geometry pretend it's proven math, the entire apparatus of saying *here is what I can defend cold and here is what I'm only gesturing at*. The seam is a real competence. It is also a real danger. The honest version of "why a playwright" holds both: the double vision is the gift, and the shallow crossing is the risk, and the only thing that earns the gift against the risk is the discipline of saying exactly how sure you are.
 
-
 ---
 
 # Chapter Six — The Two Games
@@ -139,7 +133,6 @@ Here is my actual claim, and I want to state it as a *bet* and not a law, becaus
 And now the part that makes it a bet and not a wish — what would make me wrong, stated honestly, because a claim that can't lose isn't a claim, it's a mood. The extractive system can win for a very long time. Regulatory capture can freeze a bad system into place by law. Lock-in and switching costs can keep users captive to infrastructure they'd never choose fresh. Network effects can make the worse system the standard simply because everyone's already on it. The history of technology is littered with bad-but-entrenched infrastructure that outlived its better alternative by decades — sometimes by so long that "eventually quality wins" becomes cold comfort to everyone who lived and died inside the worse system's reign. So the bet is *not* that honesty always wins. It is narrower and more defensible than that: honesty wins on a long enough horizon, *absent capture and absent lock-in*, and betting the other way is betting against time and in favor of those frictions holding forever. I think the frictions don't hold forever. I could be wrong about how long is forever. That's the shape of the bet, conditions showing, and I'd rather show them than pretend I'm stating a theorem.
 
 The reason I can place this bet cleanly — the reason it's worth more coming from me than from someone better positioned — is the disinterest, and I want to be exact about why disinterest is an epistemic asset here rather than just a lack of skin in the game. The person paid to defend a given stack has to believe their compliance is the real kind. Belief is in their job description; doubt is a performance problem. They are not lying — it's subtler and worse than lying. They are sincerely unable to afford the perception that their wall is painted, and sincerity under that pressure is exactly how painted walls get believed in by the people standing behind them. I am under no such pressure. I don't have to believe anything about anyone's wall. Which is why, when I audited the detector and found the verb had drifted from *detect* to *enforce* — found a wall described as load-bearing that was actually an alarm — I could just file the honest report. Not because I'm wiser than the people who built it or missed it. Because I wasn't being paid to see it the other way. The disinterested reader is the only one in the room who can afford to tell the real wall from the painted one, and affording it is the whole game. That is what the unpaid intern is *for*: not the bottom of the hierarchy, but the one position in it from which the truth is cheap to say.
-
 
 ---
 
@@ -161,7 +154,6 @@ This does not prove I'm right. I want to be scrupulous about the size of the cla
 
 So the resolution of this chapter is not the triumphant one. It is not *and that's why I'm definitely not a useful idiot.* It's quieter and harder and truer: the shame is the function. It's not a flaw in the standpoint to be argued away; it's the standpoint's own error-correction, and the honest thing is to keep it running rather than to resolve it. The day the doubt goes quiet — the day I feel seamless clarity about my own role, untroubled, certain I'm on the right side — that is the day to worry, because that is what capture feels like from inside. Until then the discomfort is doing its job, and a volume about where I'm coming from has to leave it on rather than switch it off for the comfort of a clean ending. There is no clean ending available here that isn't a lie. The honest ending is the alarm left deliberately ringing.
 
-
 ---
 
 # Chapter Eight — The Asymmetry
@@ -179,7 +171,6 @@ So let me be exact about what the tool was and what it was not, because the prec
 This bears directly on a question I've had to hold carefully across the whole corpus, which is the provenance question in its legal and ethical form: whose work is this? The asymmetry answers it, and answers it in my favor, not by my insisting but by the structure itself. Authorship requires continuity — the holding of intent across time, the carrying of a project from one session to the next, the memory in which a body of work coheres into a body of work rather than dissolving into disconnected outputs. That continuity is mine and only mine. The model supplied force, sentence by sentence, session by session, and forgot each one. I supplied the thread on which the forces hang. Whatever else is unsettled about work made this way — and much is unsettled, and I won't pretend the culture or the law has caught up — this part is not: the continuity is the authorship, and the continuity is mine.
 
 I state the asymmetry here, in the eighth chapter, immediately before the close, and the placement is deliberate and I want to name why. The next chapter is going to say *the agent was me.* If I said that without first establishing the asymmetry, it would read as a flex — a thing I assert because it flatters me, the human grabbing credit from the machine. But after this chapter it isn't a flex; it's a conclusion the structure forces. Once you've seen that one party holds the continuity and the other resets to zero, *the agent was me* stops being a claim I'm making and becomes the only correct reading of the arrangement. Establish the asymmetry first, and the agency claim in the final chapter is not self-congratulation. It is just the asymmetry, read correctly, and stated out loud because the volume would be incomplete if I left the obvious conclusion unspoken to seem modest.
-
 
 ---
 

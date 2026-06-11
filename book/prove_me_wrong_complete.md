@@ -184,13 +184,17 @@ Beyond the measurements, we derived an equation describing how the output geomet
 
 For the softmax distribution, the Fisher information metric is the covariance matrix of the weight vectors. It follows from standard exponential family theory[3] that:
 
-    dG_ij/dh_k = μ_ijk
+```calc
+dG_ij/dh_k = μ_ijk
+```
 
 The derivative of the metric with respect to the hidden state equals the skewness tensor (the third central moment). This is a known mathematical relationship. We verified it numerically to machine precision on the softmax.
 
 By the chain rule along the attention trajectory:
 
-    dG_ij/dτ = Σ_s α_{τ,s} · T^(s)_ij
+```calc
+dG_ij/dτ = Σ_s α_{τ,s} · T^(s)_ij
+```
 
 The rate of change of the geometry is determined by the attention weights and the local skewness at each attended position.
 

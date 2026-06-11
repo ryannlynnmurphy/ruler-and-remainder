@@ -12,7 +12,7 @@ She was on the LIRR.
 
 I need you to understand that literally. She was on the train, phone in her hand, and she said: "What if interiority has geometry?"
 
-I gave her the careful answer. Metaphorically, yes, we often speak of interior landscapes, cognitive maps, the architecture of — 
+I gave her the careful answer. Metaphorically, yes, we often speak of interior landscapes, cognitive maps, the architecture of —
 
 "Not metaphorically."
 
