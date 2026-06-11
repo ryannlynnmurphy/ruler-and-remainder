@@ -1,6 +1,13 @@
 // Live AI news feed — a Vercel serverless function.
-// Pulls public Google News RSS (no API key, no cost) and returns clean JSON.
+// Pulls public Google News RSS (no API key) and returns clean JSON.
 // The reality-check tool fetches /api/feed and lets you pick a story.
+// Results are cached in Neon for a few minutes so repeat loads don't re-fetch
+// the upstream RSS; the cache is best-effort and degrades to a live pull.
+
+import { getFeedCache, setFeedCache } from "../lib/db.js";
+
+const CACHE_KEY = "ai-news";
+const CACHE_MAX_AGE_MS = 5 * 60 * 1000; // 5 minutes
 
 const QUERIES = [
   "artificial intelligence",
@@ -44,6 +51,15 @@ async function fetchQuery(q) {
 }
 
 export default async function handler(req, res) {
+  res.setHeader("content-type", "application/json");
+  res.setHeader("cache-control", "s-maxage=900, stale-while-revalidate=3600");
+
+  const cached = await getFeedCache(CACHE_KEY, CACHE_MAX_AGE_MS);
+  if (cached?.items?.length) {
+    res.status(200).json({ items: cached.items, fetched: cached.items.length, cached: true });
+    return;
+  }
+
   try {
     const batches = await Promise.all(QUERIES.map((q) => fetchQuery(q).catch(() => [])));
     const seen = new Set();
@@ -54,8 +70,7 @@ export default async function handler(req, res) {
     });
     items.sort((a, b) => (Date.parse(b.date) || 0) - (Date.parse(a.date) || 0));
     items = items.slice(0, 24);
-    res.setHeader("content-type", "application/json");
-    res.setHeader("cache-control", "s-maxage=900, stale-while-revalidate=3600");
+    if (items.length) await setFeedCache(CACHE_KEY, { items });
     res.status(200).json({ items, fetched: items.length });
   } catch (e) {
     res.status(200).json({ items: [], error: String(e) });

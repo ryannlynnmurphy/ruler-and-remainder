@@ -1045,7 +1045,7 @@ const db = [
   ...BOOKS.filter((b) => b.href).map((b) => ({ title: b.title, url: b.href, kind: "Book", dek: b.dek })),
   ...entries.map((e) => ({ title: e.title, url: e.url, kind: e.kind, dek: e.dek })),
   { title: "The CRD Audit (runnable)", url: "/audit.html", kind: "Instrument", dek: "A deterministic instrument: paste copy and architecture, surface where stated confidence outruns reality." },
-  { title: "The Reality Check (runnable)", url: "/reality.html", kind: "Instrument", dek: "Paste an AI news story; it tells you the likely reality against the corpus and the Cybersecurity Bill of Rights. Bring your own key." },
+  { title: "The Reality Check (runnable)", url: "/reality.html", kind: "Instrument", dek: "Paste an AI news story; it tells you the likely reality against the corpus and the Cybersecurity Bill of Rights. No key needed — what you check joins a public ledger." },
   ...artifacts,
   ...pages.map((p) => ({ title: p.title, url: p.url, kind: "Apparatus", dek: "" })),
 ];
@@ -1081,7 +1081,7 @@ render();
 // ---------- INSTRUMENTS (landing page for the runnable tools) ----------------
 const INSTRUMENTS = [
   { url: "/audit.html", kicker: "Tool · runs in browser", title: "The CRD Audit", dek: "Paste a system's copy and its real architecture; the audit surfaces every place stated confidence outruns what the system actually is. Deterministic — nothing leaves the page." },
-  { url: "/reality.html", kicker: "Tool · bring your own key", title: "The Reality Check", dek: "Paste an AI news story; it returns the likely reality, read against the corpus and the Cybersecurity Bill of Rights. Bring your own key." },
+  { url: "/reality.html", kicker: "Tool · no key needed", title: "The Reality Check", dek: "Paste an AI news story; it returns the likely reality, read against the corpus and the Cybersecurity Bill of Rights. No key needed — and what you check joins a public ledger." },
   { url: "/database.html", kicker: "Tool · searchable", title: "The Index", dek: "Search and filter the whole corpus — books, pamphlets, essays, dialogues, instruments, and apparatus." },
 ];
 fs.writeFileSync(path.join(DIST, "instruments.html"), shell({
@@ -1145,7 +1145,7 @@ const cover = shell({
     <div class="dept-head reveal"><span class="no" aria-hidden="true">03</span><h2>Instruments</h2><span class="gloss">runnable research tools</span></div>
     <div class="items">
       <a class="item" href="/audit.html"><span class="kicker">Tool · runs in browser</span><h3>The CRD Audit</h3><p>Paste copy and the architecture; surface where stated confidence contradicts what the system is. Nothing leaves the page.</p></a>
-      <a class="item" href="/reality.html"><span class="kicker">Tool · bring your own key</span><h3>The Reality Check</h3><p>Paste an AI news story; get the likely reality, read against the corpus and the Cybersecurity Bill of Rights.</p></a>
+      <a class="item" href="/reality.html"><span class="kicker">Tool · no key needed</span><h3>The Reality Check</h3><p>Paste an AI news story; get the likely reality, read against the corpus and the Cybersecurity Bill of Rights. What you check joins a public ledger.</p></a>
       <a class="item" href="/database.html"><span class="kicker">Tool · searchable</span><h3>The Index</h3><p>Search and filter the whole corpus — books, pamphlets, essays, dialogues, apparatus.</p></a>
     </div>
   </section>

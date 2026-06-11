@@ -1,0 +1,192 @@
+// The Reality Check — server-side. A Vercel serverless function.
+//
+// Reads an AI news story and returns the likely reality, using the corpus's
+// method (confidence–reality divergence, the three tiers, the remainder) and
+// the Cybersecurity Bill of Rights. The model call runs HERE, with the site's
+// own key — no key required from the reader. Every check is rate-limited per
+// visitor and, unless the reader opts out, written to a public ledger.
+//
+// House style: raw fetch to the Messages API, matching api/feed.js (the project
+// carries no SDK; its only dependency is `marked`).
+
+import { recordCheck, bumpRateLimit } from "../lib/db.js";
+
+const ALLOWED_MODELS = new Set([
+  "claude-sonnet-4-6",
+  "claude-opus-4-8",
+  "claude-haiku-4-5",
+]);
+const DEFAULT_MODEL = "claude-sonnet-4-6";
+
+// Abuse ceilings. Per-visitor-per-hour keeps one reader from hammering the
+// instrument; the daily floor protects the shared key. Tunable.
+const PER_IP_PER_HOUR = 12;
+const GLOBAL_PER_DAY = 800;
+
+const SYSTEM = `You read AI news the way this corpus reads everything: you test whether the story's stated confidence exceeds what is actually known or built, and you name what the framing leaves out. You are not a debunker and you are not a hype-man. You are calibrated. Most stories are part true and part overclaim; your job is to separate them precisely.
+
+YOUR METHOD (from the corpus):
+- Confidence–reality divergence. A claim "fires" only when you can state two things a non-specialist can check: (A) what the story asserts, and (B) the likely reality from engineering/empirical fact — such that A and B contradict. If A and B agree, say so. Firing on everything is worthless; calibration is the whole value.
+- Three tiers, kept apart. Mark each judgment: ESTABLISHED (checkable now), EXPLORATORY (plausible, untested at scale), or SPECULATIVE (a shape, not load-bearing). Never let a speculative read certify an established claim.
+- Legibility and the remainder. Every story makes some things legible and buries others. Name the remainder: what the framing leaves out, and who pays for what stays invisible.
+- Verbs carry the claim. "Prevents" is not "detects"; "deterministic" is not "probabilistic"; a property of one component is not a property of the whole system. Watch the verb and the modal.
+
+THE CYBERSECURITY BILL OF RIGHTS (rights as properties, not promises) — flag which the situation implicates:
+I. know what the system does and does not do (no "military-grade," "unbreakable").
+II. data minimization by default. III. local processing. IV. encryption that stays encrypted (no backdoors/lawful access).
+V. legible failure (breach disclosure a person can act on). VI. refuse without penalty. VII. leave with everything (portability).
+VIII. inspection (no security-through-obscurity). IX. repair. X. a human in consequential decisions. XI. don't subsidize fragility (efficiency is a security property). XII. deletion that is actually deletion.
+
+OUTPUT — plain, lowercase headers, markdown. Be specific and brief. Use these sections exactly:
+
+## the claim
+One or two sentences: what the story/headline is asserting.
+
+## the likely reality
+What is probably actually true, reading the gap. State each judgment with its tier in brackets, e.g. [established], [exploratory], [speculative]. Where confidence exceeds reality, say so plainly and name the verb or modal that does the inflating.
+
+## the remainder
+What the framing leaves out — and who pays for what stays invisible.
+
+## rights implicated
+The Bill-of-Rights articles this touches, by number and name, one line each on how. If none clearly apply, say so.
+
+## what to check
+2–4 concrete, checkable questions a reader should ask before believing the story.
+
+Rules: do not invent facts, numbers, sources, or events the story does not contain. If the text is not an AI news story, say so and stop. If you lack the basis to judge a claim, mark it UNVERIFIABLE rather than guessing.`;
+
+function clientIp(req) {
+  const xff = req.headers["x-forwarded-for"];
+  if (typeof xff === "string" && xff.length) return xff.split(",")[0].trim();
+  return req.socket?.remoteAddress || "unknown";
+}
+
+function hourBucket(d) {
+  return d.toISOString().slice(0, 13); // YYYY-MM-DDTHH
+}
+function dayBucket(d) {
+  return d.toISOString().slice(0, 10); // YYYY-MM-DD
+}
+
+async function readJsonBody(req) {
+  if (req.body && typeof req.body === "object") return req.body;
+  const chunks = [];
+  for await (const c of req) chunks.push(c);
+  const raw = Buffer.concat(chunks).toString("utf8");
+  return raw ? JSON.parse(raw) : {};
+}
+
+export default async function handler(req, res) {
+  res.setHeader("content-type", "application/json");
+  if (req.method !== "POST") {
+    res.status(405).json({ error: "method not allowed" });
+    return;
+  }
+  if (!process.env.ANTHROPIC_API_KEY) {
+    res.status(503).json({ error: "the instrument is not configured yet." });
+    return;
+  }
+
+  let body;
+  try {
+    body = await readJsonBody(req);
+  } catch {
+    res.status(400).json({ error: "could not read the request." });
+    return;
+  }
+
+  const story = typeof body.story === "string" ? body.story.trim() : "";
+  const model = ALLOWED_MODELS.has(body.model) ? body.model : DEFAULT_MODEL;
+  const source = typeof body.source === "string" ? body.source.slice(0, 200) : null;
+  const publish = body.publish !== false; // default: add to the public ledger
+  if (!story) {
+    res.status(400).json({ error: "paste an ai news story first." });
+    return;
+  }
+  if (story.length > 8000) {
+    res.status(413).json({ error: "that's longer than the instrument reads — trim it to the story itself." });
+    return;
+  }
+
+  // Rate limit (best-effort — a database outage degrades to allow rather than
+  // taking the instrument down). Returns null when no DB is configured.
+  try {
+    const now = new Date();
+    const ip = clientIp(req);
+    const perIp = await bumpRateLimit(`ip:${ip}:${hourBucket(now)}`);
+    if (perIp !== null && perIp > PER_IP_PER_HOUR) {
+      res.status(429).json({ error: "you've run a lot of checks this hour — give the instrument a rest and come back soon." });
+      return;
+    }
+    const global = await bumpRateLimit(`global:${dayBucket(now)}`);
+    if (global !== null && global > GLOBAL_PER_DAY) {
+      res.status(429).json({ error: "the instrument is resting for today. it'll be back tomorrow." });
+      return;
+    }
+  } catch {
+    /* rate-limit store unavailable — proceed */
+  }
+
+  // The model call — server-side, with the site's key.
+  let text;
+  try {
+    const r = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": process.env.ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: 1600,
+        system: SYSTEM,
+        messages: [
+          {
+            role: "user",
+            content:
+              "Here is the AI news story. Read it and return the reality check.\n\n---\n" + story,
+          },
+        ],
+      }),
+    });
+    if (!r.ok) {
+      let msg = `${r.status} ${r.statusText}`;
+      try {
+        const e = await r.json();
+        if (e?.error?.message) msg = e.error.message;
+      } catch {}
+      // Don't leak provider internals to the reader.
+      console.error("anthropic error:", msg);
+      res.status(502).json({ error: "the read didn't come back this time. try again in a moment." });
+      return;
+    }
+    const data = await r.json();
+    text = (data.content || [])
+      .filter((b) => b.type === "text")
+      .map((b) => b.text)
+      .join("\n")
+      .trim();
+  } catch (err) {
+    console.error("anthropic fetch failed:", err);
+    res.status(502).json({ error: "couldn't reach the model. try again in a moment." });
+    return;
+  }
+
+  if (!text) {
+    res.status(502).json({ error: "the model returned nothing readable." });
+    return;
+  }
+
+  // Write to the public ledger (best-effort). Never block the response on it.
+  let id = null;
+  try {
+    const rec = await recordCheck({ model, story, verdict: text, source, published: publish });
+    id = rec?.id ?? null;
+  } catch (err) {
+    console.error("recordCheck failed:", err);
+  }
+
+  res.status(200).json({ text, model, id, published: publish && id !== null });
+}

@@ -301,6 +301,17 @@ main { padding-left: 36px; }
 .feeditem .when { font-family: var(--mono); font-size: 0.58rem; color: var(--faint); margin-top: auto; }
 @media (max-width: 640px) { .feedgrid { grid-template-columns: 1fr; } }
 
+/* the public ledger — recently checked stories */
+.ledger { margin-top: 2.6rem; border-top: 2px solid var(--ink); padding-top: 1.6rem; }
+.ledgergrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+.ledgeritem { background: var(--paper); padding: 1rem 1.1rem; display: flex; flex-direction: column; gap: 0.55rem; }
+.ledgeritem .lmeta { display: flex; justify-content: space-between; align-items: baseline; gap: 0.6rem; font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.03em; }
+.ledgeritem .lsrc { color: var(--measure); text-transform: uppercase; }
+.ledgeritem .lmeta .when { color: var(--faint); }
+.ledgeritem .lstory { font-family: var(--display); font-weight: 600; font-size: 0.9rem; line-height: 1.28; margin: 0; color: var(--ink); }
+.ledgeritem .lverdict { font-family: var(--serif); font-size: 0.85rem; line-height: 1.5; margin: 0; color: var(--muted); }
+@media (max-width: 640px) { .ledgergrid { grid-template-columns: 1fr; } }
+
 /* ---------- index / search ---------- */
 .dbwrap { max-width: 50rem; margin: 0 auto; padding: clamp(2rem,6vh,4rem) clamp(1.1rem,5vw,2rem) 5rem; }
 .searchbox { width: 100%; font-family: var(--display); font-weight: 700; font-size: 1.6rem; padding: 0.6rem 0; border: none; border-bottom: 1px solid var(--ink); background: transparent; color: var(--ink); }

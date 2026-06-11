@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The Reality Check · The Ruler and the Remainder</title>
-<meta name="description" content="Paste an AI news story; it tells you the likely reality, reading the gap against the corpus and the Cybersecurity Bill of Rights. Bring your own key; runs from your browser.">
+<meta name="description" content="Paste an AI news story; it tells you the likely reality, reading the gap against the corpus and the Cybersecurity Bill of Rights. No key needed — and what you check joins a public ledger.">
 <link rel="canonical" href="https://ruler-and-remainder.vercel.app/reality.html">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="The Ruler and the Remainder">
 <meta property="og:title" content="The Reality Check · The Ruler and the Remainder">
-<meta property="og:description" content="Paste an AI news story; it tells you the likely reality, against the corpus and the Cybersecurity Bill of Rights. Bring your own key.">
+<meta property="og:description" content="Paste an AI news story; it tells you the likely reality, against the corpus and the Cybersecurity Bill of Rights. No key needed.">
 <meta property="og:url" content="https://ruler-and-remainder.vercel.app/reality.html">
 <meta property="og:image" content="https://ruler-and-remainder.vercel.app/og.svg">
 <meta name="twitter:card" content="summary_large_image">
@@ -32,14 +32,15 @@
 <main id="main">
 <article class="piece toolpage">
   <a class="back" href="/instruments.html">← Instruments</a>
-  <header class="head"><div class="kicker">Instrument · bring your own key</div><h1>The Reality Check</h1></header>
+  <header class="head"><div class="kicker">Instrument · no key needed</div><h1>The Reality Check</h1></header>
   <p class="lede">Paste an AI news story. It reads the gap between what the story claims and what is
   probably true — using the corpus's method (confidence–reality divergence, the three tiers, the
   remainder) and the twelve articles of the <a href="/essays/cybersecurity-bill-of-rights.html">Cybersecurity Bill of Rights</a> —
   and tells you the likely reality.</p>
-  <p class="privacy">This one calls a model, so it needs a key. <strong>Bring your own.</strong> The call goes
-  straight from your browser to Anthropic with your key; the key is stored only in your browser (if you tick remember).
-  Nothing — not the story, not the key — touches this site. Data leaves consciously: you opt in, every time.</p>
+  <p class="privacy">This one calls a model, and the reading runs <strong>here, on the site</strong> — you don't
+  bring anything. Be plain about what that means: your story is sent to Anthropic to be read, and unless you
+  say otherwise it joins the <a href="#ledger">public ledger</a> of checks at the foot of this page, on the record.
+  Data leaves consciously — running a check is the opt-in, every time, and you can keep any single check off the ledger.</p>
 
   <section class="feedwrap">
     <div class="feedhead"><span>live ai news — pick a story to check</span><button id="reload">refresh</button></div>
@@ -52,19 +53,22 @@
   <textarea id="story" rows="7" placeholder="Paste a headline + story, or a press release, or a product announcement."></textarea></label>
 
   <div class="keyrow">
-    <label class="field keyfield"><span class="fk">your anthropic api key</span>
-    <input id="key" type="password" placeholder="sk-ant-…" autocomplete="off"></label>
     <label class="field modelfield"><span class="fk">model</span>
     <select id="model">
       <option value="claude-sonnet-4-6">sonnet 4.6 (balanced)</option>
       <option value="claude-opus-4-8">opus 4.8 (deepest)</option>
-      <option value="claude-haiku-4-5-20251001">haiku 4.5 (cheapest)</option>
+      <option value="claude-haiku-4-5">haiku 4.5 (quickest)</option>
     </select></label>
   </div>
-  <label class="remember"><input id="remember" type="checkbox"> remember my key in this browser</label>
+  <label class="remember"><input id="publish" type="checkbox" checked> add this check to the public ledger</label>
 
   <button id="run" class="run">run the reality check</button>
   <section id="out" class="results"></section>
+
+  <section id="ledger" class="feedwrap ledger">
+    <div class="feedhead"><span>recently checked — the public ledger</span><button id="reloadledger">refresh</button></div>
+    <div id="ledgerlist" class="ledgergrid"><p class="empty" style="grid-column:1/-1">loading the ledger…</p></div>
+  </section>
 </article>
 </main>
 <footer><div class="colophon">

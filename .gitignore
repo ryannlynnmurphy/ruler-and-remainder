@@ -8,6 +8,7 @@
 # environment / secrets — never commit
 .env
 .env.*
+!.env.example
 *.key
 *.pem
 secrets/
