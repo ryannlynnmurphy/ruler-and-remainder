@@ -134,22 +134,48 @@ ${body}
 </html>`;
 }
 
-function piece({ title, kicker, md, bodyClass = "", backHref = "/#corpus", backLabel = "Index", lead = "", desc = "", route = "" }) {
+function piece({ title, kicker, md, backHref = "/#corpus", backLabel = "Index", desc = "", route = "", fileMeta = "" }) {
   const { withRefs, block } = footnotes(md);
   // strip the leading H1 (we render our own head)
   const noH1 = withRefs.replace(/^\s*#\s+.+?\n/, "");
   const html = marked.parse(cleanMd(noH1));
   return shell({
     title,
-    bodyClass,
+    bodyClass: "reading",
     desc: desc || firstProse(md),
     route,
-    body: `<article class="piece ${bodyClass ? "autotheory" : ""}">
+    body: `<article class="piece doc">
   <a class="back" href="${backHref}">← ${backLabel}</a>
-  <header class="head reveal">${kicker ? `<div class="kicker">${kicker}</div>` : ""}<h1>${title}</h1>${bodyClass ? `<p class="genre-note">Autotheory — autobiography reasoning as theory and back again.</p>` : ""}</header>
-  ${lead}
+  <header class="head reveal">${kicker ? `<div class="kicker">${kicker}</div>` : ""}<h1>${title}</h1>${fileMeta ? `<p class="filemeta">${fileMeta}</p>` : ""}</header>
   <div class="prose reveal">${html}${block}</div>
   <div class="foot"><a href="${backHref}">← ${backLabel}</a></div>
+</article>`,
+  });
+}
+
+// a designed book-reading page: title page + classic book typography
+function bookPage(b, md) {
+  const { withRefs, block } = footnotes(md);
+  const noH1 = withRefs.replace(/^\s*#\s+.+?\n/, "");
+  const html = marked.parse(cleanMd(noH1));
+  const author = /with claude/i.test(b.kicker) ? "by claude &amp; ryann" : "by ryann murphy";
+  const dl = `read below, or take it with you — <a href="${b.epub}">↓ epub</a>${b.pdf ? ` · <a href="${b.pdf}">↓ pdf</a>` : ""}`;
+  return shell({
+    title: b.title,
+    bodyClass: "bookread",
+    desc: b.dek,
+    route: b.href,
+    body: `<article class="book-wrap">
+  <a class="back" href="/#books">← all books</a>
+  <header class="titlepage reveal">
+    <div class="kicker">${b.kicker}</div>
+    <h1 class="booktitle">${b.title}</h1>
+    <p class="byline">${author}</p>
+    <p class="bookdek">${b.dek}</p>
+    <p class="downloads">${dl}</p>
+  </header>
+  <div class="bookprose prose reveal">${html}${block}</div>
+  <div class="foot"><a href="/#books">← all books</a></div>
 </article>`,
   });
 }
@@ -342,11 +368,7 @@ for (const b of BOOKS) {
       if (exists(path.join(ROOT, c))) { fs.copyFileSync(path.join(ROOT, c), path.join(DIST, "pdf", `${b.slug}.pdf`)); b.pdf = `/pdf/${b.slug}.pdf`; break; }
     }
   }
-  const lead = `<p class="downloads">Read below, or take it with you — <a href="${b.epub}">↓ EPUB</a>${b.pdf ? ` · <a href="${b.pdf}">↓ PDF</a>` : ""}</p>`;
-  fs.writeFileSync(
-    path.join(DIST, "books", `${b.slug}.html`),
-    piece({ title: b.title, kicker: b.kicker, md, bodyClass: b.artbook ? "artbook" : "", backHref: "/#books", backLabel: "All books", lead, desc: b.dek, route: b.href })
-  );
+  fs.writeFileSync(path.join(DIST, "books", `${b.slug}.html`), bookPage(b, md));
 }
 
 // ---------- CORPUS (research + website) -------------------------------------
@@ -371,7 +393,7 @@ for (const { dir, file } of corpus) {
   const title = titleOf(md, file);
   const s = slug(file);
   const kind = KIND[file] || "Essay";
-  fs.writeFileSync(path.join(DIST, "essays", `${s}.html`), piece({ title, kicker: kind, md, route: `/essays/${s}.html` }));
+  fs.writeFileSync(path.join(DIST, "essays", `${s}.html`), piece({ title, kicker: kind, md, route: `/essays/${s}.html`, fileMeta: `${file} · ryann murphy` }));
   entries.push({ title, slug: s, url: `/essays/${s}.html`, kind, dek: firstProse(md), pamphlet: FEATURED.includes(file) });
 }
 
@@ -382,7 +404,7 @@ for (const f of ["METHOD.md", "PROVENANCE.md"]) {
   const md = read(path.join(ROOT, f));
   const t = titleOf(md, f);
   const s = f.replace(/\.md$/i, "").toLowerCase();
-  fs.writeFileSync(path.join(DIST, `${s}.html`), piece({ title: t, kicker: "Apparatus", md, backHref: "/", backLabel: "Cover", route: `/${s}.html` }));
+  fs.writeFileSync(path.join(DIST, `${s}.html`), piece({ title: t, kicker: "Apparatus", md, backHref: "/", backLabel: "Cover", route: `/${s}.html`, fileMeta: `${f} · ryann murphy` }));
   pages.push({ title: t, url: `/${s}.html` });
 }
 
@@ -442,7 +464,8 @@ const bookFeatures = BOOKS.filter((b) => b.href).map((b) => `
     <h3>${b.title}</h3>
     <p>${b.dek}</p>
     <span class="read">Read →${b.epub ? " · EPUB" : ""}${b.pdf ? " · PDF" : ""}</span>
-  </a>`).join("");
+  </a>`).join("") +
+  `<div class="feature facecell reveal"><span class="face">＾‿＾</span><span class="facenote">more on the way</span></div>`;
 
 const pamphlets = entries.filter((e) => e.pamphlet).map((e) => `
   <a class="item" href="${e.url}"><span class="kicker">Pamphlet</span><h3>${e.title}</h3><p>${e.dek}…</p></a>`).join("");

@@ -169,6 +169,38 @@ main { padding-left: 36px; }
 .autotheory .prose h1 { font-family: var(--display); font-weight: 900; font-size: clamp(1.4rem,3.2vw,1.9rem); letter-spacing: 0.01em; line-height: 1.05; margin: 5.5rem 0 0; padding-top: 2.4rem; border-top: 2px solid var(--ink); color: var(--measure); }
 .autotheory .prose h2 { font-family: var(--display); font-weight: 800; font-size: clamp(1.6rem,4vw,2.3rem); letter-spacing: -0.02em; line-height: 1.04; margin: 3.2rem 0 1.1rem; }
 
+/* ---------- corpus essays: substack / "opening a file" ---------- */
+.doc .head { border-bottom: 1px solid var(--rule); }
+.doc .filemeta { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.03em; color: var(--muted); margin: 0.9rem 0 0; }
+.doc .filemeta::before { content: "▢ "; color: var(--measure); }
+.doc .prose { font-size: 1.12rem; line-height: 1.72; }
+.doc .prose p { margin: 0 0 1.3rem; }
+.doc .prose h2 { margin-top: 2.4rem; }
+
+/* ---------- book reading mode (beautiful ebook) ---------- */
+.book-wrap { max-width: 33rem; margin: 0 auto; padding: clamp(1.4rem,5vh,3rem) clamp(1.1rem,5vw,2rem) 6rem; }
+.book-wrap > .back, .book-wrap .foot a { font-family: var(--mono); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; color: var(--muted); text-decoration: none; }
+.titlepage { text-align: center; border-bottom: 1px solid var(--ink); padding: clamp(2rem,8vh,5rem) 0 clamp(1.8rem,5vh,3rem); margin: 1.2rem 0 3.2rem; }
+.titlepage .kicker { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; color: var(--measure); }
+.titlepage .booktitle { font-family: var(--display); font-weight: 700; font-size: clamp(2.1rem,7vw,3.4rem); line-height: 1.0; letter-spacing: -0.02em; margin: 1rem 0 0.9rem; }
+.titlepage .byline { font-family: var(--mono); font-size: 0.76rem; letter-spacing: 0.1em; color: var(--ink); margin: 0 0 1.3rem; }
+.titlepage .bookdek { font-family: var(--serif); font-size: 1.02rem; line-height: 1.5; color: var(--muted); max-width: 27rem; margin: 0 auto 1.3rem; }
+.titlepage .downloads { margin: 0; }
+.bookprose { font-size: 1.08rem; line-height: 1.78; }
+.bookprose p { margin: 0; }
+.bookprose p + p { text-indent: 1.4em; }
+.bookprose h1 { text-align: center; font-family: var(--display); font-weight: 700; font-size: clamp(1.5rem,4vw,2rem); letter-spacing: 0.03em; color: var(--measure); margin: 5.5rem 0 2.5rem; padding-top: 3rem; border-top: 1px solid var(--ink); }
+.bookprose h2 { font-family: var(--display); font-weight: 700; font-size: clamp(1.45rem,4vw,1.95rem); line-height: 1.06; letter-spacing: -0.01em; margin: 4rem 0 1.3rem; }
+.bookprose h3 { font-family: var(--display); font-weight: 600; font-size: 1.12rem; color: var(--ink-soft); margin: 2.2rem 0 0.5rem; }
+.bookprose h1 + p, .bookprose h2 + p, .bookprose h3 + p, .bookprose > p:first-of-type, .bookprose blockquote + p, .bookprose hr + p, .bookprose ul + p, .bookprose ol + p, .bookprose table + p, .bookprose pre + p { text-indent: 0; }
+.bookprose h2 + p::first-letter, .bookprose > p:first-of-type::first-letter { font-family: var(--display); font-weight: 700; float: left; font-size: 3rem; line-height: 0.78; padding: 0.3rem 0.5rem 0 0; color: var(--measure); }
+.bookprose blockquote { text-indent: 0; margin: 1.5rem 0; }
+
+/* ---------- happy face cell ---------- */
+.facecell { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.6rem; background: var(--paper-2); text-align: center; min-height: 9rem; }
+.facecell .face { font-family: var(--display); font-size: 2.6rem; font-weight: 700; color: var(--measure); letter-spacing: 0.05em; }
+.facecell .facenote { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.08em; color: var(--muted); }
+
 /* ---------- index / search ---------- */
 .dbwrap { max-width: 50rem; margin: 0 auto; padding: clamp(2rem,6vh,4rem) clamp(1.1rem,5vw,2rem) 5rem; }
 .searchbox { width: 100%; font-family: var(--display); font-weight: 700; font-size: 1.6rem; padding: 0.6rem 0; border: none; border-bottom: 1px solid var(--ink); background: transparent; color: var(--ink); }
