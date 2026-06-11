@@ -335,19 +335,30 @@ function editionStripFront(md, partRe) {
 
 // render one chapter's body: full prose via marked, tier badges, blockquotes →
 // pullquotes, drop cap on the first paragraph, sub-heads kept as <h3>.
-function editionBody(bodyMd, dropcap) {
+function editionBody(bodyMd, dropcap, idBase) {
+  // strip a paper's leading front-matter (### subtitle / series line / byline·date
+  // and a following rule) — the cover, deck, and author already carry all of it.
+  bodyMd = bodyMd.replace(/^(?:[ \t]*###[ \t]+.*\r?\n)+[ \t]*(?:---[ \t]*\r?\n)?/, "");
   let html = renderMd(tierBadges(bodyMd));
-  // any in-chapter sub-heads (the manuscript's own ## / #### inside a chapter)
-  // are normalized to <h3> so they pick up the .body h3 sub-head style and never
-  // masquerade as a chapter title.
-  html = html.replace(/<(\/?)h[1-6]>/g, "<$1h3>");
+  // deeper sub-heads (### / #### / stray #) → minor <h4> sub-heads
+  html = html.replace(/<(\/?)(?:h1|h3|h4|h5|h6)\b[^>]*>/g, "<$1h4>");
+  // the manuscript's own ## sections → anchored section heads, collected for the TOC
+  const sections = [];
+  let k = 0;
+  html = html.replace(/<h2>([\s\S]*?)<\/h2>/g, (_, inner) => {
+    k++;
+    const id = `${idBase || "ch"}-s${k}`;
+    const plain = inner.replace(/<[^>]+>/g, "").replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&").trim();
+    sections.push({ id, n: k, title: plain });
+    return `<h3 class="section" id="${id}">${inner}</h3>`;
+  });
   // markdown blockquotes → editorial pull quotes
   html = html.replace(/<blockquote>\s*([\s\S]*?)\s*<\/blockquote>/g, (_, inner) => {
     const txt = inner.replace(/<\/?p>/g, " ").replace(/\s+/g, " ").trim();
     return `<div class="pullquote">${txt}</div>`;
   });
   const cls = "body" + (dropcap ? " dropcap" : "");
-  return `<div class="${cls}">${html}</div>`;
+  return { html: `<div class="${cls}">${html}</div>`, sections };
 }
 
 // Parse a manuscript into { front:[{title,id,html}], parts:[{label,title,deck,
@@ -400,7 +411,8 @@ function editionParse(b, md) {
   const pushAppendix = (title, body) => {
     appN++;
     const letter = String.fromCharCode(64 + appN); // A, B, C…
-    appendices.push({ letter, title: title || `Appendix ${letter}`, id: "app-" + letter.toLowerCase(), html: editionBody(body, true) });
+    const aid = "app-" + letter.toLowerCase();
+    appendices.push({ letter, title: title || `Appendix ${letter}`, id: aid, html: editionBody(body, true, aid).html });
   };
 
   for (const sec of sections) {
@@ -439,6 +451,13 @@ function editionPage(b, md) {
   const flatChaps = [];
   for (const p of parts) for (const c of p.chapters) flatChaps.push(c);
 
+  // pre-render each chapter once, collecting its in-chapter sections for the TOC
+  for (const c of flatChaps) {
+    const r = editionBody(c.body, true, c.id);
+    c.html = r.html;
+    c.sections = r.sections;
+  }
+
   // ---- COVER meta line ----
   const partsWithTitles = parts.filter((p) => p.title || p.label);
   const metaBits = [
@@ -454,6 +473,12 @@ function editionPage(b, md) {
     toc += `\n  <div class="toc-group">\n    <div class="toc-grouplabel">${esc(label)}</div>`;
     for (const c of p.chapters) {
       toc += `\n    <a class="toc-row" href="#${c.id}"><span class="num">${c.n}</span><span class="name">${esc(c.title)}</span><span class="sub">${esc(c.deck)}</span></a>`;
+      // surface a paper's own sections as navigable sub-rows (only when there are several)
+      if ((c.sections || []).length >= 2) {
+        for (const s of c.sections) {
+          toc += `\n    <a class="toc-sec" href="#${s.id}"><span class="secnum">·</span><span>${esc(s.title)}</span></a>`;
+        }
+      }
     }
     toc += `\n  </div>`;
   }
@@ -499,7 +524,7 @@ function editionPage(b, md) {
       body += `\n<article class="chapter wrap" id="${c.id}">
   <div class="chapnum">Chapter ${wordNum(c.n)}</div>
   <h2>${esc(c.title)}</h2>${c.deck ? `\n  <p class="deck">${esc(c.deck)}</p>` : ""}
-  ${editionBody(c.body, true)}${bridge}
+  ${c.html}${bridge}
 </article>`;
     }
   }
@@ -905,15 +930,15 @@ const BOOKS = [
       chapterTextRe: /^Volume\b/i,
       partTitles: {
         "PART ONE: THE THEORETICAL FRAMEWORK": { label: "Part One", title: "The Theoretical Framework", deck: "The thesis, in full: intelligence per watt, and why extraction cannot produce alignment." },
-        "PART TWO: THE APPLIED RESEARCH": { label: "Part Two", title: "The Applied Research", deck: "Thesis, antithesis, synthesis — debugging infrastructure from the outside, then building it." },
+        "PART TWO: THE APPLIED RESEARCH": { label: "Part Two", title: "The Applied Research", deck: "Debugging the stack from outside it, then building the alternative." },
         "PART THREE: THE PHILOSOPHICAL SYNTHESIS": { label: "Part Three", title: "The Philosophical Synthesis", deck: "Intelligence as values, and the accountability gap read from the right end." },
         "COMPANION ESSAYS": { label: "Companion Essays", title: "", deck: "Voting with your stack, and philosophy as engineering now." },
       },
       decks: {
         "Volume I: Radical Optimism": "The case for intelligence per watt.",
         "Debugging Your Infrastructure from an Outsider's Perspective": "What cloud computing is for, and isn't.",
-        "Against the Household Data Center": "A considered antithesis to the thesis.",
-        "The Vision and the Watt": "Synthesis: what survives, what must be paired.",
+        "Against the Household Data Center": "The strongest case against building it yourself.",
+        "The Vision and the Watt": "What survives the critique — and what it must be paired with.",
         "Applying the Scientific Method to a Living System": "Six hypotheses, run against a real system.",
         "The Portable Node": "A playwright ships a sovereign phone.",
         "Intelligence Is a Set of Values, Not a Skill Set": "Argument as method; values over skills.",

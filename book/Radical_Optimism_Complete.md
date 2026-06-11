@@ -32,33 +32,7 @@ The method that produced the series is itself the first finding: structured argu
 
 ## Volume I: Radical Optimism
 
-### A Case for Intelligence Per Watt
-
-RADICAL
-
-OPTIMISM
-
-A Case for Intelligence Per Watt
-
-Why Extraction Cannot Produce Alignment,
-
-Why Centralized AI Is Thermodynamically Insolvent,
-and Why the Edge Is the Only Architecture Left
-
-A Seven-Paper Research Series
-
-Scatter Computing
-
-Ryann Murphy
-
-New York, NY
-
-April 2026
-
-Scatter Computing is a nonprofit organization
-focused on AI safety through decentralization.
-
-Foreword: Why Radical Optimism
+## Foreword: Why Radical Optimism
 
 This volume is titled Radical Optimism because its argument is fundamentally hopeful and fundamentally at odds with where the industry is pointed. The AI industry is making a structural, expensive mistake. The mistake is correctable. The tools to correct it exist. The people who can see the correction clearly are already using those tools. That is what optimism means here: the belief that what is going wrong can be named clearly enough that it stops.
 
@@ -100,13 +74,11 @@ The Scatter Method is the research methodology through which this argument was d
 
 We publish this work as an open framework. The philosophical layers are complete. The scientific layers are specified but not yet executed. We invite collaborators.
 
-PAPER I
-
-The Scatter Method
+## Paper I — The Scatter Method
 
 In which the method is proposed.
 
-1. The Obvious Thing Nobody Said
+### 1. The Obvious Thing Nobody Said
 
 The thesis-antithesis-synthesis structure is not new. Hegel published it in 1807. The Socratic method dates to the fourth century BCE. Devil’s advocacy has been a formal role in Catholic canonical law since the sixteenth century.
 
@@ -114,7 +86,7 @@ Yet in the expanding literature on prompt engineering and AI-assisted research, 
 
 This is not a failure of AI. It is a failure of imagination on the part of the people building with it. The field is dominated by engineers who think in systems. What it lacks are people who think in scenes. The field has also largely failed to notice it is optimizing for the wrong thing. That failure is the subject of this volume.
 
-2. Narrative Prompting: The Story Is the Instruction
+### 2. Narrative Prompting: The Story Is the Instruction
 
 The first technique is the simplest and least documented: begin with a story.
 
@@ -128,7 +100,7 @@ A founder building a voice assistant for a thermodynamic AI home does not write:
 
 This is what playwrights do. They do not write instructions for actors. They write worlds, and the actors inhabit them. Narrative prompting applies the same principle to language models.
 
-3. The Dialectical Prompt Method
+### 3. The Dialectical Prompt Method
 
 The second technique formalizes what thoughtful people do intuitively: they argue with their own ideas.
 
@@ -146,7 +118,7 @@ Stage 6 — Actionable Output. The model identifies real people, organizations, 
 
 No individual stage is novel. What is novel is the sequence, and the recognition that this sequence — the structure of a good argument — has not been formalized despite being more epistemically sound than most “advanced” prompt engineering.
 
-4. Ensemble Casting: Building a Team from the World’s Perspectives
+### 4. Ensemble Casting: Building a Team from the World’s Perspectives
 
 The third technique emerges directly from the playwright’s craft: casting.
 
@@ -156,7 +128,7 @@ Ensemble casting is the practice of constructing AI-generated collaborators, eac
 
 Paper II subjects this technique to adversarial challenge. Paper III sharpens the critique. Paper VI escalates it into an alignment argument with direct implications for frontier labs. The critique comes later, and it does not spare the author.
 
-5. Why the Scatter Method Works
+### 5. Why the Scatter Method Works
 
 The three techniques share a common logic: they treat the LLM as a dramatic medium rather than an information retrieval system.
 
@@ -164,21 +136,19 @@ This works structurally. LLMs do not know things. They perform things. When the 
 
 The Scatter Method creates conditions under which interesting things can be said. A good play does not tell the audience what to think. It puts characters with incompatible commitments in a room and lets the audience watch what happens. The method does the same thing with a language model — and the researcher is both playwright and audience. Applied to the question of what AI infrastructure should look like, the method produced the argument that constitutes the later papers.
 
-PAPER II
-
-The Scatter Method, Applied to Itself
+## Paper II — The Scatter Method, Applied to Itself
 
 In which we subject the method to its own process.
 
-1. Problem Definition
+### 1. Problem Definition
 
 Scatter Computing has published a research note proposing something called the Scatter Method. Is this claim true? Is the method a genuine methodological contribution, or a well-written repackaging of things people already do?
 
-2. Hypothesis
+### 2. Hypothesis
 
 The Scatter Method is a legitimate contribution. Its novelty lies not in new techniques but in the synthesis of ancient epistemological practices into a reproducible framework specifically designed for LLM interaction. Its value is that it addresses known failure modes of AI-assisted work through structural design rather than individual discipline.
 
-3. Adversarial Challenge
+### 3. Adversarial Challenge
 
 Objection 1: This is not novel. Competent users already push back on LLM outputs. The academic literature already includes chain-of-thought, self-refine, and multi-agent debate. Branding is not novelty.
 
@@ -190,7 +160,7 @@ Objection 4: The theatrical framing is self-serving. Positioning the playwright�
 
 Objection 5: “Ancient techniques” is not a credential. Hegel’s dialectic was a theory of historical development, not a prompting strategy. Claiming continuity is rhetorically effective but philosophically imprecise.
 
-4. Audit and Synthesis
+### 4. Audit and Synthesis
 
 On novelty: The objection underestimates synthesis. The Wright brothers did not invent the wing, the engine, or the propeller. They combined them. The paper should engage more directly with existing multi-agent debate frameworks.
 
@@ -202,7 +172,7 @@ On self-serving framing: Fair. The playwright’s skill set is one point of entr
 
 On philosophical lineage: Correct in detail, wrong in spirit. Drop the word “Hegelian.” Keep the structure.
 
-5. Ensemble Cast Responses
+### 5. Ensemble Cast Responses
 
 The German Infrastructure Engineer
 
@@ -232,13 +202,11 @@ The first thing I would say about free computing is: who maintains it? When it b
 
 The fact that this method exists is better than what most technology projects do, which is nothing. If the Scatter Method is a first draft of inclusion, I can work with a first draft. It must remain a draft. It must never become the final version.
 
-PAPER III
-
-Synthesis
+## Paper III — Synthesis
 
 What survived.
 
-1. What Survived the Audit
+### 1. What Survived the Audit
 
 Claim 1: Structured disagreement produces better AI-assisted research than structured agreement. Most prompting techniques optimize for the model saying yes more helpfully. The Scatter Method optimizes for the model saying no more usefully. The dialectical stage is the method’s load-bearing contribution. It makes rigor structural. This claim is testable.
 
@@ -248,7 +216,7 @@ Claim 3: Ensemble casting is a rehearsal, not a replacement. Paper VI argues thi
 
 Claim 4: The method should include a verification stage. After synthesis and before composition, submit the synthesized position to an independent check.
 
-2. The Revised Scatter Method
+### 2. The Revised Scatter Method
 
 Technique 1: Narrative Prompting. Direct the model through story. Establish world, stakes, users, experience.
 
@@ -270,19 +238,17 @@ Stage 7 — Actionable Output.
 
 Technique 3: Ensemble Casting. Construct AI-generated collaborators from specific cultural, professional, and experiential perspectives. Ground each character in real knowledge. Mark all outputs as drafts requiring real-world validation.
 
-PAPER IV
-
-Engineering and Reverse-Engineering
+## Paper IV — Engineering and Reverse-Engineering
 
 Paper III said “here is what survived.” This asks: where’s the science?
 
-1. The Problem With the First Three Papers
+### 1. The Problem With the First Three Papers
 
 The Scatter Method, as proposed and revised, is a philosophical instrument. It produces arguments, perspectives, syntheses that feel rigorous because they have survived adversarial scrutiny. It does not produce data, falsifiable predictions, or results that can be measured, replicated, or disproved.
 
 A method that generates only philosophy is a method that can persuade without proving. To become a research engine, it needs an empirical layer.
 
-2. The Fix: Scientific Method as Middle Layer
+### 2. The Fix: Scientific Method as Middle Layer
 
 Each technique must be subjected to the scientific method before the dialectical structure is applied to the results.
 
@@ -294,7 +260,7 @@ Layer 3 — Philosophy again. Empirical results are fed back through the dialect
 
 This is a loop. The synthesis from Layer 3 becomes the hypothesis for the next iteration of Layer 2. The method becomes recursive.
 
-3. Experimental Designs
+### 3. Experimental Designs
 
 Narrative Prompting
 
@@ -308,23 +274,21 @@ Ensemble Casting
 
 Generate ensemble cast outputs for design problems. Recruit human evaluators from the backgrounds the characters claim to represent. Ask two questions: does this reflect a perspective someone from my background would hold, and does this contain insights a non-specialist would be unlikely to generate?
 
-4. Reverse-Engineering
+### 4. Reverse-Engineering
 
 If you can engineer the method, you can also reverse-engineer it. Take any AI-assisted research output and work backward: What story was the model told? What assumptions did that story encode? What perspectives were included and which were absent? Was there an adversarial stage?
 
 Reverse-engineering is the audit function. The method, reverse-engineered, becomes a literacy tool — a framework for reading AI-assisted work critically. The absence of dialectical structure becomes visible. The single-pass, single-perspective, confidently-stated AI output reveals itself as what it is: an argument that was never tested.
 
-5. The Recursive Structure
+### 5. The Recursive Structure
 
 The full method operates as a three-layer recursive loop: Philosophy → Science → Philosophy → Science. Each pass produces a claim, tests it, reinterprets the results. Karl Popper described this in 1963. The Scatter Method operationalizes it for LLM-assisted research.
 
-PAPER V
-
-The Scatter Method Under Experiment
+## Paper V — The Scatter Method Under Experiment
 
 Paper IV said “now prove it.” This asks: what if we can’t?
 
-1. Narrative Prompting: Likely Experimental Result
+### 1. Narrative Prompting: Likely Experimental Result
 
 It probably depends on the task — and the dependency probably destroys the general claim.
 
@@ -332,7 +296,7 @@ For open-ended creative and strategic tasks, narrative prompting almost certainl
 
 The probable finding: narrative prompting is a domain-specific technique, not a universal one. The method needs a decision layer: what kind of problem is this, and does it benefit from narrative context or suffer from it?
 
-2. The Dialectical Workflow: Likely Experimental Result
+### 2. The Dialectical Workflow: Likely Experimental Result
 
 Two problems. One measurable, one structural.
 
@@ -342,7 +306,7 @@ The structural problem: the researcher controls the outcome. In a real dialectic
 
 A controlled experiment would likely find that the workflow changes the length and hedging of outputs without significantly changing their substance. The adversarial stage is a styling pass, not a reasoning pass.
 
-3. Ensemble Casting: Likely Experimental Result
+### 3. Ensemble Casting: Likely Experimental Result
 
 Three problems, escalating in severity.
 
@@ -352,13 +316,13 @@ Problem 2: The researcher cannot evaluate what they do not know. The researcher 
 
 Problem 3: The technique may reduce real consultation. The psychological effect of having heard a persuasive simulated voice may reduce motivation to seek the real voice. The rehearsal functions as a substitute. Paper VI treats this as the central alignment failure of current-generation AI deployment.
 
-4. The Framework as a Whole: The Circularity Problem
+### 4. The Framework as a Whole: The Circularity Problem
 
 The method proposes that the way to evaluate an idea is to subject it to dialectical scrutiny using an LLM. The method was itself developed through dialectical scrutiny using an LLM. The proof of concept is that it was applied to itself using the same tool it recommends. The method validates itself by its own criteria.
 
 This is circular reasoning dressed in theatrical structure. The method feels rigorous because it performs rigor. The rigor is internal to the system.
 
-5. What Remains
+### 5. What Remains
 
 If these predictions are correct, what is left?
 
@@ -366,13 +330,11 @@ This: the method surfaces questions that would not otherwise be asked. A researc
 
 The method may not produce measurably better outputs. It may produce measurably better researchers — people who have been through a process that forced them to consider opposition, diversity, and their own blind spots. This is a weaker claim than the method originally made. It is also more honest. And it is testable: does using the method change the researcher’s subsequent behavior, even if it does not change the model’s output? That experiment — the behavioral one, not the output one — may be where the method’s real validation lies. Paper VI presents it.
 
-PAPER VI
-
-The Scatter Method Under Observation
+## Paper VI — The Scatter Method Under Observation
 
 If the method works, it works on the researcher. This paper presents the researcher.
 
-1. The Observation
+### 1. The Observation
 
 Between February and April 2026, a single researcher with no prior CS, ML, or professional software engineering experience designed, built, and deployed the following systems:
 
@@ -390,7 +352,7 @@ The researcher is a playwright. Her terminal degree is a BA in Playwriting from 
 
 This is an observation about a method — and about what the method revealed: a structural problem in AI infrastructure the existing field has not adequately named.
 
-2. The Methodology of Building
+### 2. The Methodology of Building
 
 The process is the evidence.
 
@@ -440,7 +402,7 @@ Legibility is therefore a political demand (show the cost), an architectural cho
 
 *Next steps: add the routing screen as the worked "show the cost"; run `S` on real attention matrices and publish whether the fine prediction recovers; keep the consciousness question permanently boxed.*
 
-3. Thesis
+### 3. Thesis
 
 The method produced an engineer. The engineer found a problem. The problem is bigger than the method.
 
@@ -450,7 +412,7 @@ Layer 2 — Infrastructural. Cloud computing is thermodynamically insolvent for 
 
 Layer 3 — Strategic. The solution is quantized edge intelligence produced inside constitutional safety processes and released for local deployment.
 
-4. Antithesis
+### 4. Antithesis
 
 Against the Methodological Claim
 
@@ -478,7 +440,7 @@ Objection 9: The moat is safety and trust, not the model. Open-source quantized 
 
 Objection 10: This is a business opinion.
 
-5. Synthesis
+### 5. Synthesis
 
 On the Methodological Objections
 
@@ -506,7 +468,7 @@ On the moat: this is the strongest objection, and points toward the strategic in
 
 On business-opinion: fair. The strategic argument is a prediction, not a scientific finding. The method does not validate it. It structures the argument clearly enough to be evaluated.
 
-6. The Scientific Layer
+### 6. The Scientific Layer
 
 Hypothesis 1: The Scatter Method enables non-technical narrative thinkers to build functional AI systems.
 
@@ -532,7 +494,7 @@ Design: Model total energy cost of serving one billion daily inference requests 
 
 Prediction: Edge has lower total cost per inference for small-to-medium model sizes, advantage increasing in heating climates.
 
-7. The Recursive Layer
+### 7. The Recursive Layer
 
 Thesis
 
@@ -552,7 +514,7 @@ For Hypothesis 3: if evaluators rate edge output equivalent to cloud for fewer t
 
 The researcher’s priors are themselves evidence. She builds edge systems because the method led her to conclude edge has favorable thermodynamic properties. The infrastructure thesis and the method are entangled because the method surfaced the thesis and the thesis directed the engineering. The entanglement is the phenomenon. The method produces researchers who ask questions about the infrastructure they are using. That is its behavioral effect.
 
-8. Ensemble Casting as an Alignment Threat
+### 8. Ensemble Casting as an Alignment Threat
 
 The method turns on itself and names the harm it can cause.
 
@@ -594,7 +556,7 @@ Treat ensemble casting as a known misuse pattern. Invest in research on detectio
 
 More ambitiously: partner with edge practitioners whose operating conditions expose second-order failures frontier evaluation cannot catch. This parallels the argument for distributed inference. Centralization concentrates the phenomena centralization can see. Decentralization reveals phenomena visible only from outside.
 
-9. What Paper VI Proves by Being Paper VI
+### 9. What Paper VI Proves by Being Paper VI
 
 The method produced the case study. The analysis. The objections. The synthesis. The scientific hypotheses. The adversarial critique of the hypotheses. The infrastructure thesis. The alignment argument. Every output was subjected to the method’s own adversarial process.
 
@@ -602,13 +564,11 @@ This is what it means to prove itself through itself: not circularity, but gener
 
 The strongest remaining objection: a method eloquent about its own limitations is still being eloquent. Performance is not proof. The method has demonstrated coherence. It has not demonstrated correctness. That is honest. The honesty is the strongest argument the method has.
 
-PAPER VII
-
-Intelligence Per Watt
+## Paper VII — Intelligence Per Watt
 
 The full argument, and the metric that matters.
 
-1. The Metric
+### 1. The Metric
 
 Every technology that becomes infrastructure gets held to a metric its inventors did not choose. Steam was held to horsepower. Electricity to the kilowatt-hour. Automobiles to miles per gallon. Airlines to revenue per available seat mile. The metric is imposed by the physics and economics of mature-phase use. Before maturity, industries report numbers that flatter them. After maturity, the metric that survives is the one that describes what the infrastructure actually costs and what it delivers.
 
@@ -636,7 +596,7 @@ The exact and the speculative do not get to validate each other.
 
 *Next steps: publish the per-token energy protocol so the 0.75 J/token figure is reproducible; compute bits-per-joule for a quantized 7B local model versus a frontier cloud round-trip; state the CS-vs-ML distinction in one sentence in the Overview.*
 
-2. What the Industry Is Optimizing For
+### 2. What the Industry Is Optimizing For
 
 The industry is not optimizing for intelligence per watt. It is optimizing for shareholder value.
 
@@ -646,7 +606,7 @@ Each choice is rational under shareholder-value optimization. Each is a disaster
 
 Compute intelligence per watt honestly for a query that originates on a phone, travels to a data center, processes on hardware requiring megawatts of cooling, and returns over the network. Include the share of the training run, the data center construction energy amortized, transmission losses, cooling overhead, cooling water, land opportunity cost. The number is appalling. Not by a little. By a margin that makes the current architecture look, from a physics standpoint, like a Rolls-Royce commute to pick up a loaf of bread.
 
-3. The Good-Enough Threshold Has Been Crossed
+### 3. The Good-Enough Threshold Has Been Crossed
 
 Every infrastructure transition has a threshold: the point at which the alternative becomes good enough for the workloads most users run. Not good enough for edge cases. Not good enough for benchmarks. Good enough for the median task of the median user. That threshold is not a prediction. It is a point on a curve, and the curve has already crossed it.
 
@@ -656,7 +616,7 @@ This moves the intelligence-per-watt calculation from prospective to present-ten
 
 The industry is not racing toward a threshold it has not reached. The industry is racing past a threshold its users already crossed. The capital being deployed is optimizing for capability margins the market has not demanded and, at current energy prices and thermal budgets, cannot indefinitely pay for. The good-enough threshold was cleared sometime in the last eighteen months. Almost nobody noticed because the incumbents had strong incentives not to.
 
-4. Why Extraction Cannot Produce Alignment
+### 4. Why Extraction Cannot Produce Alignment
 
 A business model built on value extraction in the form of data extraction cannot produce an aligned model. Extraction does not produce alignment. Extraction produces skew.
 
@@ -680,7 +640,7 @@ This is *why* extraction produces skew rather than alignment: the harvest severs
 
 *Next steps: state the falsifier — a structurally (not merely behaviorally) symmetric extraction-funded system would refute this; connect to the ensemble-casting "second-order alignment failure" as the same closed channel; keep the exploratory tier label.*
 
-5. What Alignment Actually Requires
+### 5. What Alignment Actually Requires
 
 An aligned intelligence is data-sovereign. The user owns the inputs. The system does not capture them. The user chooses what is remembered, forgotten, shared, private. The relationship is contractual in the user’s favor.
 
@@ -692,7 +652,7 @@ An aligned intelligence is local by default and remote by exception. Local means
 
 A true general intelligence, at any scale, would satisfy these properties. It would be dynamic, not extractive. Fed by ambient energy, not industrial inputs. A participant in the ecology, not a predator on it. A system that takes more than it gives is parasitic. A parasite cannot be aligned with its host. The current architecture is parasitic. The alternative is symbiotic. Alignment lives on the symbiotic side of that line.
 
-6. Why Decentralization Is the Only Architecture That Works
+### 6. Why Decentralization Is the Only Architecture That Works
 
 Intelligence per watt is maximized when three conditions are met: ambient rather than industrial energy input, captured rather than dissipated waste heat, computation close enough to the user that transmission overhead is negligible.
 
@@ -706,7 +666,7 @@ Decentralization also solves categories of alignment problem centralization cann
 
 Decentralization raises new questions — unaligned local models cannot be moderated, local models can be jailbroken or stripped of safety. These are real. Not decisive. The resolution is to ensure models distributed to the edge are grown inside constitutional safety processes, with alignment embedded in the weights deeply enough to survive adversarial pressure. A model both aligned to the user and grown in a constitutional safety lab can be distributed to the edge without producing worse outcomes than cloud deployment. That is the design target. That is the work.
 
-7. The Choice
+### 7. The Choice
 
 The labs that built the frontier have two paths.
 
@@ -716,7 +676,7 @@ The other path: lead the transition. Quantize aggressively. Release aligned edge
 
 The choice is not between growth and decline. The cloud architecture will decline for ML workloads regardless. The edge will emerge regardless. The only question is whether the labs currently leading are the labs that lead the transition, or the labs left holding infrastructure the market no longer needs.
 
-8. The Radical Part of Radical Optimism
+### 8. The Radical Part of Radical Optimism
 
 Optimism is the belief the reframe is achievable. Radical is the admission it requires the industry to do something it is structured to resist.
 
@@ -730,7 +690,7 @@ It requires the research community to take seriously that the most important ali
 
 All of this is radical. None of it is impossible. The tools exist. The physics cooperates. The users are there. What is missing is the collective decision to stop optimizing for the wrong thing.
 
-9. Closing
+### 9. Closing
 
 This volume began with a playwright’s observation: a method from the theater, applied to language models, could produce research and systems conventional technical pipelines could not. Across seven papers, the method proposed itself, broke itself, rebuilt itself, demanded its own empirical validation, predicted its own failures, documented its case study, surfaced a structural critique of the infrastructure it was built on, named an alignment failure in one of its own techniques, and consolidated around a single metric.
 
