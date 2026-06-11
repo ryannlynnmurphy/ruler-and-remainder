@@ -79,7 +79,7 @@ function footnotes(md) {
   return { withRefs, block };
 }
 
-const NAV = `<a href="/#books">Books</a><a href="/#corpus">Corpus</a><a href="/database.html">Index</a><a href="/audit.html">Instrument</a><a href="/method.html">Method</a>`;
+const NAV = `<a href="/#books">Books</a><a href="/#corpus">Corpus</a><a href="/database.html">Index</a><a href="/instruments.html">Instruments</a><a href="/method.html">Method</a>`;
 
 function shell({ title, body, bodyClass = "", desc = "", route = "" }) {
   const d = (desc || DEFAULT_DESC).replace(/\s+/g, " ").trim();
@@ -1050,6 +1050,28 @@ render();
 </script>`,
 }));
 
+// ---------- INSTRUMENTS (landing page for the runnable tools) ----------------
+const INSTRUMENTS = [
+  { url: "/audit.html", kicker: "Tool · runs in browser", title: "The CRD Audit", dek: "Paste a system's copy and its real architecture; the audit surfaces every place stated confidence outruns what the system actually is. Deterministic — nothing leaves the page." },
+  { url: "/reality.html", kicker: "Tool · bring your own key", title: "The Reality Check", dek: "Paste an AI news story; it returns the likely reality, read against the corpus and the Cybersecurity Bill of Rights. Bring your own key." },
+  { url: "/database.html", kicker: "Tool · searchable", title: "The Index", dek: "Search and filter the whole corpus — books, pamphlets, essays, dialogues, instruments, and apparatus." },
+];
+fs.writeFileSync(path.join(DIST, "instruments.html"), shell({
+  title: "Instruments",
+  route: "/instruments.html",
+  desc: "The runnable instruments of the corpus — the CRD Audit, the Reality Check, and the Index. Each runs in your browser.",
+  body: `<div class="piece doc">
+  <a class="back" href="/">← Cover</a>
+  <header class="head reveal"><div class="kicker">Runnable research tools</div><h1>Instruments</h1></header>
+  <div class="prose reveal"><p>The corpus is not only argued — parts of it run. These are the instruments: small tools that turn the books' claims into something you can operate. Each runs in your browser.</p></div>
+  <div class="items" style="margin-top:1.8rem">
+${INSTRUMENTS.map((i) => `    <a class="item" href="${i.url}"><span class="kicker">${i.kicker}</span><h3>${i.title}</h3><p>${i.dek}</p></a>`).join("\n")}
+    <div class="item facecell"><span class="face">＾‿＾</span><span class="facenote">more instruments as the corpus grows</span></div>
+  </div>
+  <div class="foot"><a href="/">← Cover</a></div>
+</div>`,
+}));
+
 // ---------- COVER / HOME -----------------------------------------------------
 const bookFeatures = BOOKS.filter((b) => b.href).map((b) => `
   <a class="feature reveal" href="${b.href}">
@@ -1139,7 +1161,7 @@ fs.writeFileSync(path.join(DIST, "og.svg"),
 </svg>`);
 
 // sitemap + robots
-const routes = ["/", "/database.html", "/audit.html",
+const routes = ["/", "/database.html", "/instruments.html", "/audit.html", "/reality.html",
   ...BOOKS.filter((b) => b.href).map((b) => b.href),
   ...entries.map((e) => e.url), ...pages.map((p) => p.url)];
 fs.writeFileSync(path.join(DIST, "sitemap.xml"),
