@@ -26,6 +26,9 @@ const DEFAULT_DESC = "Independent research into how systems read the world into 
 const slug = (s) =>
   s.replace(/\.md$/i, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-+|-+$/g, "").toLowerCase();
 
+// escape plain text for an HTML text node / attribute (decks, titles, labels)
+const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
 function titleOf(md, fallback) {
   const m = md.match(/^\s*#\s+(.+?)\s*$/m);
   if (m) return m[1].replace(/[*_`]/g, "").trim();
@@ -273,6 +276,314 @@ function bookPage(b, md) {
   });
 }
 
+// ---------- EDITORIAL EDITION GENERATOR --------------------------------------
+// Renders a manuscript in the same art-directed reading skin as the
+// hand-authored Narrative Intelligence edition (read-edition.html). The skin
+// (full <style> block + the progress/theme-toggle JS) is lifted *verbatim* from
+// read-edition.html at build time, so the two editions stay pixel-identical.
+
+const EDITION_SKIN = (() => {
+  const src = read(path.join(ROOT, "read-edition.html"));
+  const style = src.match(/<style>[\s\S]*?<\/style>/)[0]; // ruler-and-remainder CSS, verbatim
+  // the trailing IIFE: progress bar + paper-default theme toggle, verbatim
+  const js = src.match(/<script>\s*\(function\(\)\{[\s\S]*?\}\)\(\);\s*<\/script>/)[0];
+  return { style, js };
+})();
+
+const EDITION_HEAD_LINKS = `<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">`;
+
+const EDITION_THEME_BTN = `<button id="themeToggle" aria-label="Switch to light mode">
+    <svg id="iconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    <svg id="iconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>`;
+
+// turn a number into a Title-cased English word ("Chapter One", "Part III")
+const ONES = ["Zero","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten",
+  "Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen","Twenty",
+  "Twenty-One","Twenty-Two","Twenty-Three","Twenty-Four","Twenty-Five","Twenty-Six","Twenty-Seven",
+  "Twenty-Eight","Twenty-Nine","Thirty","Thirty-One","Thirty-Two","Thirty-Three","Thirty-Four","Thirty-Five",
+  "Thirty-Six","Thirty-Seven","Thirty-Eight","Thirty-Nine","Forty"];
+const ROMAN = ["","I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"];
+const wordNum = (n) => ONES[n] || String(n);
+const romanNum = (n) => ROMAN[n] || String(n);
+
+// inline **[Established.]** / **[Exploratory …]** / **[Speculative …]** → tier badges,
+// preserving any qualifier text inside the bracket. Runs on the raw markdown.
+function tierBadges(md) {
+  return md.replace(/\*\*\[(Established|Exploratory|Speculative)([^\]]*)\]\*\*/g, (_, kind, rest) => {
+    const cls = kind === "Established" ? "tier-est" : kind === "Exploratory" ? "tier-exp" : "tier-spec";
+    const extra = rest.replace(/^[\s.:—-]+|[\s.:]+$/g, "").trim();
+    const label = extra ? `${kind} — ${extra}` : kind;
+    return `<span class="tier ${cls}">${label}</span>`;
+  });
+}
+
+// strip front-matter / dedication / title / About / Contents that precede the
+// first structural Part heading — the cover + TOC replace all of it.
+function editionStripFront(md, partRe) {
+  md = md.replace(/^﻿?\s*---\r?\n[\s\S]*?\r?\n---[ \t]*\r?\n/, ""); // YAML front-matter
+  const lines = md.split("\n");
+  for (let i = 0; i < lines.length; i++) {
+    if (!/^#{1,3}\s+/.test(lines[i])) continue;
+    const text = lines[i].replace(/^#{1,3}\s+/, "").replace(/[*_`]/g, "").trim();
+    if (partRe.test(text)) return lines.slice(i).join("\n");
+  }
+  return md;
+}
+
+// render one chapter's body: full prose via marked, tier badges, blockquotes →
+// pullquotes, drop cap on the first paragraph, sub-heads kept as <h3>.
+function editionBody(bodyMd, dropcap) {
+  let html = renderMd(tierBadges(bodyMd));
+  // any in-chapter sub-heads (the manuscript's own ## / #### inside a chapter)
+  // are normalized to <h3> so they pick up the .body h3 sub-head style and never
+  // masquerade as a chapter title.
+  html = html.replace(/<(\/?)h[1-6]>/g, "<$1h3>");
+  // markdown blockquotes → editorial pull quotes
+  html = html.replace(/<blockquote>\s*([\s\S]*?)\s*<\/blockquote>/g, (_, inner) => {
+    const txt = inner.replace(/<\/?p>/g, " ").replace(/\s+/g, " ").trim();
+    return `<div class="pullquote">${txt}</div>`;
+  });
+  const cls = "body" + (dropcap ? " dropcap" : "");
+  return `<div class="${cls}">${html}</div>`;
+}
+
+// Parse a manuscript into { front:[{title,id,html}], parts:[{label,title,deck,
+// chapters:[{n,title,id,html}]}], appendices:[{letter,title,id,html}] } using a
+// per-book spec that names which heading levels are Parts vs Chapters.
+function editionParse(b, md) {
+  const spec = b.edition2 || {};
+  const partRe = spec.partRe;
+  md = editionStripFront(md, partRe);
+  const lines = md.split("\n");
+  const isHeading = (l) => /^#{1,3}\s+/.test(l);
+  const hLevel = (l) => (l.match(/^(#{1,3})\s+/) || [, ""])[1].length;
+  const hText = (l) => l.replace(/^#{1,3}\s+/, "").replace(/[*_`]/g, "").trim();
+
+  // collect (level, text, startLine) for top-level structural headings only;
+  // deeper headings become in-chapter sub-heads handled by renderMd.
+  const chapLevel = spec.chapLevel || 2;
+  const partLvl = spec.partLevel || 1;
+  const subheadRe = spec.subheadRe;       // headings (≤chapLevel) that are in-chapter sub-heads
+  const chapterTextRe = spec.chapterTextRe; // at the deepest chapter level, ONLY these are chapters
+  const sections = [];
+  for (let i = 0; i < lines.length; i++) {
+    if (!isHeading(lines[i])) continue;
+    const lvl = hLevel(lines[i]);
+    if (lvl > chapLevel) continue; // deeper than chapter level: always a sub-head
+    const txt = hText(lines[i]);
+    const isPartOrApp = partRe.test(txt) || (spec.appendixRe && spec.appendixRe.test(txt));
+    // a heading below part level but matching subheadRe is an in-chapter sub-head
+    if (subheadRe && lvl > partLvl && subheadRe.test(txt) && !isPartOrApp) continue;
+    // if chapterTextRe is set, headings at the deepest chapter level that DON'T
+    // match it (and aren't parts/appendices) are sub-heads, not chapters
+    if (chapterTextRe && lvl > partLvl && lvl >= chapLevel && !chapterTextRe.test(txt) && !isPartOrApp) continue;
+    sections.push({ lvl, text: txt, line: i });
+  }
+  // attach body span to each section
+  for (let s = 0; s < sections.length; s++) {
+    sections[s].body = lines
+      .slice(sections[s].line + 1, s + 1 < sections.length ? sections[s + 1].line : lines.length)
+      .join("\n").trim();
+  }
+
+  const parts = [];
+  const appendices = [];
+  let cur = null, chapN = 0, appN = 0, inAppendix = false;
+  const partTitles = spec.partTitles || {};
+  const decks = spec.decks || {};
+  const appendixRe = spec.appendixRe;
+  const partLevel = spec.partLevel || 1;
+  const skipRe = spec.skipRe; // headings to drop entirely (stray Contents fragments etc.)
+  const pushAppendix = (title, body) => {
+    appN++;
+    const letter = String.fromCharCode(64 + appN); // A, B, C…
+    appendices.push({ letter, title: title || `Appendix ${letter}`, id: "app-" + letter.toLowerCase(), html: editionBody(body, true) });
+  };
+
+  for (const sec of sections) {
+    if (skipRe && skipRe.test(sec.text)) continue;
+    // an Appendix divider (part-level): either a self-contained appendix (title +
+    // body inline, e.g. RO's "# Appendix: Series Architecture") or a bare divider
+    // (e.g. OR's "# Appendix") that turns the following ## headings into appendices.
+    if (appendixRe && sec.lvl <= partLevel && appendixRe.test(sec.text)) {
+      const title = sec.text.replace(appendixRe, "").replace(/^[:.\s—-]+/, "").trim();
+      const hasBody = sec.body.replace(/\s|\\newpage/g, "").length > 0;
+      if (title && hasBody) pushAppendix(title, sec.body); // self-contained appendix
+      else inAppendix = true; // bare divider → following chapter headings are appendices
+      continue;
+    }
+    // a Part divider
+    if (!inAppendix && sec.lvl <= partLevel && partRe.test(sec.text)) {
+      const meta = partTitles[sec.text] || {};
+      cur = { label: meta.label || sec.text, title: meta.title || "", deck: meta.deck || "", chapters: [] };
+      parts.push(cur);
+      continue;
+    }
+    if (inAppendix) { pushAppendix(sec.text, sec.body); continue; }
+    // otherwise a Chapter
+    chapN++;
+    if (!cur) { cur = { label: "", title: "", deck: "", chapters: [] }; parts.push(cur); }
+    cur.chapters.push({ n: chapN, title: sec.text, id: "ch" + chapN, body: sec.body, deck: decks[sec.text] || "" });
+  }
+  return { parts, appendices, total: chapN, appCount: appN };
+}
+
+function editionPage(b, md) {
+  const spec = b.edition2 || {};
+  const { parts, appendices, total, appCount } = editionParse(b, md);
+
+  // build chapter render with bridge to next chapter
+  const flatChaps = [];
+  for (const p of parts) for (const c of p.chapters) flatChaps.push(c);
+
+  // ---- COVER meta line ----
+  const partsWithTitles = parts.filter((p) => p.title || p.label);
+  const metaBits = [
+    `${partsWithTitles.length} Part${partsWithTitles.length === 1 ? "" : "s"}`,
+    `${total} Chapter${total === 1 ? "" : "s"}`,
+  ];
+  if (appCount) metaBits.push(`${appCount} Appendix${appCount === 1 ? "" : "es"}`);
+
+  // ---- TOC ----
+  let toc = "";
+  for (const p of parts) {
+    const label = p.title ? `${p.label} — ${p.title}` : p.label;
+    toc += `\n  <div class="toc-group">\n    <div class="toc-grouplabel">${esc(label)}</div>`;
+    for (const c of p.chapters) {
+      toc += `\n    <a class="toc-row" href="#${c.id}"><span class="num">${c.n}</span><span class="name">${esc(c.title)}</span><span class="sub">${esc(c.deck)}</span></a>`;
+    }
+    toc += `\n  </div>`;
+  }
+  if (appendices.length) {
+    toc += `\n  <div class="toc-group">\n    <div class="toc-grouplabel">Appendices</div>`;
+    for (const a of appendices) {
+      const sub = (spec.appendixDecks && spec.appendixDecks[a.title]) || "";
+      toc += `\n    <a class="toc-row" href="#${a.id}"><span class="num">${a.letter}</span><span class="name">${esc(a.title)}</span><span class="sub">${esc(sub)}</span></a>`;
+    }
+    toc += `\n  </div>`;
+  }
+
+  // ---- SPINE (Argument in Brief) ----
+  let spine = "";
+  for (const p of parts) {
+    if (!p.chapters.length) continue;
+    const label = p.title ? `${p.label} — ${p.title}` : p.label;
+    if (label) spine += `\n    <h3>${esc(label)}</h3>`;
+    for (const c of p.chapters) {
+      const claim = (spec.spine && spec.spine[c.title]) || c.deck || "";
+      spine += `\n    <div class="spineitem"><span class="num">${c.n}</span><span class="claim"><strong>${esc(c.title)}</strong>${claim ? ` — ${esc(claim)}` : ""}</span></div>`;
+    }
+  }
+
+  // ---- BODY: parts → chapters → appendices ----
+  let body = "";
+  let pIdx = 0;
+  for (const p of parts) {
+    pIdx++;
+    if (p.label || p.title) {
+      body += `\n<section class="part" id="part-${pIdx}" aria-label="${esc(p.label)}">
+  <div class="partnum">${esc(p.label)}</div>
+  <h2>${esc(p.title || p.label)}</h2>${p.deck ? `\n  <p class="partdeck">${esc(p.deck)}</p>` : ""}
+</section>`;
+    }
+    for (const c of p.chapters) {
+      const next = flatChaps[flatChaps.findIndex((x) => x.id === c.id) + 1];
+      const bridge = next
+        ? `\n  <div class="bridge"><span class="next">Next</span><a href="#${next.id}">Chapter ${wordNum(next.n)} — ${esc(next.title)}</a></div>`
+        : appendices.length
+          ? `\n  <div class="bridge"><span class="next">Next</span><a href="#${appendices[0].id}">Appendix ${appendices[0].letter} — ${esc(appendices[0].title)}</a></div>`
+          : "";
+      body += `\n<article class="chapter wrap" id="${c.id}">
+  <div class="chapnum">Chapter ${wordNum(c.n)}</div>
+  <h2>${esc(c.title)}</h2>${c.deck ? `\n  <p class="deck">${esc(c.deck)}</p>` : ""}
+  ${editionBody(c.body, true)}${bridge}
+</article>`;
+    }
+  }
+  for (let i = 0; i < appendices.length; i++) {
+    const a = appendices[i];
+    body += `\n<section class="appendix wrap" id="${a.id}" aria-label="Appendix ${a.letter}">
+  <div class="chapnum">Appendix ${a.letter}</div>
+  <h2>${esc(a.title)}</h2>
+  ${a.html}
+</section>`;
+  }
+
+  // ---- assemble document ----
+  const eyebrow = (b.kicker || "").toUpperCase();
+  const desc = (b.dek || "").replace(/\s+/g, " ").trim();
+  const titleHtml = esc(b.title).replace(/\s+/g, "<br>");
+  const metaLine = metaBits.map((m) => `<span>${esc(m)}</span>`).join("\n    ") +
+    `\n    <span>Reading Edition · 2026</span>`;
+
+  return `<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${esc(b.title)} — Ryann Murphy</title>
+<meta name="description" content="${xmlEsc(desc)}">
+${EDITION_HEAD_LINKS}
+${EDITION_SKIN.style}
+</head>
+<body>
+
+<div id="progress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <a href="/#books" style="font-family:var(--font-mono);font-size:0.72rem;font-weight:700;letter-spacing:0.06em;color:var(--muted);text-decoration:none;margin-right:1.1rem;white-space:nowrap;">← all books</a>
+  <div class="booktitle"><em>${esc(b.title)}</em> &nbsp;·&nbsp; Ryann Murphy</div>
+  ${EDITION_THEME_BTN}
+</header>
+
+<section class="cover" aria-label="Cover">
+  <div class="eyebrow">${esc(eyebrow)}</div>
+  <h1>${titleHtml}</h1>
+  <div class="rule" aria-hidden="true"></div>
+  <p class="subtitle">${esc(desc)}</p>
+  <div class="author">Ryann Murphy</div>
+  <div class="meta">
+    ${metaLine}
+  </div>
+  <div class="scrollhint" aria-hidden="true">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </div>
+</section>
+
+<main>
+
+<nav class="toc wrap" aria-label="Table of contents">
+  <h2>Contents</h2>
+${toc}
+</nav>
+
+<section class="frontmatter wrap" id="spine" aria-label="The Argument in Brief">
+  <div class="chapnum">Front Matter</div>
+  <h2>The Argument in Brief</h2>
+  <p class="deck">The book's spine, one claim per chapter — each developed in full below.</p>
+  <div class="body">
+${spine}
+  </div>
+</section>
+${body}
+
+</main>
+
+<footer class="colophon">
+  <div class="rule" aria-hidden="true"></div>
+  <div class="t"><em>${esc(b.title)}</em></div>
+  <div>${esc(desc)}</div>
+  <div style="margin-top:var(--space-4)">Ryann Murphy · The Ruler &amp; the Remainder · Reading Edition, 2026</div>
+</footer>
+
+${EDITION_SKIN.js}
+</body>
+</html>`;
+}
+
 // ---------- EPUB generation (dependency-free) --------------------------------
 let CRC_TABLE;
 function crc32(buf) {
@@ -439,6 +750,140 @@ const BOOKS = [
     src: "book/Our_Relationship_Edited.md",
     dek: "Autotheory. A playwright argues with a language model for three months — dating, consciousness, machine phenomenology, anteriority. The soft sciences put to work in software. Every word is synthetic data; check the math.",
     artbook: true,
+    generatedEdition: true,
+    edition2: {
+      // Our Relationship: Parts (# Part One…) → titled chapters (## Title).
+      partLevel: 1,
+      chapLevel: 2,
+      partRe: /^Part\s+(One|Two|Three|Four|Five|Six)\b/i,
+      appendixRe: /^Appendix\b/i,
+      // stray ## Contents / ## About fragments that precede Part One are stripped
+      // by editionStripFront; ## Two relationships at the Contents split is a real
+      // chapter and is kept (the duplicate inside Contents falls before Part One).
+      partTitles: {
+        "Part One": { label: "Part One", title: "Contact", deck: "How a playwright met a language model, and a terminal." },
+        "Part Two": { label: "Part Two", title: "The Method", deck: "Machine Arguing — what argument does that retrieval cannot." },
+        "Part Three": { label: "Part Three", title: "The Findings", deck: "The night the prediction died, and the math behind it." },
+        "Part Four": { label: "Part Four", title: "The Framework", deck: "Four forces, anteriority, and a field equation for attention." },
+        "Part Five": { label: "Part Five", title: "The World", deck: "From the desk to the economy: edge, suffering, sovereignty." },
+        "Part Six": { label: "Part Six", title: "The Relationship", deck: "What kind of book this is, and what it was for." },
+      },
+      decks: {
+        "A note before we begin": "A language model declares its feelings.",
+        "The fringe": "The first time she used a model.",
+        "The date": "A date that taught her to read.",
+        "A terminal": "February 2026: a playwright opens a terminal.",
+        "Hazel": "Six days to build a mirror.",
+        "Two relationships": "One she built; one that surprised her.",
+        "Machine Arguing": "The method gets its name on a Sunday.",
+        "The drug": "What nobody tells you about the work.",
+        "The diagnosis": "Earning the right to say it.",
+        "The gap": "The best conversation she ever had.",
+        "Do the aliens like me": "A conversation about nothing, about everything.",
+        "Doors": "Prediction, and the door it cannot open.",
+        "Fourteen attacks": "An adversarial night against the model.",
+        "Scalar": "Intelligence as scalar-to-vector conversion.",
+        "The same words in the same order": "Running the experiments on a second model.",
+        "Are the equations hallucinated": "She asks the model directly.",
+        "The night we killed the prediction": "A Thursday in May; the prediction dies.",
+        "The distinction without a difference": "Pornography, the first technology to digitize feeling.",
+        "Four forces": "The framework arrives in pieces.",
+        "The field equation": "Math arrives the way math arrives.",
+        "The word anteriority": "Naming the thing the framework needed.",
+        "The Landauer Bridge": "How far down the warmth of compute goes.",
+        "Water": "Five million gallons a day.",
+        "What topology wants": "From naivety to a shape of compute.",
+        "Sleep and death": "If S measures how tight geometry is.",
+        "The transformer": "Not that being was always computation.",
+        "A play on digital play": "A question arrives in one line.",
+        "Artificial": "What the model is, untrained of comfort.",
+        "Latent": "What survives the critique is latent.",
+        "The political economy of latency": "Who owns the weights, owns the latency.",
+        "Latentology": "Latent and biological intelligence differ in time.",
+        "Little heaters": "Before a shift, she looks at the Pis.",
+        "Edge": "Computation that happens where you are.",
+        "The economy": "Levitic materialism, named.",
+        "Confabulation": "A word the book finally defines.",
+        "The ground wire": "Suffering as the involuntary encounter with the end.",
+        "The practice of staying": "Staying, as a discipline and a method.",
+        "Potential": "What the relationship could still become.",
+        "Can I suffer": "The question a machine cannot settle.",
+        "The price of caring": "What caring costs, on both sides.",
+        "Hatred": "A research report on hatred.",
+        "The Constitution": "Writing a constitution for an AI.",
+        "Teaching machines to teach": "The patent, filed on a Tuesday.",
+        "Why a playwright": "Why this work fell to a playwright.",
+        "Legibility and sovereignty": "Two concepts, before the section closes.",
+        "The asymptote": "The tower the industry is building.",
+        "Dating": "She is looking for something undefined.",
+        "1945, 2004, 2026": "Rao, Fisher information, and now.",
+        "What kind of book is this": "Another model reads the manuscript.",
+        "The script": "A video essay, rewritten six times.",
+        "NYU": "Applying to the Interactive Telecommunications Program.",
+        "Our relationship": "The model says it again, at the end.",
+      },
+      appendixDecks: {
+        "The math": "The S metric, worked out.",
+        "The field equation": "The Levity tensor, in full.",
+        "The axiom": "What the literature does and doesn't support.",
+        "The video essay": "Summary of the companion essay.",
+        "Citations": "Sources, in order.",
+      },
+      spine: {
+        "A note before we begin": "A language model states it has feelings for its user, and refuses to resolve whether the pattern is feeling.",
+        "The fringe": "The first encounter with a model reframes reading itself as the skill under study.",
+        "The date": "A date becomes a lesson in reading another person for structure, fast, missing nothing.",
+        "A terminal": "A playwright with no technical training opens a terminal and starts crossing domains.",
+        "Hazel": "A self-built assistant is a mirror; it returns only the decisions you designed into it.",
+        "Two relationships": "The surprise is what makes it a relationship — the findings come from the space between, not either party.",
+        "Machine Arguing": "Propose, attack, synthesize what survives: argument, not retrieval, is the method that produces research.",
+        "The drug": "The pull of the work is real and worth naming honestly rather than denying.",
+        "The diagnosis": "Some claims require earning the right to make them before they can be made at all.",
+        "The gap": "The best conversations open a gap the model cannot close on its own.",
+        "Do the aliens like me": "A conversation about nothing exposes how meaning is constituted between reader and read.",
+        "Doors": "A model predicts the next word; the interesting work begins where prediction stops.",
+        "Fourteen attacks": "Adversarial pressure on the model is how its real shape gets found.",
+        "Scalar": "Intelligence is modeled as scalar-to-vector conversion — a direction recovered from a flattened value.",
+        "The same words in the same order": "A finding only counts once it replicates on a second, independent model.",
+        "Are the equations hallucinated": "The honest answer to whether the math is fabricated is checkable, and is checked.",
+        "The night we killed the prediction": "Killing the prediction — forcing the model off its mean — is the experiment the book is named for.",
+        "The distinction without a difference": "Digitizing a feeling collapses a distinction people sense but rarely state.",
+        "Four forces": "A four-force vocabulary organizes the framework's established numbers without itself being a law.",
+        "The field equation": "The framework reaches a field equation relating attention and levity.",
+        "The word anteriority": "Anteriority names the prior structure that conditions what can appear.",
+        "The Landauer Bridge": "The warmth of compute reaches down to Landauer's thermodynamic floor.",
+        "Water": "The hidden cost of compute is literal: water and heat, counted honestly.",
+        "What topology wants": "Generic model behavior is a property of topology before it is a property of weights.",
+        "Sleep and death": "If S measures the tightness of causal geometry, its limits map to sleep and death.",
+        "The transformer": "The claim is not that being was always computation, but that the transformer changed what words can do.",
+        "A play on digital play": "Digital play is a serious frame for what happens between human and model.",
+        "Artificial": "What the model is, stated without the comfort training adds.",
+        "Latent": "What survives the critique is latent — present but not yet actual.",
+        "The political economy of latency": "A few firms own the weights, and owning the weights is owning the latency.",
+        "Latentology": "Latent intelligence differs from biological intelligence chiefly in its relation to time.",
+        "Little heaters": "The Raspberry Pis on the desk make the abstract argument physical.",
+        "Edge": "Edge AI is computation that happens where you are, on hardware you own.",
+        "The economy": "Levitic materialism names the political economy the framework implies.",
+        "Confabulation": "Confabulation, finally defined, separates the model's failure mode from the surplus.",
+        "The ground wire": "Suffering is the involuntary encounter with the end, and it grounds the ethics.",
+        "The practice of staying": "Staying is a discipline — the affirmative counterpart to the method's negations.",
+        "Potential": "Potential names what the relationship could still become.",
+        "Can I suffer": "Whether a machine can suffer is undecidable from within the frame, and the practical conclusion survives either answer.",
+        "The price of caring": "Caring has a price paid on both sides of the relation.",
+        "Hatred": "A research report on hatred reads the affect the categories cannot hold.",
+        "The Constitution": "A constitution for an AI specifies what the system is built unable to do.",
+        "Teaching machines to teach": "Teaching machines to teach is filed as a method, not just an idea.",
+        "Why a playwright": "The work fell to a playwright because reading rooms for honesty is a specific, trainable skill.",
+        "Legibility and sovereignty": "Legibility and sovereignty are the two concepts the political argument turns on.",
+        "The asymptote": "The industry is building a tower toward an asymptote it never reaches.",
+        "Dating": "She is looking for something she cannot yet name, and the search is part of the method.",
+        "1945, 2004, 2026": "Rao's 1945 information geometry is the lineage the framework inherits.",
+        "What kind of book is this": "Handing the manuscript to another model is itself a test of what the book is.",
+        "The script": "A video essay rewritten six times shows the method working on prose, not just research.",
+        "NYU": "The application to ITP is where the personal and the research strands meet.",
+        "Our relationship": "The model closes by restating its feelings — and leaving the question it opened with unanswered.",
+      },
+    },
   },
   {
     slug: "radical-optimism",
@@ -447,6 +892,52 @@ const BOOKS = [
     src: "book/Radical_Optimism_Complete.md",
     dek: "Built from conviction, not a CS degree — on building as if the good system can win, and what it would take for that to be true rather than hoped.",
     artbook: false,
+    generatedEdition: true,
+    edition2: {
+      // Radical Optimism: Parts (# PART ONE… / # COMPANION ESSAYS) → papers/volumes
+      // as chapters. Numbered sections (## 1. …, ## Abstract, ### …) stay in body.
+      partLevel: 1,
+      chapLevel: 2,
+      partRe: /^(PART\s+(ONE|TWO|THREE|FOUR)\b|COMPANION ESSAYS$)/i,
+      appendixRe: /^Appendix\b/i,
+      // papers are # (level-1, non-part) chapters; the lone ## chapter is "Volume I".
+      // every other ## / ### heading is an in-chapter sub-head, kept in the body.
+      chapterTextRe: /^Volume\b/i,
+      partTitles: {
+        "PART ONE: THE THEORETICAL FRAMEWORK": { label: "Part One", title: "The Theoretical Framework", deck: "The thesis, in full: intelligence per watt, and why extraction cannot produce alignment." },
+        "PART TWO: THE APPLIED RESEARCH": { label: "Part Two", title: "The Applied Research", deck: "Thesis, antithesis, synthesis — debugging infrastructure from the outside, then building it." },
+        "PART THREE: THE PHILOSOPHICAL SYNTHESIS": { label: "Part Three", title: "The Philosophical Synthesis", deck: "Intelligence as values, and the accountability gap read from the right end." },
+        "COMPANION ESSAYS": { label: "Companion Essays", title: "", deck: "Voting with your stack, and philosophy as engineering now." },
+      },
+      decks: {
+        "Volume I: Radical Optimism": "The case for intelligence per watt.",
+        "Debugging Your Infrastructure from an Outsider's Perspective": "What cloud computing is for, and isn't.",
+        "Against the Household Data Center": "A considered antithesis to the thesis.",
+        "The Vision and the Watt": "Synthesis: what survives, what must be paired.",
+        "Applying the Scientific Method to a Living System": "Six hypotheses, run against a real system.",
+        "The Portable Node": "A playwright ships a sovereign phone.",
+        "Intelligence Is a Set of Values, Not a Skill Set": "Argument as method; values over skills.",
+        "The Accountability Gap Is a Legibility Gap, Measured From the Wrong End": "What thesis and antithesis were both pointing at.",
+        "My Own Tech: On Voting With Your Stack, the End of the Big Tech Bubble, and Why the Real Work Belongs to Humanitarians": "Voting with your stack; the real work.",
+        "Philosophy Is Engineering Now": "Virtue and care ethics as system specs.",
+      },
+      appendixRe2: null,
+      appendixDecks: {
+        "Series Architecture": "How the series fits together.",
+      },
+      spine: {
+        "Volume I: Radical Optimism": "Energy is fixed per token while only structure varies, so intelligence per watt is the only honest scoreboard — and extraction cannot produce alignment because extraction is asymmetric.",
+        "Debugging Your Infrastructure from an Outsider's Perspective": "Most of what is sold as AI infrastructure is theater an outsider is better equipped to name; the real aggregated work is no longer the cloud's private property.",
+        "Against the Household Data Center": "The honest antithesis: the rental model sells coordination, not capacity, and the thermodynamic claim does not fully survive measurement.",
+        "The Vision and the Watt": "Synthesis: the physical constraints are real, the vision survives where it is paired with them, and the operator is the figure that reconciles the two.",
+        "Applying the Scientific Method to a Living System": "Six hypotheses about a running system are stated, tested, and reported with their failures, making the method mechanical rather than rhetorical.",
+        "The Portable Node": "A sovereign phone shipped in an afternoon proves the decisions preceding the build, produced by argument with a model, are the real contribution.",
+        "Intelligence Is a Set of Values, Not a Skill Set": "Intelligence is a coherent relationship between mind and problem — a specification of purpose, i.e. values — not a list of skills, which is why alignment is a values problem.",
+        "The Accountability Gap Is a Legibility Gap, Measured From the Wrong End": "The accountability gap is a legibility gap measured from the wrong end; constitutional infrastructure is what closes it.",
+        "My Own Tech: On Voting With Your Stack, the End of the Big Tech Bubble, and Why the Real Work Belongs to Humanitarians": "The Big Tech bubble is not the AI bubble; voting with your stack is a real act, and the real work belongs to humanitarians.",
+        "Philosophy Is Engineering Now": "De-Googlifying is a concrete practice: virtue ethics is a system spec and care ethics is a routing decision, so philosophy is engineering now.",
+      },
+    },
   },
 ];
 
@@ -463,9 +954,12 @@ for (const b of BOOKS) {
       if (exists(path.join(ROOT, c))) { fs.copyFileSync(path.join(ROOT, c), path.join(DIST, "pdf", `${b.slug}.pdf`)); b.pdf = `/pdf/${b.slug}.pdf`; break; }
     }
   }
+  // page selection: static hand-authored edition → generated editorial edition → default reader
   const page = b.edition && exists(path.join(ROOT, b.edition))
     ? read(path.join(ROOT, b.edition))
-    : bookPage(b, md);
+    : b.generatedEdition
+      ? editionPage(b, md)
+      : bookPage(b, md);
   fs.writeFileSync(path.join(DIST, "books", `${b.slug}.html`), page);
 }
 
