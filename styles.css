@@ -122,13 +122,14 @@ main { padding-left: 36px; }
 .item h3 { font-family: var(--display); font-weight: 700; font-size: 1.25rem; line-height: 1.12; margin: 0; letter-spacing: -0.01em; transition: color 0.15s; }
 .item p { font-size: 0.85rem; line-height: 1.4; color: var(--muted); margin: 0.1rem 0 0; font-family: var(--serif); }
 
-.features { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
-.feature { background: var(--paper); padding: 2rem 1.8rem 2.2rem; text-decoration: none; color: var(--ink); display: block; transition: background 0.15s; }
-.feature:hover { background: var(--paper-2); }
+.features { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+.feature { background: var(--paper-2); border: 1px solid var(--rule); padding: 2.6rem 2.2rem 2.9rem; text-decoration: none; color: var(--ink); display: flex; flex-direction: column; transition: border-color 0.15s, background 0.15s; }
+.feature:hover { background: var(--paper); border-color: var(--measure); }
 .feature:hover h3 { color: var(--measure); }
 .feature .kicker { font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.14em; text-transform: lowercase; color: var(--measure); }
-.feature h3 { font-family: var(--display); font-weight: 800; font-size: clamp(1.7rem, 3.6vw, 2.3rem); line-height: 1.02; letter-spacing: -0.02em; margin: 0.5rem 0 0.7rem; transition: color 0.15s; }
-.feature p { font-size: 0.92rem; color: var(--muted); margin: 0 0 0.9rem; font-family: var(--serif); }
+.feature h3 { font-family: var(--display); font-weight: 800; font-size: clamp(1.7rem, 3.4vw, 2.2rem); line-height: 1.04; letter-spacing: -0.02em; margin: 0.7rem 0 1rem; transition: color 0.15s; }
+.feature p { font-size: 0.95rem; line-height: 1.58; color: var(--muted); margin: 0 0 1.4rem; font-family: var(--serif); }
+.feature .read { margin-top: auto; }
 .feature .read { font-family: var(--mono); font-size: 0.7rem; font-weight: 700; text-transform: lowercase; letter-spacing: 0.08em; }
 @media (max-width: 680px) { .features { grid-template-columns: 1fr; } }
 
@@ -156,8 +157,10 @@ main { padding-left: 36px; }
 .prose a { color: var(--measure); }
 .prose blockquote { margin: 1.7rem 0; padding-left: 1.3rem; border-left: 4px solid var(--measure); font-style: italic; color: var(--ink-soft); font-size: 1.12rem; }
 /* section break = a small long-division house (the recurring motif) */
-.prose hr { border: none; width: 2.6em; height: 0.5em; margin: 2.8rem 0; border-top: 2px solid var(--measure); position: relative; overflow: visible; }
-.prose hr::before { content: ")"; position: absolute; left: -0.02em; top: -0.7em; color: var(--measure); font-family: var(--display); font-weight: 400; font-size: 1.1em; transform: scaleY(1.45) scaleX(0.78); }
+/* section break drawn as a long-division bracket: the divisor's curve + the dividend's overbar */
+.prose hr { border: none; width: 2.4em; height: 1.1em; margin: 3rem auto; position: relative; overflow: visible; }
+.prose hr::before { content: ")"; position: absolute; left: 0; top: 50%; transform: translateY(-50%) scaleX(0.72); transform-origin: left center; color: var(--measure); font-family: var(--serif); font-weight: 400; font-size: 1.7em; line-height: 0; }
+.prose hr::after { content: ""; position: absolute; left: 0.46em; right: 0; top: calc(50% - 0.55em); height: 1.5px; background: var(--measure); }
 .prose code { font-family: var(--mono); font-size: 0.82em; background: var(--paper-2); padding: 0.1em 0.35em; }
 .prose pre { font-family: var(--mono); font-size: 0.8rem; line-height: 1.5; background: var(--ink); color: #efe9d8; padding: 1rem 1.2rem; overflow-x: auto; margin: 1.4rem 0; }
 .prose pre.calc, .bookprose pre.calc {
@@ -199,12 +202,12 @@ main { padding-left: 36px; }
 .reader { max-width: 72rem; padding: clamp(0.9rem,2.6vh,1.6rem) clamp(1rem,4vw,2.6rem) 1.4rem; }
 .reader > .back { display: inline-block; margin-bottom: 0.7rem; }
 .reader .viewport { position: relative; }
-.reader.paged .viewport { overflow: hidden; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); padding: 0 clamp(1.2rem,3vw,2.6rem); cursor: default; }
+.reader.paged .viewport { overflow: hidden; padding: 0 clamp(1.2rem,3vw,2.6rem); cursor: default; }
 
 /* the column engine — width/height/columns are set inline by the pager */
 .reader.paged .pages {
   column-fill: auto;
-  column-rule: 1px solid var(--rule);
+  column-rule: 1px solid color-mix(in srgb, var(--rule) 55%, transparent);
   transform: translateX(0);
   transition: transform 0.42s cubic-bezier(.4,0,.15,1);
   will-change: transform;
