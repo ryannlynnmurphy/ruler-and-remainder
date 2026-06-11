@@ -92,13 +92,14 @@ function shell({ title, body, bodyClass = "", desc = "", route = "" }) {
 <link rel="stylesheet" href="/styles.css">
 </head>
 <body class="${bodyClass}">
-<div id="measure"></div>
+<a class="skip" href="#main">Skip to content</a>
+<div id="measure" aria-hidden="true"></div>
 <div class="ruler-gutter" aria-hidden="true"></div>
 <header class="topbar">
   <a class="home" href="/">The Ruler &amp; the Remainder<small>Independent research · R. Murphy</small></a>
-  <nav>${NAV}</nav>
+  <nav aria-label="Primary">${NAV}</nav>
 </header>
-<main>
+<main id="main">
 ${body}
 </main>
 <footer><div class="colophon">
@@ -139,7 +140,7 @@ function piece({ title, kicker, md, bodyClass = "", backHref = "/#corpus", backL
     route,
     body: `<article class="piece ${bodyClass ? "autotheory" : ""}">
   <a class="back" href="${backHref}">← ${backLabel}</a>
-  <div class="head reveal">${kicker ? `<div class="kicker">${kicker}</div>` : ""}<h1>${title}</h1>${bodyClass ? `<p class="genre-note">Autotheory — autobiography reasoning as theory and back again.</p>` : ""}</div>
+  <header class="head reveal">${kicker ? `<div class="kicker">${kicker}</div>` : ""}<h1>${title}</h1>${bodyClass ? `<p class="genre-note">Autotheory — autobiography reasoning as theory and back again.</p>` : ""}</header>
   ${lead}
   <div class="prose reveal">${html}${block}</div>
   <div class="foot"><a href="${backHref}">← ${backLabel}</a></div>
@@ -451,7 +452,7 @@ const cover = shell({
   body: `
 <section class="cover">
   <div class="issueline reveal"><span>Vol. I</span><span class="dot">●</span><span>An academic journal of interactive media arts</span><span class="dot">●</span><span>Independent research</span></div>
-  <h1 class="title reveal">The<br>Ruler <span class="amp">&amp;</span><br>the <span class="block">▟</span> Remainder</h1>
+  <h1 class="title reveal">The<br>Ruler <span class="amp">&amp;</span><br>the <span class="block" aria-hidden="true">▟</span> Remainder</h1>
   <p class="statement reveal">How systems read the world into legible categories — and who pays for what stays invisible. The measure is the ruler. What it cannot hold is the remainder.</p>
   <div class="manifesto reveal">Independent research.<br><span class="r">No lab signs these pages.</span><br>The credential is the argument.</div>
   <p class="enter reveal"><a href="#books">↓ Enter ↓</a></p>
@@ -459,17 +460,17 @@ const cover = shell({
 
 <div class="contents">
   <section class="dept" id="books">
-    <div class="dept-head reveal"><span class="no">01</span><h2>Books</h2><span class="gloss">long-form</span></div>
+    <div class="dept-head reveal"><span class="no" aria-hidden="true">01</span><h2>Books</h2><span class="gloss">long-form</span></div>
     <div class="features">${bookFeatures}</div>
   </section>
 
   <section class="dept" id="pamphlets">
-    <div class="dept-head reveal"><span class="no">02</span><h2>Pamphlets</h2><span class="gloss">the vocabulary — legibilism · attentionism · latentology</span></div>
+    <div class="dept-head reveal"><span class="no" aria-hidden="true">02</span><h2>Pamphlets</h2><span class="gloss">the vocabulary — legibilism · attentionism · latentology</span></div>
     <div class="items">${pamphlets}</div>
   </section>
 
   <section class="dept" id="instruments">
-    <div class="dept-head reveal"><span class="no">03</span><h2>Instruments</h2><span class="gloss">runnable research tools</span></div>
+    <div class="dept-head reveal"><span class="no" aria-hidden="true">03</span><h2>Instruments</h2><span class="gloss">runnable research tools</span></div>
     <div class="items">
       <a class="item" href="/audit.html"><span class="kicker">Tool · runs in browser</span><h3>The CRD Audit</h3><p>Paste marketing or technical copy; surface where stated confidence outruns architectural reality. Nothing leaves the page.</p></a>
       <a class="item" href="/database.html"><span class="kicker">Tool · searchable</span><h3>The Index</h3><p>Search and filter the whole corpus — books, pamphlets, essays, dialogues, apparatus.</p></a>
@@ -477,13 +478,13 @@ const cover = shell({
   </section>
 
   <section class="dept" id="corpus">
-    <div class="dept-head reveal"><span class="no">04</span><h2>The Corpus</h2><span class="gloss">essays · dialogues · method</span></div>
+    <div class="dept-head reveal"><span class="no" aria-hidden="true">04</span><h2>The Corpus</h2><span class="gloss">essays · dialogues · method</span></div>
     <div class="items">${corpusPicks}</div>
     <p class="by" style="margin-top:1.4rem"><a href="/database.html">Browse all ${db.length} entries in the index →</a></p>
   </section>
 
   <section class="dept" id="apparatus">
-    <div class="dept-head reveal"><span class="no">05</span><h2>Apparatus</h2><span class="gloss">how to read this</span></div>
+    <div class="dept-head reveal"><span class="no" aria-hidden="true">05</span><h2>Apparatus</h2><span class="gloss">how to read this</span></div>
     <div class="items">
       ${pages.map((p) => `<a class="item" href="${p.url}"><span class="kicker">Apparatus</span><h3>${p.title}</h3></a>`).join("")}
       <a class="item" href="/essays/a-note-on-method-and-distribution.html"><span class="kicker">Note</span><h3>A Note on Method and Distribution</h3></a>

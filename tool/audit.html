@@ -21,16 +21,17 @@
 <link rel="stylesheet" href="/styles.css">
 </head>
 <body class="tool">
-<div id="measure"></div>
+<a class="skip" href="#main">Skip to content</a>
+<div id="measure" aria-hidden="true"></div>
 <div class="ruler-gutter" aria-hidden="true"></div>
 <header class="topbar">
   <a class="home" href="/">The Ruler &amp; the Remainder<small>Independent research · R. Murphy</small></a>
-  <nav><a href="/#books">Books</a><a href="/#corpus">Corpus</a><a href="/database.html">Index</a><a href="/audit.html">Instrument</a><a href="/method.html">Method</a></nav>
+  <nav aria-label="Primary"><a href="/#books">Books</a><a href="/#corpus">Corpus</a><a href="/database.html">Index</a><a href="/audit.html">Instrument</a><a href="/method.html">Method</a></nav>
 </header>
-<main>
+<main id="main">
 <article class="piece toolpage">
   <a class="back" href="/#instruments">← Instruments</a>
-  <div class="head"><div class="kicker">Instrument · runs in your browser</div><h1>The CRD Audit</h1></div>
+  <header class="head"><div class="kicker">Instrument · runs in your browser</div><h1>The CRD Audit</h1></header>
   <p class="lede">The method needs two sentences. <strong>A:</strong> the claim, from the copy.
   <strong>B:</strong> the architectural reality, from the spec or the code. It fires where A's
   confidence contradicts B — and it runs a second pass, checking the same copy against the
