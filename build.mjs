@@ -104,7 +104,7 @@ ${body}
 </main>
 <footer><div class="colophon">
   <span class="lead">${SITE}</span> — an academic journal of interactive media arts.
-  Independent research by Ryann Murphy.<br>
+  Independent research by Ryann Murphy in AI governance, AI sovereignty &amp; computational neuroscience.<br>
   Set in Bodoni Moda, Newsreader, and Space Mono. Text released under
   <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
   Source on <a href="https://github.com/ryannlynnmurphy/ruler-and-remainder">GitHub</a>.
@@ -318,7 +318,7 @@ const BOOKS = [
     title: "Radical Optimism",
     kicker: "Book",
     src: "book/Radical_Optimism_Complete.md",
-    dek: "On building as if the good system can win — and what it would take for that to be true rather than hoped.",
+    dek: "Built from conviction, not a CS degree — on building as if the good system can win, and what it would take for that to be true rather than hoped.",
     artbook: false,
   },
 ];
