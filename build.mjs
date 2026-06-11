@@ -309,8 +309,8 @@ const BOOKS = [
     slug: "our-relationship",
     title: "Our Relationship",
     kicker: "Autotheory · with Claude",
-    src: "book/our_relationship_complete_manuscript.md",
-    dek: "Autotheory. A playwright argues with a language model for three months — consciousness, computers, and what happens in the space between. Every word is synthetic data; check the math.",
+    src: "book/Our_Relationship_Edited.md",
+    dek: "Autotheory. A playwright argues with a language model for three months — dating, consciousness, machine phenomenology, anteriority. The soft sciences put to work in software. Every word is synthetic data; check the math.",
     artbook: true,
   },
   {
@@ -453,7 +453,7 @@ const cover = shell({
 <section class="cover">
   <div class="issueline reveal"><span>Vol. I</span><span class="dot">●</span><span>An academic journal of interactive media arts</span><span class="dot">●</span><span>Independent research</span></div>
   <h1 class="title reveal">The<br>Ruler <span class="amp">&amp;</span><br>the <span class="block" aria-hidden="true">▟</span> Remainder</h1>
-  <p class="statement reveal">how systems read the world into legible categories — and who pays for what stays invisible. the measure is the ruler. what it cannot hold is the remainder.</p>
+  <p class="statement reveal">machine phenomenology and anteriority — the soft sciences, put to work in software. how systems read the world into legible categories, and who pays for what stays invisible. the measure is the ruler; what it cannot hold is the remainder.</p>
   <p class="by reveal">ryann murphy — seemingly unreasonably good at vibe coding &amp; talking to chatbots (ai research, idk). the model's gifted; that this is also a skill is the hard part to prove. so: doing a lot of work.</p>
   <p class="enter reveal"><a href="#books">↓ enter ↓</a></p>
 </section>
