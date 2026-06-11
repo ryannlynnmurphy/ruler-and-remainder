@@ -92,9 +92,9 @@ main { padding-left: 36px; }
   max-width: 100%;
 }
 .cover h1.title .amp { color: var(--measure); font-style: italic; font-weight: 700; }
-/* long division: the remainder sits under the division house */
-.cover h1.title .longdiv { border-top: 0.055em solid var(--measure); padding-top: 0.05em; }
-.cover h1.title .longdiv::before { content: ")"; color: var(--measure); font-weight: 400; display: inline-block; transform: scaleY(1.35) scaleX(0.78); margin: 0 0.06em 0 0.2em; vertical-align: 0.04em; }
+/* long division: the remainder is the dividend under the division house */
+.cover h1.title .longdiv { display: inline-block; border-top: 0.055em solid var(--measure); padding-top: 0.06em; margin-left: 0.12em; }
+.cover h1.title .longdiv::before { content: ")"; color: var(--measure); font-weight: 400; margin-right: 0.03em; }
 .cover .statement .thesis { font-family: var(--display); font-weight: 600; color: var(--ink); }
 .cover .statement {
   font-family: var(--serif); font-weight: 400; font-style: normal;
@@ -221,6 +221,27 @@ main { padding-left: 36px; }
 .reality strong { font-weight: 600; }
 .tierflag { font-family: var(--mono); font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 0.1rem 0.35rem; background: var(--paper-2); color: var(--remainder); white-space: nowrap; }
 .tierflag.t-established { color: #3c5a37; } .tierflag.t-exploratory { color: #8a6d1f; } .tierflag.t-speculative { color: var(--measure); }
+
+/* ---------- index page head (was falling back to serif) ---------- */
+.dbwrap .back { font-family: var(--mono); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; color: var(--muted); text-decoration: none; }
+.dbwrap .head { border-bottom: 1px solid var(--ink); padding-bottom: 1rem; margin: 1.2rem 0 1.6rem; }
+.dbwrap .head .kicker { font-family: var(--mono); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; color: var(--measure); }
+.dbwrap .head h1 { font-family: var(--display); font-weight: 700; font-size: clamp(2rem,5vw,3rem); letter-spacing: -0.02em; text-transform: lowercase; margin: 0.5rem 0 0; }
+.searchbox::placeholder { font-style: normal; }
+
+/* ---------- live AI news dashboard (reality check) ---------- */
+.feedwrap { margin: 1.4rem 0 2rem; }
+.feedhead { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.06em; color: var(--muted); border-bottom: 1px solid var(--ink); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+.feedhead button { font-family: var(--mono); font-size: 0.64rem; cursor: pointer; border: 1px solid var(--rule); background: transparent; color: var(--muted); padding: 0.2rem 0.55rem; }
+.feedhead button:hover { border-color: var(--measure); color: var(--measure); }
+.feedgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+.feeditem { background: var(--paper); padding: 0.9rem 1rem; text-align: left; cursor: pointer; border: none; display: flex; flex-direction: column; gap: 0.45rem; font: inherit; transition: background 0.12s; }
+.feeditem:hover { background: var(--paper-2); }
+.feeditem .src { display: flex; align-items: center; gap: 0.45rem; font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.03em; color: var(--measure); }
+.feeditem .src img { width: 18px; height: 18px; flex: 0 0 18px; border-radius: 2px; }
+.feeditem h4 { font-family: var(--display); font-weight: 600; font-size: 0.92rem; line-height: 1.22; margin: 0; color: var(--ink); }
+.feeditem .when { font-family: var(--mono); font-size: 0.58rem; color: var(--faint); margin-top: auto; }
+@media (max-width: 640px) { .feedgrid { grid-template-columns: 1fr; } }
 
 /* ---------- index / search ---------- */
 .dbwrap { max-width: 50rem; margin: 0 auto; padding: clamp(2rem,6vh,4rem) clamp(1.1rem,5vw,2rem) 5rem; }

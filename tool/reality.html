@@ -41,7 +41,12 @@
   straight from your browser to Anthropic with your key; the key is stored only in your browser (if you tick remember).
   Nothing — not the story, not the key — touches this site. Data leaves consciously: you opt in, every time.</p>
 
-  <div class="examples"><span>Try one:</span><button id="loadex">A hype-y launch story</button></div>
+  <section class="feedwrap">
+    <div class="feedhead"><span>live ai news — pick a story to check</span><button id="reload">refresh</button></div>
+    <div id="feed" class="feedgrid"><p class="empty" style="grid-column:1/-1">loading the feed…</p></div>
+  </section>
+
+  <div class="examples"><span>or paste your own — </span><button id="loadex">try a hype-y launch story</button></div>
 
   <label class="field"><span class="fk">the ai news story</span>
   <textarea id="story" rows="7" placeholder="Paste a headline + story, or a press release, or a product announcement."></textarea></label>

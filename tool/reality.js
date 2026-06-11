@@ -68,7 +68,43 @@ window.addEventListener("DOMContentLoaded", () => {
   const saved = localStorage.getItem(KEY_STORE);
   if (saved) { keyEl.value = saved; remember.checked = true; }
 
-  $("loadex").addEventListener("click", () => { storyEl.value = EXAMPLE; storyEl.focus(); });
+  $("loadex").addEventListener("click", () => { storyEl.value = EXAMPLE; storyEl.scrollIntoView({ behavior: "smooth", block: "center" }); storyEl.focus(); });
+
+  // ---- live AI news feed (from /api/feed) ----
+  function when(d) {
+    const t = Date.parse(d); if (!t) return "";
+    const h = Math.round((Date.now() - t) / 36e5);
+    if (h < 1) return "just now"; if (h < 24) return h + "h ago";
+    const dd = Math.round(h / 24); return dd + "d ago";
+  }
+  async function loadFeed() {
+    const feed = $("feed");
+    feed.innerHTML = `<p class="empty" style="grid-column:1/-1">loading the feed…</p>`;
+    try {
+      const r = await fetch("/api/feed");
+      const data = await r.json();
+      const items = data.items || [];
+      if (!items.length) { feed.innerHTML = `<p class="empty" style="grid-column:1/-1">no stories right now — paste your own below.</p>`; return; }
+      feed.innerHTML = "";
+      items.forEach((it) => {
+        const card = document.createElement("button");
+        card.className = "feeditem";
+        card.innerHTML =
+          `<span class="src">${it.image ? `<img src="${it.image}" alt="" loading="lazy">` : ""}${esc(it.source || it.domain || "news")}</span>` +
+          `<h4>${esc(it.title)}</h4>` +
+          `<span class="when">${when(it.date)}</span>`;
+        card.addEventListener("click", () => {
+          storyEl.value = it.title + (it.summary ? "\n\n" + it.summary : "") + `\n\n(source: ${it.source || it.domain})`;
+          storyEl.scrollIntoView({ behavior: "smooth", block: "center" });
+        });
+        feed.appendChild(card);
+      });
+    } catch (e) {
+      feed.innerHTML = `<p class="empty" style="grid-column:1/-1">couldn't load the feed (${esc(String(e))}). paste your own story below.</p>`;
+    }
+  }
+  $("reload").addEventListener("click", loadFeed);
+  loadFeed();
 
   runBtn.addEventListener("click", async () => {
     const key = keyEl.value.trim(), story = storyEl.value.trim();
