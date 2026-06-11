@@ -89,7 +89,7 @@ ${body}
   Independent research by Ryann Murphy. The credential is the argument.<br>
   Set in Fraunces, Newsreader, and Space Mono. Text released under
   <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
-  Source on <a href="https://github.com/ryannlynnmurphy/narrative-intelligence">GitHub</a>.
+  Source on <a href="https://github.com/ryannlynnmurphy/ruler-and-remainder">GitHub</a>.
 </div></footer>
 <script>
 (function(){
