@@ -161,8 +161,72 @@ function piece({ title, kicker, md, backHref = "/#corpus", backLabel = "Index", 
   });
 }
 
-// a designed book-reading page: title page + classic book typography
+// client pager: lays the book into screen-height columns and turns them as
+// a two-page spread (one page on phones). Progressive enhancement — with no
+// JS the .pages block just scrolls normally.
+const PAGER_JS = `(function(){
+  var s=document.currentScript, reader=s&&s.closest('.reader'); if(!reader) return;
+  var vp=reader.querySelector('.viewport'), pages=reader.querySelector('.pages');
+  var pager=reader.querySelector('.pager'), prev=reader.querySelector('.pg-prev');
+  var next=reader.querySelector('.pg-next'), status=reader.querySelector('.pg-status');
+  var spread=0,total=1,step=1,n=2,inited=false;
+  function readHash(){var m=(location.hash||'').match(/p(\\d+)/);return m?Math.max(0,parseInt(m[1],10)-1):null;}
+  function layout(){
+    var wide=window.matchMedia('(min-width:760px)').matches;
+    n=wide?2:1; var gut=wide?56:0;
+    var vcs=getComputedStyle(vp);
+    var vpad=(parseFloat(vcs.paddingLeft)||0)+(parseFloat(vcs.paddingRight)||0);
+    var contentW=vp.clientWidth-vpad;
+    var avail=window.innerHeight-vp.getBoundingClientRect().top-92;
+    var ph=Math.max(380,avail);
+    pages.style.columnCount=n; pages.style.columnGap=gut+'px';
+    pages.style.width=contentW+'px'; pages.style.height=ph+'px'; vp.style.height=ph+'px';
+    step=contentW+gut;
+    var sw=pages.scrollWidth;
+    // safety net: if the browser made no horizontal overflow columns but the
+    // content is clipped, fall back to plain scrolling rather than hide text.
+    if(sw<=contentW+4 && pages.scrollHeight>ph+4){
+      reader.classList.remove('paged'); pager.hidden=true;
+      pages.style.cssText=''; vp.style.height=''; return;
+    }
+    total=Math.max(1,Math.ceil((sw-2)/step));
+    if(!inited){var h=readHash(); if(h!=null) spread=h; inited=true;}
+    if(spread>total-1) spread=total-1;
+    apply();
+  }
+  function apply(){
+    pages.style.transform='translateX('+(-spread*step)+'px)';
+    if(inited){try{history.replaceState(null,'','#p'+(spread+1));}catch(e){}}
+    var p1=spread*n+1, last=total*n, p2=Math.min(last,p1+n-1);
+    status.textContent=(n===2&&p2>p1?p1+'–'+p2:''+p1)+' / '+last;
+    prev.disabled=spread<=0; next.disabled=spread>=total-1;
+  }
+  function go(d){spread=Math.max(0,Math.min(total-1,spread+d));apply();}
+  reader.classList.add('paged'); pager.hidden=false;
+  prev.addEventListener('click',function(){go(-1);});
+  next.addEventListener('click',function(){go(1);});
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key==='PageDown'){go(1);e.preventDefault();}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){go(-1);e.preventDefault();}
+  });
+  vp.addEventListener('click',function(e){
+    if(e.target.closest('a,button')) return;
+    var r=vp.getBoundingClientRect();
+    if(e.clientX<r.left+r.width*0.32) go(-1);
+    else if(e.clientX>r.left+r.width*0.68) go(1);
+  });
+  var x0=null;
+  vp.addEventListener('touchstart',function(e){x0=e.touches[0].clientX;},{passive:true});
+  vp.addEventListener('touchend',function(e){if(x0==null)return;var dx=e.changedTouches[0].clientX-x0;if(Math.abs(dx)>40)go(dx<0?1:-1);x0=null;});
+  var rt; window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(layout,160);});
+  window.addEventListener('load',layout);
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(layout);
+  layout();
+})();`;
+
+// a designed book-reading page: a title spread + a two-page flip reader
 function bookPage(b, md) {
+  md = md.replace(/^﻿?\s*---\r?\n[\s\S]*?\r?\n---[ \t]*\r?\n/, ""); // drop YAML front-matter
   const { withRefs, block } = footnotes(md);
   const noH1 = withRefs.replace(/^\s*#\s+.+?\n/, "");
   let html = renderMd(noH1);
@@ -176,25 +240,35 @@ function bookPage(b, md) {
       '$1<p class="chapter-open">'
     );
   }
-  const proseClass = "bookprose prose reveal" + (capChapter ? " caps-chapter" : "");
+  const proseClass = "pages bookprose prose" + (capChapter ? " caps-chapter" : "");
   const author = /with claude/i.test(b.kicker) ? "by claude &amp; ryann" : "by ryann murphy";
-  const dl = `read below, or take it with you — <a href="${b.epub}">↓ epub</a>${b.pdf ? ` · <a href="${b.pdf}">↓ pdf</a>` : ""}`;
+  const dl = `take it with you — <a href="${b.epub}">↓ epub</a>${b.pdf ? ` · <a href="${b.pdf}">↓ pdf</a>` : ""}`;
   return shell({
     title: b.title,
     bodyClass: "bookread",
     desc: b.dek,
     route: b.href,
-    body: `<article class="book-wrap">
+    body: `<article class="book-wrap reader">
   <a class="back" href="/#books">← all books</a>
-  <header class="titlepage reveal">
-    <div class="kicker">${b.kicker}</div>
-    <h1 class="booktitle">${b.title}</h1>
-    <p class="byline">${author}</p>
-    <p class="bookdek">${b.dek}</p>
-    <p class="downloads">${dl}</p>
-  </header>
-  <div class="${proseClass}">${html}${block}</div>
+  <div class="viewport">
+    <div class="${proseClass}">
+      <section class="cover">
+        <div class="kicker">${b.kicker}</div>
+        <h1 class="booktitle">${b.title}</h1>
+        <p class="byline">${author}</p>
+        <p class="bookdek">${b.dek}</p>
+        <p class="downloads">${dl}</p>
+      </section>
+      ${html}${block}
+    </div>
+  </div>
+  <nav class="pager" aria-label="Pages" hidden>
+    <button class="pg-btn pg-prev" type="button" aria-label="Previous page">←</button>
+    <span class="pg-status" role="status" aria-live="polite"></span>
+    <button class="pg-btn pg-next" type="button" aria-label="Next page">→</button>
+  </nav>
   <div class="foot"><a href="/#books">← all books</a></div>
+  <script>${PAGER_JS}</script>
 </article>`,
   });
 }

@@ -191,15 +191,54 @@ main { padding-left: 36px; }
 .doc .prose h3 { margin-top: 1.8rem; margin-bottom: 0.55rem; font-size: 1.15rem; }
 .doc .prose table { font-size: 0.86rem; display: block; overflow-x: auto; }
 
-/* ---------- book reading mode (beautiful ebook) ---------- */
+/* ---------- book reading mode: two-page flip reader ---------- */
 .book-wrap { max-width: 33rem; margin: 0 auto; padding: clamp(1.4rem,5vh,3rem) clamp(1.1rem,5vw,2rem) 6rem; }
 .book-wrap > .back, .book-wrap .foot a { font-family: var(--mono); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; color: var(--muted); text-decoration: none; }
-.titlepage { text-align: center; border-bottom: 1px solid var(--ink); padding: clamp(2rem,8vh,5rem) 0 clamp(1.8rem,5vh,3rem); margin: 1.2rem 0 3.2rem; }
-.titlepage .kicker { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; color: var(--measure); }
-.titlepage .booktitle { font-family: var(--display); font-weight: 700; font-size: clamp(2.1rem,7vw,3.4rem); line-height: 1.0; letter-spacing: -0.02em; margin: 1rem 0 0.9rem; }
-.titlepage .byline { font-family: var(--mono); font-size: 0.76rem; letter-spacing: 0.1em; color: var(--ink); margin: 0 0 1.3rem; }
-.titlepage .bookdek { font-family: var(--serif); font-size: 1.02rem; line-height: 1.5; color: var(--muted); max-width: 27rem; margin: 0 auto 1.3rem; }
-.titlepage .downloads { margin: 0; }
+
+/* reader shell */
+.reader { max-width: 72rem; padding: clamp(0.9rem,2.6vh,1.6rem) clamp(1rem,4vw,2.6rem) 1.4rem; }
+.reader > .back { display: inline-block; margin-bottom: 0.7rem; }
+.reader .viewport { position: relative; }
+.reader.paged .viewport { overflow: hidden; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); padding: 0 clamp(1.2rem,3vw,2.6rem); cursor: default; }
+
+/* the column engine — width/height/columns are set inline by the pager */
+.reader.paged .pages {
+  column-fill: auto;
+  column-rule: 1px solid var(--rule);
+  transform: translateX(0);
+  transition: transform 0.42s cubic-bezier(.4,0,.15,1);
+  will-change: transform;
+  padding: clamp(1.4rem,4vh,2.6rem) 0;
+}
+.reader.paged .pages > h1 { break-before: column; }
+.reader.paged .pages h1, .reader.paged .pages h2, .reader.paged .pages h3,
+.reader.paged .pages blockquote, .reader.paged .pages table,
+.reader.paged .pages pre, .reader.paged .pages figure, .reader.paged .pages li,
+.reader.paged .cover { break-inside: avoid; }
+.reader.paged .pages pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+.reader.paged .pages img, .reader.paged .pages table { max-width: 100%; }
+.reader.paged .pages h1 { margin-top: 0; padding-top: 0.4rem; }
+
+/* the cover page */
+.reader .cover { text-align: center; padding: clamp(2rem,7vh,4.5rem) 0.5rem; border-bottom: 1px solid var(--rule); margin-bottom: 2.4rem; }
+.reader.paged .cover { break-after: column; break-inside: avoid; border-bottom: none; margin: 0; padding: clamp(3rem,13vh,7rem) 0 0; }
+.reader .cover p { text-indent: 0; }
+.reader .cover .kicker { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; color: var(--measure); }
+.reader .cover .booktitle { font-family: var(--display); font-weight: 700; font-size: clamp(2rem,5vw,3rem); line-height: 1.0; letter-spacing: -0.02em; margin: 1rem 0 0.8rem; color: var(--ink); }
+.reader .cover .byline { font-family: var(--mono); font-size: 0.76rem; letter-spacing: 0.1em; color: var(--ink); margin: 0 0 1.2rem; }
+.reader .cover .bookdek { font-family: var(--serif); font-size: 1rem; line-height: 1.5; color: var(--muted); max-width: 24rem; margin: 0 auto 1.2rem; text-indent: 0; }
+.reader .cover .downloads { margin: 0; }
+
+/* pager controls */
+.pager { display: flex; align-items: center; justify-content: center; gap: 1.4rem; margin-top: 0.9rem; }
+.pager[hidden] { display: none; }
+.pg-btn { font-family: var(--mono); font-size: 1rem; font-weight: 700; background: var(--paper-2); color: var(--ink); border: 1px solid var(--ink); width: 2.4rem; height: 2.4rem; cursor: pointer; line-height: 1; padding: 0; }
+.pg-btn:hover:not(:disabled) { background: var(--measure); color: var(--paper); }
+.pg-btn:disabled { opacity: 0.28; cursor: default; }
+.pg-status { font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.08em; color: var(--muted); min-width: 7rem; text-align: center; }
+.reader.paged .foot { display: none; }
+@media (max-width: 759px) { .reader { padding-left: 1rem; padding-right: 1rem; } .reader.paged .pages { column-rule: none; } }
+
 .bookprose { font-size: 1.08rem; line-height: 1.78; }
 .bookprose p { margin: 0; }
 .bookprose p + p { text-indent: 1.4em; }
