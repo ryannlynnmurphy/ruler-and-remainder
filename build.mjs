@@ -71,7 +71,7 @@ function shell({ title, body, bodyClass = "" }) {
 <meta name="description" content="${SITE} — an academic journal of interactive media arts. Independent research into how systems read the world into legible categories, and what they leave out. By Ryann Murphy.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;0,6..96,900;1,6..96,400;1,6..96,800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/styles.css">
 </head>
 <body class="${bodyClass}">
@@ -266,10 +266,10 @@ const cover = shell({
   body: `
 <section class="cover">
   <div class="issueline reveal"><span>Vol. I</span><span class="dot">●</span><span>An academic journal of interactive media arts</span><span class="dot">●</span><span>Independent research</span></div>
-  <h1 class="title reveal">The Ruler <span class="amp">&amp;</span> the Remainder</h1>
-  <p class="statement reveal">A body of independent research into how systems — machines, institutions, people — read the world into legible categories, and what they leave out. The measure is the ruler. What it cannot account for is the remainder.</p>
-  <blockquote class="epi reveal">Every system that survives learns how to read.</blockquote>
-  <p class="by reveal">Written and assembled by <a href="/essays/a-note-on-method-and-distribution.html">Ryann Murphy</a>, independent researcher. The credential is the argument — <a href="/method.html">the method is public</a>.</p>
+  <h1 class="title reveal">The<br>Ruler <span class="amp">&amp;</span><br>the <span class="block">▟</span> Remainder</h1>
+  <p class="statement reveal">How systems read the world into legible categories — and who pays for what stays invisible. The measure is the ruler. What it cannot hold is the remainder.</p>
+  <div class="manifesto reveal">Independent research.<br><span class="r">No lab signs these pages.</span><br>The credential is the argument.</div>
+  <p class="enter reveal"><a href="#books">↓ Enter ↓</a></p>
 </section>
 
 <div class="contents">
