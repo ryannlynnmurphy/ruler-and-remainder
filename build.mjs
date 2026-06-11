@@ -1,4 +1,4 @@
-// Build "The Ruler and the Remainder" — an academic journal of interactive media arts.
+// Build "The Ruler and the Remainder" — a personal research corpus.
 // Renders the corpus (markdown) + the books into a single art-directed static site.
 import { marked } from "marked";
 import fs from "node:fs";
@@ -109,8 +109,7 @@ function shell({ title, body, bodyClass = "", desc = "", route = "" }) {
 ${body}
 </main>
 <footer><div class="colophon">
-  <span class="lead">${SITE}</span> — an academic journal of interactive media arts.
-  Independent research by Ryann Murphy in AI governance, AI sovereignty &amp; computational neuroscience.<br>
+  <span class="lead">${SITE}</span> — a personal research corpus. independent research by ryann murphy in ai governance, ai sovereignty &amp; computational neuroscience.<br>
   Set in Bodoni Moda, Newsreader, and Space Mono. Text released under
   <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
   Source on <a href="https://github.com/ryannlynnmurphy/ruler-and-remainder">GitHub</a>.
@@ -474,16 +473,16 @@ const corpusPicks = entries.filter((e) => !e.pamphlet && ["Method", "Essay", "Di
   .map((e) => `<a class="item" href="${e.url}"><span class="kicker">${e.kind}</span><h3>${e.title}</h3></a>`).join("");
 
 const cover = shell({
-  title: "An academic journal of interactive media arts",
+  title: "a personal research corpus",
   bodyClass: "home",
   route: "/",
   desc: "How systems read the world into legible categories — and who pays for what stays invisible. Independent research, books, and a runnable audit by Ryann Murphy.",
   body: `
 <section class="cover">
-  <div class="issueline reveal"><span>Vol. I</span><span class="dot">●</span><span>An academic journal of interactive media arts</span><span class="dot">●</span><span>Independent research</span></div>
-  <h1 class="title reveal">The<br>Ruler <span class="amp">&amp;</span><br>the <span class="block" aria-hidden="true">▟</span> Remainder</h1>
-  <p class="statement reveal">machine phenomenology and anteriority — the soft sciences, put to work in software. how systems read the world into legible categories, and who pays for what stays invisible. the measure is the ruler; what it cannot hold is the remainder.</p>
-  <p class="by reveal">ryann murphy — seemingly unreasonably good at vibe coding &amp; talking to chatbots (ai research, idk). the model's gifted; that this is also a skill is the hard part to prove. so: doing a lot of work.</p>
+  <div class="issueline reveal"><span>a personal research corpus</span><span class="dot">●</span><span>ryann murphy</span></div>
+  <h1 class="title reveal">the<br>ruler <span class="amp">&amp;</span><br>the <span class="longdiv"><span class="house">remainder</span></span></h1>
+  <p class="statement reveal">a humanities cross-disciplinary buffet — philosophy, queer theory, phenomenology, anteriority — put to work in software. how systems read the world into legible categories, and who pays for what stays invisible. the measure is the ruler; what it cannot hold is the remainder.</p>
+  <p class="by reveal">ryann murphy — seemingly unreasonably good at vibe coding &amp; talking to chatbots (ai research, idk). i argue with the model until something true falls out; i call it machine arguing. it's gifted — that this is also a skill is the hard part to prove.</p>
   <p class="enter reveal"><a href="#books">↓ enter ↓</a></p>
 </section>
 
@@ -537,7 +536,7 @@ fs.writeFileSync(path.join(DIST, "og.svg"),
 `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
 <rect width="1200" height="630" fill="#f4f0e6"/>
 <rect width="1200" height="20" fill="#e2300c"/>
-<text x="80" y="150" font-family="monospace" font-size="26" letter-spacing="6" fill="#6c6557">VOL. I — AN ACADEMIC JOURNAL OF INTERACTIVE MEDIA ARTS</text>
+<text x="80" y="150" font-family="monospace" font-size="26" letter-spacing="6" fill="#6c6557">VOL. I — A PERSONAL RESEARCH CORPUS</text>
 <text x="76" y="300" font-family="Georgia,serif" font-weight="bold" font-size="120" fill="#0e0d0a">The Ruler</text>
 <text x="76" y="430" font-family="Georgia,serif" font-weight="bold" font-size="120" fill="#0e0d0a">&amp; the <tspan fill="#e2300c">Remainder</tspan></text>
 <text x="80" y="540" font-family="monospace" font-size="28" letter-spacing="3" fill="#0e0d0a">INDEPENDENT RESEARCH · RYANN MURPHY</text>
