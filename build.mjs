@@ -430,6 +430,7 @@ const BOOKS = [
     pdfFrom: ["book/pdf/Narrative_Intelligence_interior_fixed.pdf", "book/pdf/Narrative_Intelligence.pdf"],
     artbook: false,
     dropcap: "chapter", // drop cap on chapter openers only, not front-matter/appendices
+    edition: "read-edition.html", // hand-authored editorial edition (decks, tiers, spine) — served instead of the generated reader
   },
   {
     slug: "our-relationship",
@@ -462,7 +463,10 @@ for (const b of BOOKS) {
       if (exists(path.join(ROOT, c))) { fs.copyFileSync(path.join(ROOT, c), path.join(DIST, "pdf", `${b.slug}.pdf`)); b.pdf = `/pdf/${b.slug}.pdf`; break; }
     }
   }
-  fs.writeFileSync(path.join(DIST, "books", `${b.slug}.html`), bookPage(b, md));
+  const page = b.edition && exists(path.join(ROOT, b.edition))
+    ? read(path.join(ROOT, b.edition))
+    : bookPage(b, md);
+  fs.writeFileSync(path.join(DIST, "books", `${b.slug}.html`), page);
 }
 
 // ---------- CORPUS (research + website) -------------------------------------
