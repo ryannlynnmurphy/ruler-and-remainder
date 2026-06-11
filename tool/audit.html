@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The CRD Audit · The Ruler and the Remainder</title>
+<meta name="description" content="A deterministic instrument that treats copy as a model output and surfaces where stated confidence outruns architectural reality. Runs entirely in your browser.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Newsreader:opsz,wght@6..72,400;6..72,600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body class="tool">
+<div id="measure"></div>
+<div class="ruler-gutter" aria-hidden="true"></div>
+<header class="topbar">
+  <a class="home" href="/">The Ruler &amp; the Remainder<small>Independent research · R. Murphy</small></a>
+  <nav><a href="/#books">Books</a><a href="/#corpus">Corpus</a><a href="/database.html">Index</a><a href="/audit.html">Instrument</a><a href="/method.html">Method</a></nav>
+</header>
+<main>
+<article class="piece toolpage">
+  <a class="back" href="/#instruments">← Instruments</a>
+  <div class="head"><div class="kicker">Instrument · runs in your browser</div><h1>The CRD Audit</h1></div>
+  <p class="lede">A runnable instrument. It treats a piece of marketing or technical copy as a
+  model output and tests one condition: does the stated confidence exceed the architectural
+  reality? It surfaces candidates — you complete the two-sentence test. It is calibrated to
+  fire on the gap, not on the existence of something critical to say.</p>
+  <p class="privacy">Runs entirely in your browser. Nothing you paste leaves the page — no server, no API, no log.
+  <a href="/essays/the-crd-audit-confidence-reality-divergence-as-narrative-intelligence.html">Read the method →</a></p>
+
+  <div class="examples">
+    <span>Try a case:</span>
+    <button data-example="determinism">Determinism claim</button>
+    <button data-example="integrity">Tamper-proof claim</button>
+    <button data-example="honest">The honest version</button>
+  </div>
+
+  <textarea id="input" rows="7" placeholder="Paste marketing or technical copy here — a product page, a security claim, a press line — and run the audit."></textarea>
+  <button id="run" class="run">Run the audit</button>
+
+  <section id="results" class="results"></section>
+</article>
+</main>
+<footer><div class="colophon">
+  <span class="lead">The Ruler and the Remainder</span> — an academic journal of interactive media arts.
+  Independent research by Ryann Murphy. Text released under
+  <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+</div></footer>
+<script>
+(function(){var m=document.getElementById('measure');function p(){var h=document.documentElement;var s=h.scrollTop||document.body.scrollTop;var mx=(h.scrollHeight-h.clientHeight)||1;m.style.width=(100*s/mx)+'%';}document.addEventListener('scroll',p,{passive:true});p();})();
+</script>
+<script src="/audit.js"></script>
+</body>
+</html>
