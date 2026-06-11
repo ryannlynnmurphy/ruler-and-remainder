@@ -475,8 +475,11 @@ function editionPage(b, md) {
       toc += `\n    <a class="toc-row" href="#${c.id}"><span class="num">${c.n}</span><span class="name">${esc(c.title)}</span><span class="sub">${esc(c.deck)}</span></a>`;
       // surface a paper's own sections as navigable sub-rows (only when there are several)
       if ((c.sections || []).length >= 2) {
+        // normalize wildly inconsistent section labels (1. / I. / Part I: / plain)
+        // to clean titles so the contents read consistently
+        const cleanSec = (t) => t.replace(/^(?:\d+\.|[IVXLC]{1,6}\.|Part\s+[IVXLC]{1,6}:)\s+/, "").trim();
         for (const s of c.sections) {
-          toc += `\n    <a class="toc-sec" href="#${s.id}"><span class="secnum">·</span><span>${esc(s.title)}</span></a>`;
+          toc += `\n    <a class="toc-sec" href="#${s.id}"><span class="secnum">·</span><span>${esc(cleanSec(s.title))}</span></a>`;
         }
       }
     }
