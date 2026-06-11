@@ -130,6 +130,9 @@ main { padding-left: 36px; }
 .piece .head .kicker { font-family: var(--mono); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--measure); }
 .piece h1 { font-family: var(--display); font-weight: 800; font-size: clamp(2.1rem, 5.5vw, 3.4rem); line-height: 1.0; letter-spacing: -0.02em; margin: 0.6rem 0 0; }
 .genre-note { font-family: var(--mono); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--remainder); margin: 0.9rem 0 0; }
+.downloads { font-family: var(--mono); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin: 0 0 2rem; }
+.downloads a { color: var(--measure); text-decoration: none; }
+.downloads a:hover { text-decoration: underline; }
 
 .prose { font-size: 1.08rem; }
 .prose h2 { font-family: var(--display); font-weight: 800; font-size: 1.7rem; letter-spacing: -0.01em; margin: 2.8rem 0 0.7rem; }

@@ -107,7 +107,7 @@ ${body}
 </html>`;
 }
 
-function piece({ title, kicker, md, bodyClass = "", backHref = "/#corpus", backLabel = "Index" }) {
+function piece({ title, kicker, md, bodyClass = "", backHref = "/#corpus", backLabel = "Index", lead = "" }) {
   const { withRefs, block } = footnotes(md);
   // strip the leading H1 (we render our own head)
   const noH1 = withRefs.replace(/^\s*#\s+.+?\n/, "");
@@ -118,10 +118,150 @@ function piece({ title, kicker, md, bodyClass = "", backHref = "/#corpus", backL
     body: `<article class="piece ${bodyClass ? "autotheory" : ""}">
   <a class="back" href="${backHref}">← ${backLabel}</a>
   <div class="head reveal">${kicker ? `<div class="kicker">${kicker}</div>` : ""}<h1>${title}</h1>${bodyClass ? `<p class="genre-note">Autotheory — autobiography reasoning as theory and back again.</p>` : ""}</div>
+  ${lead}
   <div class="prose reveal">${html}${block}</div>
   <div class="foot"><a href="${backHref}">← ${backLabel}</a></div>
 </article>`,
   });
+}
+
+// ---------- EPUB generation (dependency-free) --------------------------------
+let CRC_TABLE;
+function crc32(buf) {
+  if (!CRC_TABLE) {
+    CRC_TABLE = [];
+    for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; CRC_TABLE[n] = c >>> 0; }
+  }
+  let crc = 0xFFFFFFFF;
+  for (let i = 0; i < buf.length; i++) crc = CRC_TABLE[(crc ^ buf[i]) & 0xFF] ^ (crc >>> 8);
+  return (crc ^ 0xFFFFFFFF) >>> 0;
+}
+function zipStore(entries) {
+  const local = [], central = []; let offset = 0;
+  for (const e of entries) {
+    const name = Buffer.from(e.name, "utf8");
+    const data = Buffer.isBuffer(e.data) ? e.data : Buffer.from(e.data, "utf8");
+    const crc = crc32(data);
+    const h = Buffer.alloc(30);
+    h.writeUInt32LE(0x04034b50, 0); h.writeUInt16LE(20, 4); h.writeUInt16LE(0, 6);
+    h.writeUInt16LE(0, 8); h.writeUInt16LE(0, 10); h.writeUInt16LE(23755, 12); // 2026-06-11
+    h.writeUInt32LE(crc, 14); h.writeUInt32LE(data.length, 18); h.writeUInt32LE(data.length, 22);
+    h.writeUInt16LE(name.length, 26); h.writeUInt16LE(0, 28);
+    local.push(h, name, data);
+    const c = Buffer.alloc(46);
+    c.writeUInt32LE(0x02014b50, 0); c.writeUInt16LE(20, 4); c.writeUInt16LE(20, 6);
+    c.writeUInt16LE(0, 8); c.writeUInt16LE(0, 10); c.writeUInt16LE(0, 12); c.writeUInt16LE(23755, 14);
+    c.writeUInt32LE(crc, 16); c.writeUInt32LE(data.length, 20); c.writeUInt32LE(data.length, 24);
+    c.writeUInt16LE(name.length, 28); c.writeUInt16LE(0, 30); c.writeUInt16LE(0, 32);
+    c.writeUInt16LE(0, 34); c.writeUInt16LE(0, 36); c.writeUInt32LE(0, 38); c.writeUInt32LE(offset, 42);
+    central.push(c, name);
+    offset += h.length + name.length + data.length;
+  }
+  const cdStart = offset; let cdSize = 0; for (const b of central) cdSize += b.length;
+  const eocd = Buffer.alloc(22);
+  eocd.writeUInt32LE(0x06054b50, 0); eocd.writeUInt16LE(0, 4); eocd.writeUInt16LE(0, 6);
+  eocd.writeUInt16LE(entries.length, 8); eocd.writeUInt16LE(entries.length, 10);
+  eocd.writeUInt32LE(cdSize, 12); eocd.writeUInt32LE(cdStart, 16); eocd.writeUInt16LE(0, 20);
+  return Buffer.concat([...local, ...central, eocd]);
+}
+
+const xmlEsc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+function epubCss() {
+  return `body{font-family:Georgia,'Times New Roman',serif;line-height:1.6;margin:5% 6%;color:#0e0d0a;}
+h1,h2,h3{font-family:'Helvetica Neue',Arial,sans-serif;line-height:1.1;letter-spacing:-0.01em;}
+h1{font-size:1.7em;font-weight:800;margin:2.4em 0 0.6em;padding-top:1em;border-top:2px solid #0e0d0a;}
+h2{font-size:1.3em;font-weight:700;margin:1.8em 0 0.5em;}
+h3{font-size:1.05em;font-weight:700;color:#6c6557;}
+p{margin:0 0 1em;} a{color:#e2300c;}
+blockquote{margin:1.4em 0;padding-left:1em;border-left:3px solid #e2300c;font-style:italic;color:#34302a;}
+hr{border:none;text-align:center;margin:2em 0;} hr:after{content:"✶";color:#e2300c;}
+code{font-family:monospace;font-size:0.85em;background:#ece6d7;padding:0 0.2em;}
+pre{font-family:monospace;font-size:0.8em;background:#0e0d0a;color:#efe9d8;padding:1em;overflow-x:auto;}
+pre code{background:none;}
+table{width:100%;border-collapse:collapse;font-size:0.9em;margin:1.4em 0;}
+th,td{text-align:left;padding:0.4em 0.5em;border-bottom:1px solid #cfc7b1;}
+sup{color:#e2300c;font-size:0.7em;}
+.kick{font-family:monospace;font-size:0.8em;letter-spacing:0.1em;text-transform:uppercase;color:#e2300c;}`;
+}
+function svgCover(b) {
+  const words = b.title.split(/\s+/);
+  const lines = words.map((w, i) => `<text x="58" y="${360 + i * 92}" font-family="Georgia,serif" font-weight="bold" font-size="84" fill="${i === words.length - 1 ? "#e2300c" : "#0e0d0a"}">${xmlEsc(w)}</text>`).join("");
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="933" viewBox="0 0 700 933">
+<rect width="700" height="933" fill="#f4f0e6"/>
+<rect x="0" y="0" width="700" height="16" fill="#e2300c"/>
+<text x="58" y="130" font-family="Georgia,serif" font-size="24" letter-spacing="3" fill="#0e0d0a">THE RULER &amp; THE REMAINDER</text>
+<text x="58" y="160" font-family="monospace" font-size="15" letter-spacing="3" fill="#6c6557">VOL. I — INDEPENDENT RESEARCH</text>
+${lines}
+<text x="58" y="${360 + words.length * 92 + 30}" font-family="monospace" font-size="16" letter-spacing="2" fill="#6c6557">${xmlEsc(b.kicker.toUpperCase())}</text>
+<text x="58" y="880" font-family="monospace" font-size="22" letter-spacing="3" fill="#0e0d0a">RYANN MURPHY</text>
+</svg>`;
+}
+function xhtml(title, body) {
+  return `<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="en">
+<head><meta charset="utf-8"/><title>${xmlEsc(title)}</title><link rel="stylesheet" type="text/css" href="style.css"/></head>
+<body>${body}</body></html>`;
+}
+function makeEpub(b, md) {
+  // render body, inject heading ids, collect a nav
+  let html = marked.parse(md);
+  const headings = [];
+  let i = 0;
+  html = html.replace(/<(h[1-3])>([\s\S]*?)<\/\1>/g, (m, tag, inner) => {
+    const text = inner.replace(/<[^>]+>/g, "").trim();
+    const id = "h" + i++ + "-" + slug(text).slice(0, 36);
+    headings.push({ level: +tag[1], text, id });
+    return `<${tag} id="${id}">${inner}</${tag}>`;
+  });
+  // XHTML well-formedness for strict readers
+  html = html.replace(/<br>/g, "<br/>").replace(/<hr>/g, "<hr/>").replace(/<img([^>]*?)>/g, "<img$1/>");
+
+  const ID = `https://ruler-and-remainder.vercel.app/books/${b.slug}`;
+  const navItems = headings.filter((h) => h.level <= 2).map((h) => `<li><a href="book.xhtml#${h.id}">${xmlEsc(h.text)}</a></li>`).join("\n");
+  const nav = xhtml("Contents", `<nav epub:type="toc" id="toc"><h1>Contents</h1><ol>${navItems}</ol></nav>`);
+  const coverDoc = xhtml(b.title, `<div style="text-align:center;margin:0;padding:0"><img src="cover.svg" alt="${xmlEsc(b.title)} — Ryann Murphy" style="max-width:100%;height:auto"/></div>`);
+  const content = xhtml(b.title, `<p class="kick">${xmlEsc(b.kicker)}</p>\n${html}`);
+  const opf = `<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="bookid">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dc:identifier id="bookid">${ID}</dc:identifier>
+<dc:title>${xmlEsc(b.title)}</dc:title>
+<dc:creator>Ryann Murphy</dc:creator>
+<dc:language>en</dc:language>
+<dc:publisher>The Ruler and the Remainder</dc:publisher>
+<dc:rights>CC BY 4.0</dc:rights>
+<meta property="dcterms:modified">2026-06-11T00:00:00Z</meta>
+<meta name="cover" content="cover-img"/>
+</metadata>
+<manifest>
+<item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>
+<item id="css" href="style.css" media-type="text/css"/>
+<item id="cover-img" href="cover.svg" media-type="image/svg+xml" properties="cover-image"/>
+<item id="cover" href="cover.xhtml" media-type="application/xhtml+xml"/>
+<item id="content" href="book.xhtml" media-type="application/xhtml+xml"/>
+</manifest>
+<spine>
+<itemref idref="cover"/>
+<itemref idref="content"/>
+</spine>
+</package>`;
+  const container = `<?xml version="1.0"?>
+<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
+<rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles>
+</container>`;
+  return zipStore([
+    { name: "mimetype", data: "application/epub+zip" },
+    { name: "META-INF/container.xml", data: container },
+    { name: "OEBPS/content.opf", data: opf },
+    { name: "OEBPS/nav.xhtml", data: nav },
+    { name: "OEBPS/style.css", data: epubCss() },
+    { name: "OEBPS/cover.svg", data: svgCover(b) },
+    { name: "OEBPS/cover.xhtml", data: coverDoc },
+    { name: "OEBPS/book.xhtml", data: content },
+  ]);
 }
 
 // ---------- clean ------------------------------------------------------------
@@ -129,6 +269,7 @@ fs.rmSync(DIST, { recursive: true, force: true });
 fs.mkdirSync(path.join(DIST, "essays"), { recursive: true });
 fs.mkdirSync(path.join(DIST, "books"), { recursive: true });
 fs.mkdirSync(path.join(DIST, "pdf"), { recursive: true });
+fs.mkdirSync(path.join(DIST, "epub"), { recursive: true });
 
 // ---------- BOOKS ------------------------------------------------------------
 const BOOKS = [
@@ -162,16 +303,21 @@ const BOOKS = [
 for (const b of BOOKS) {
   if (!exists(path.join(ROOT, b.src))) { b.missing = true; continue; }
   const md = read(path.join(ROOT, b.src));
-  fs.writeFileSync(
-    path.join(DIST, "books", `${b.slug}.html`),
-    piece({ title: b.title, kicker: b.kicker, md, bodyClass: b.artbook ? "artbook" : "", backHref: "/#books", backLabel: "All books" })
-  );
   b.href = `/books/${b.slug}.html`;
+  // EPUB (real downloadable e-book, generated from the source)
+  fs.writeFileSync(path.join(DIST, "epub", `${b.slug}.epub`), makeEpub(b, md));
+  b.epub = `/epub/${b.slug}.epub`;
+  // PDF if a source exists
   if (b.pdfFrom) {
     for (const c of b.pdfFrom) {
       if (exists(path.join(ROOT, c))) { fs.copyFileSync(path.join(ROOT, c), path.join(DIST, "pdf", `${b.slug}.pdf`)); b.pdf = `/pdf/${b.slug}.pdf`; break; }
     }
   }
+  const lead = `<p class="downloads">Read below, or take it with you — <a href="${b.epub}">↓ EPUB</a>${b.pdf ? ` · <a href="${b.pdf}">↓ PDF</a>` : ""}</p>`;
+  fs.writeFileSync(
+    path.join(DIST, "books", `${b.slug}.html`),
+    piece({ title: b.title, kicker: b.kicker, md, bodyClass: b.artbook ? "artbook" : "", backHref: "/#books", backLabel: "All books", lead })
+  );
 }
 
 // ---------- CORPUS (research + website) -------------------------------------
@@ -251,7 +397,7 @@ const bookFeatures = BOOKS.filter((b) => b.href).map((b) => `
     <div class="kicker">${b.kicker}</div>
     <h3>${b.title}</h3>
     <p>${b.dek}</p>
-    <span class="read">Read →${b.pdf ? ` · <span style="border-bottom:1px solid">PDF</span>` : ""}</span>
+    <span class="read">Read →${b.epub ? " · EPUB" : ""}${b.pdf ? " · PDF" : ""}</span>
   </a>`).join("");
 
 const pamphlets = entries.filter((e) => e.pamphlet).map((e) => `
