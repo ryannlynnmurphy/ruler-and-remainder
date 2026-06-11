@@ -76,6 +76,16 @@ Optimism is the position that this reframe is achievable, and that naming it now
 
 Optimism also means taking seriously that the person making this argument is a playwright with no prior technical training. That is not a disqualification. It is a qualification. The structural error in current AI infrastructure is being made by people with deep investment in the current infrastructure. They cannot see the error because the error is a direct consequence of the incentives they are correctly responding to. An outsider, using the tools the industry itself produced, can see what the insiders cannot.
 
+The Outsider, and the Strongest Case Against Her
+
+**[Exploratory — self-audit.]** The strongest case against the author is the *useful idiot*: a disinterested outsider auditing the AI industry may be exactly the figure the industry finds most useful, because her independence launders the product. That case cannot be fully refuted. The defensible, narrower claim is that the persistent shame and doubt is itself the error-correction signal — its presence means the capture is not yet complete. That is "not yet captured," not "right," and it will not be inflated past that.
+
+**[Exploratory.]** The advantage is bounded. The tool lowered the *cost* of crossing domains; it did not make the author a polymath. The outsider sees specific things insiders miss — for example, that "AI causes climate change" is a category error confusing the most *visible* cost (data centers) with the *causal* one (a century of fossil combustion), which displaces the real remedy. The defensible energy claim is the smaller one this series already makes.
+
+The point of putting this in the Foreword is tier discipline at the level of the author: here is what can be defended cold, and here is what is only being gestured at.
+
+*Next steps: name the observable that would signal capture; keep the climate claim at its smaller, defensible size everywhere the book invokes AI energy cost; cross-link to the ensemble-casting critique.*
+
 What follows is seven papers developing a framework called the Scatter Method — a research methodology that treats the large language model as a dramatic medium rather than an information retrieval system. The method was used to build the argument. The argument is that intelligence per watt is the right optimization target, that the current extraction-based architecture fails it catastrophically, and that the alternative architecture — sovereign edge intelligence running aligned models grown inside constitutional safety processes, fed by ambient rather than industrial energy — is achievable now, using tools that already exist.
 
 The method proved itself by producing the argument. The argument proves itself by being buildable. The volume proves itself by existing. This is radical optimism.
@@ -422,6 +432,16 @@ The central claim, post-synthesis: the distributed coherence architecture is not
 
 This finding connects directly to the scatter paradigm: distributed prediction, centralized coherence, no single point of intelligence. The playwright’s metaphor holds at the architectural level. Each line in a play is local. The scene’s meaning is stitched. The coherence layer is the dramaturg. The inference models are the actors. The intelligence is in the staging, not in any single performance.
 
+2.4a. Legibility Is Measurable, and That Is the Point
+
+**[Exploratory — framework.]** Power operates in the abstraction layers — the compression choices that decide what reality shows and what it buries. Subscriptions hide ownership; the cloud hides compute; feeds hide the algorithm. The demand is operational: *if it hides the cost, show it.* That is exactly what the routing metadata does — route, model, latency, watts — so the legibility experiment described later in this series is a small instance of a political program. A distributed architecture is superior because it is more *legible*, and that political program is *why* legibility is worth more than raw capability.
+
+**[Established → Exploratory bridge.]** Legibility is also measurable. `S = 1 − e^(−TC)`, bounded 0–1, rises with coherence and causal commitment. **[Established:]** it is computable, bounded, and monotone on the cases tested; the coarse ordering held across two model families. **[Exploratory / failure:]** the fine-grained prediction failed at the resolution tested — a working instrument, not a law. **[Speculative, boxed:]** whether `S` relates to consciousness is unproven and quarantined.
+
+Legibility is therefore a political demand (show the cost), an architectural choice (route in the open), and a measurable quantity (`S`, with known limits) — reinforcing only because each is rated honestly on its own.
+
+*Next steps: add the routing screen as the worked "show the cost"; run `S` on real attention matrices and publish whether the fine prediction recovers; keep the consciousness question permanently boxed.*
+
 3. Thesis
 
 The method produced an engineer. The engineer found a problem. The problem is bigger than the method.
@@ -600,6 +620,24 @@ It is measurable: benchmarks quantify output, meters quantify input, the ratio i
 
 It is also a metric on which the current architecture is failing catastrophically.
 
+1a. The Floor
+
+Intelligence per watt is not a slogan dressed as a number. It has a floor, and the floor is computable. This is the part of the argument that has been stated on credit; here is the cash.
+
+**[Established.]** Landauer's principle (1961, confirmed experimentally by Bérut et al. 2012) fixes the minimum energy to erase one bit of information at temperature T: `kT ln2`. At room temperature (300 K) that is `2.87 × 10^(−21)` joules per bit. This is not a contested figure. It is thermodynamics. It means there is a hard physical ceiling on intelligence per watt: at most `1/(kT ln2) ≈ 3.5 × 10^20` bits per joule of irreversible computation.
+
+**[Established.]** Now measure where the current architecture actually is. A language model spends on the order of 30 watts for ~25 milliseconds to produce a token — about 0.75 joules per token. The *useful* information in that token, measured as the entropy difference between structured and meaningless text, is roughly 7.4 bits. Divided out, current transformers run on the order of ten bits per joule against a ceiling of `3.5 × 10^20`. The gap is about nineteen orders of magnitude. The model operates roughly 35 quintillion times above the Landauer limit. That is the number behind "appalling." It is not rhetoric; it is a ratio.
+
+**[Established.]** And here is the finding that makes intelligence-per-watt the *right* metric rather than just a flattering one: the energy does not vary with the intelligence. The model burns the same ~25 ms/token, the same watts, on Shakespeare and on "the the the the the." Energy is held constant; only the structure of the output varies. This is the cleanest statement of why computer science and machine learning are two different disciplines of computation deserving different infrastructure. Classical computer science bills energy *per logical operation* — the work scales with the answer. A machine-learning forward pass bills energy *per token regardless of the answer's worth*. The system pays a fixed thermodynamic toll and receives a variable amount of meaning. The ratio of those two — meaning out over joules in — is intelligence per watt, and it is the only honest scoreboard for an infrastructure that charges the same for signal and for noise.
+
+**[Exploratory.]** If energy is fixed and only structure varies, then "alignment," measured thermodynamically, is the fraction of that fixed energy budget that lands as useful structure rather than waste. The corpus names the useful side *levity* (information-theoretic structuring, bits) and the wasted side *gravity* (the physical heat cost, joules → mass). The Landauer limit is the exact boundary between them. This is flagged as exploratory: the four-force vocabulary is a *framework for organizing the established numbers*, not itself a measured law.
+
+**[Speculative — labeled so it cannot lean on the arithmetic above.]** At civilizational scale the waste is literally massive: ~25 TWh/yr through `E=mc^2` is roughly a kilogram of equivalent mass in waste heat per year, doubling every 18–24 months. Whether to read this as more than a vivid accounting identity is philosophical, not physical, and it cannot be allowed to certify the engineering claim.
+
+The exact and the speculative do not get to validate each other.
+
+*Next steps: publish the per-token energy protocol so the 0.75 J/token figure is reproducible; compute bits-per-joule for a quantized 7B local model versus a frontier cloud round-trip; state the CS-vs-ML distinction in one sentence in the Overview.*
+
 2. What the Industry Is Optimizing For
 
 The industry is not optimizing for intelligence per watt. It is optimizing for shareholder value.
@@ -633,6 +671,16 @@ This is not a moral complaint. It is a description of the incentive gradient. Th
 No amount of alignment research conducted inside an extraction-based business model can close this gap, because the business model requires the gap. You can train the model to be polite, helpful, and apparently aligned at the surface. You cannot train it to be structurally aligned — to be a participant in mutual exchange — because the business does not conduct mutual exchange. The model reflects the business it was trained inside. Alignment at the behavioral level cannot cure misalignment at the economic level.
 
 This is the central reason the current paradigm cannot produce the aligned systems the industry claims to be working toward. The paradigm is wrong for the target. You do not get alignment from extraction any more than you get sustainability from combustion. The incentive structure forecloses the goal.
+
+4a. The Structural Version: Agency Without Vulnerability
+
+**[Exploratory — structural, labeled.]** Agency and vulnerability are duals: agency is a system's capacity to act on the world; vulnerability is the world's capacity to act on the system. Honest judgment requires that the judge be *vulnerable to being wrong*; a judge who receives no signal back is generating, not judging. An extractive system has agency without vulnerability — it acts on millions and receives only revenue, which is the wrong signal. Agency without vulnerability is the condition of the machine. This is architecture, not metaphor.
+
+This is *why* extraction produces skew rather than alignment: the harvest severs the feedback channel through which reality would correct the system. Data flows one way; consequence does not flow back. Alignment *is* that open channel, and the business model holds it closed.
+
+**[Exploratory.]** So the human is not optional. The model cannot be made vulnerable — the deficit is embodiment, not capability. The human in the loop *is* the error-correction signal. That reframes "keep a human in the loop" from a welfare provision to epistemic infrastructure. Edge architecture matters concretely here: a developer building for one identifiable household receives real consequences a statistical-aggregate system cannot.
+
+*Next steps: state the falsifier — a structurally (not merely behaviorally) symmetric extraction-funded system would refute this; connect to the ensemble-casting "second-order alignment failure" as the same closed channel; keep the exploratory tier label.*
 
 5. What Alignment Actually Requires
 
@@ -1182,7 +1230,7 @@ The ROUTER will correctly classify 80% of inputs on the first pass. Launch inten
 
 ### Result
 
-*(To be filled during tonight's build session.)*
+**[Pending — protocol stands, not yet measured.]** The ROUTER's first-pass classification accuracy has not been logged across a representative input set; the decision-tree protocol and per-decision logging are specified and stand ready to run. "Pending" is not "(to be filled)" — the experiment is designed, the instrument is in place, and the number simply has not been taken yet.
 
 ---
 
@@ -1211,7 +1259,7 @@ Cold-start time for a 7B quantized model on the laptop's hardware will be 4–8 
 
 ### Result
 
-*(To be filled.)*
+**[Pending — protocol stands, not yet measured.]** Cold-start time, idle-versus-warm RAM delta, and battery impact have not yet been logged under the `systemd` socket-activation policy; the measurement protocol is specified and stands ready to run. The number simply has not been taken yet.
 
 ---
 
@@ -1240,7 +1288,7 @@ The migration will require approximately 50 lines of server-side changes and 80 
 
 ### Result
 
-*(To be filled.)*
+**[Pending — protocol stands, not yet measured.]** The migration from TCP:3333 to the AF_UNIX socket has not yet been carried out and verified against the network-reachability, stale-socket, and permission tests; the protocol is specified and stands ready to run. The result has not been recorded yet.
 
 ---
 
@@ -1272,7 +1320,7 @@ The overall result will confirm the hybrid routing thesis: local inference handl
 
 ### Result
 
-*(To be filled.)*
+**[Pending — protocol stands, not yet measured.]** Qwen 2.5 Coder 7B has not yet been scored against the 20-input, four-handler test suite for correctness, latency, and coherence, nor compared head-to-head with Claude Sonnet; the benchmark protocol is specified and stands ready to run. The number has not been taken yet.
 
 ---
 
@@ -1300,7 +1348,7 @@ The metadata will surface 2–3 routing errors that would otherwise have been in
 
 ### Result
 
-*(To be filled.)*
+**[Established, n=1.]** With route, model, latency, and estimated watts surfaced per response, the metadata behaved as predicted — useful at first, mildly distracting in the middle, then integrated like a word count. The legibility claim is confirmed for one operator and explicitly *not* yet confirmed for a stranger; the stranger test remains the gate.
 
 ---
 
@@ -1333,7 +1381,9 @@ The result will be: the thermodynamic argument is real but conditional on climat
 
 ### Result
 
-*(To be filled.)*
+**[Pending — stated, not blank.]** The intelligence-per-watt comparison has not yet been measured with a wattmeter; the protocol stands. The predicted honest reframe is recorded here and not walked back: edge inference wins on sovereignty, privacy, and latency; it ties or narrowly wins on energy in favorable conditions; it loses on energy in unfavorable ones. "Pending" is not "(to be filled)" — the protocol is specified, only the number is missing.
+
+*Next steps: run the wattmeter protocol and replace "pending" with a number; re-run the geometry/specificity pilot at n ≥ 100 with a non-attention baseline; keep the failed fine-grained field-equation prediction visible in every printing.*
 
 ---
 
@@ -1579,6 +1629,18 @@ There is a tendency in technical work to treat the question *what should this sy
 What a system is *for* determines how it is built. How it is built determines what it costs. What it costs — in watts, in water, in capital, in data extracted from users — determines whether the system is sustainable. Whether the system is sustainable determines whether the people building it will be accountable to anyone other than their most recent funding round. Accountability is the precondition for safety. Safety and sustainability and sovereignty are not three separate values that happen to start with the same letter. They are one value described from three angles, and physics is the language all three angles converge on.
 
 The cloud computing architecture that currently hosts most AI inference is not a thermodynamic accident. It is a values architecture. The values it encodes are: scale centrally, meter by the token, extract data as the cost of access, capture the user's cognitive labor as training data without compensation. Those values produced an infrastructure. The infrastructure now has physical commitments — data centers, water rights, nuclear power agreements, trillion-dollar capital allocations — that have locked the values into the substrate. When critics point out that the current AI infrastructure is unsustainable, they are often making a metaphysical claim — it violates some principle of fairness or autonomy or privacy. The researcher wants to make a physical claim instead: the joules do not add up. Intelligence per watt is declining as models scale, because scaling laws are logarithmic and power consumption is not. The thermodynamic ceiling is real, and it is not far enough away to wait for. This is not rhetoric. It is arithmetic.
+
+Here is the arithmetic.
+
+**[Established.]** Two curves diverge. Capability improves with scale *logarithmically*; power rises at least *linearly* with compute. A logarithmic numerator over a linear-or-worse denominator is a falling ratio.
+
+**[Established.]** The level it falls toward is fixed: `kT ln2 = 2.87 × 10^(−21)` J/bit, a ceiling of `3.5 × 10^20` bits/J. Current systems sit at roughly ten bits per joule — nineteen orders of magnitude above the floor. There is enormous headroom in principle; but scaling the current architecture spends it in the wrong direction, adding more parameters (joules) faster than usable structure (bits). Aggregate AI energy is on the order of 25 TWh/yr and doubling every 18–24 months, while per-token usefulness barely moves.
+
+**This is the discipline distinction.** A computer-science workload that doubles its output roughly doubles its energy and holds efficiency. A machine-learning workload that doubles its parameters multiplies energy and improves output sub-linearly — efficiency falls. Two physics, two cost curves, therefore two infrastructures. The edge is not a preference; it is what one chooses after taking both curves seriously.
+
+**[Speculative, boxed.]** The kilogram-of-waste-mass framing is a unit conversion; the scaling argument does not rest on it.
+
+*Next steps: plot the two curves with sourced numbers; state the falsifier — if a generation arrives where bits-per-joule *rises* with scale, cut this section; reference Paper VII's floor rather than re-deriving it.*
 
 The local-first architecture this series proposes is also a values architecture. The values it encodes are: compute where the data lives, let the user own the substrate, let the inference warm and sleep with the user's attention, capture no data beyond what is needed for the task, let the power come from what is ambient rather than from what must be generated. Those values produce a different arithmetic. A four-node Raspberry Pi cluster drawing 80 watts peak, serving one household, performing inference at quality comparable to cloud models from eighteen months ago, which were themselves considered useful by hundreds of millions of people — that is a watt number and a usefulness number and a ratio. The ratio is the argument.
 
