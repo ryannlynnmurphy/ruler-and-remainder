@@ -12,6 +12,8 @@ const exists = (p) => fs.existsSync(p);
 marked.setOptions({ gfm: true, breaks: false });
 
 const SITE = "The Ruler and the Remainder";
+const SITE_URL = "https://ruler-and-remainder.vercel.app";
+const DEFAULT_DESC = "Independent research into how systems read the world into legible categories, and who pays for what stays invisible. Books, pamphlets, and a runnable audit by Ryann Murphy.";
 
 // ---------- helpers ----------------------------------------------------------
 const slug = (s) =>
@@ -61,14 +63,28 @@ function footnotes(md) {
 
 const NAV = `<a href="/#books">Books</a><a href="/#corpus">Corpus</a><a href="/database.html">Index</a><a href="/audit.html">Instrument</a><a href="/method.html">Method</a>`;
 
-function shell({ title, body, bodyClass = "" }) {
+function shell({ title, body, bodyClass = "", desc = "", route = "" }) {
+  const d = (desc || DEFAULT_DESC).replace(/\s+/g, " ").trim();
+  const url = SITE_URL + route;
   return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${title} · ${SITE}</title>
-<meta name="description" content="${SITE} — an academic journal of interactive media arts. Independent research into how systems read the world into legible categories, and what they leave out. By Ryann Murphy.">
+<meta name="description" content="${xmlEsc(d)}">
+<link rel="canonical" href="${url}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="${SITE}">
+<meta property="og:title" content="${xmlEsc(title)} · ${SITE}">
+<meta property="og:description" content="${xmlEsc(d)}">
+<meta property="og:url" content="${url}">
+<meta property="og:image" content="${SITE_URL}/og.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${xmlEsc(title)} · ${SITE}">
+<meta name="twitter:description" content="${xmlEsc(d)}">
+<meta name="theme-color" content="#e2300c">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;0,6..96,900;1,6..96,400;1,6..96,800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
@@ -87,7 +103,7 @@ ${body}
 <footer><div class="colophon">
   <span class="lead">${SITE}</span> — an academic journal of interactive media arts.
   Independent research by Ryann Murphy. The credential is the argument.<br>
-  Set in Fraunces, Newsreader, and Space Mono. Text released under
+  Set in Bodoni Moda, Newsreader, and Space Mono. Text released under
   <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
   Source on <a href="https://github.com/ryannlynnmurphy/ruler-and-remainder">GitHub</a>.
 </div></footer>
@@ -107,7 +123,7 @@ ${body}
 </html>`;
 }
 
-function piece({ title, kicker, md, bodyClass = "", backHref = "/#corpus", backLabel = "Index", lead = "" }) {
+function piece({ title, kicker, md, bodyClass = "", backHref = "/#corpus", backLabel = "Index", lead = "", desc = "", route = "" }) {
   const { withRefs, block } = footnotes(md);
   // strip the leading H1 (we render our own head)
   const noH1 = withRefs.replace(/^\s*#\s+.+?\n/, "");
@@ -115,6 +131,8 @@ function piece({ title, kicker, md, bodyClass = "", backHref = "/#corpus", backL
   return shell({
     title,
     bodyClass,
+    desc: desc || firstProse(md),
+    route,
     body: `<article class="piece ${bodyClass ? "autotheory" : ""}">
   <a class="back" href="${backHref}">← ${backLabel}</a>
   <div class="head reveal">${kicker ? `<div class="kicker">${kicker}</div>` : ""}<h1>${title}</h1>${bodyClass ? `<p class="genre-note">Autotheory — autobiography reasoning as theory and back again.</p>` : ""}</div>
@@ -316,7 +334,7 @@ for (const b of BOOKS) {
   const lead = `<p class="downloads">Read below, or take it with you — <a href="${b.epub}">↓ EPUB</a>${b.pdf ? ` · <a href="${b.pdf}">↓ PDF</a>` : ""}</p>`;
   fs.writeFileSync(
     path.join(DIST, "books", `${b.slug}.html`),
-    piece({ title: b.title, kicker: b.kicker, md, bodyClass: b.artbook ? "artbook" : "", backHref: "/#books", backLabel: "All books", lead })
+    piece({ title: b.title, kicker: b.kicker, md, bodyClass: b.artbook ? "artbook" : "", backHref: "/#books", backLabel: "All books", lead, desc: b.dek, route: b.href })
   );
 }
 
@@ -342,7 +360,7 @@ for (const { dir, file } of corpus) {
   const title = titleOf(md, file);
   const s = slug(file);
   const kind = KIND[file] || "Essay";
-  fs.writeFileSync(path.join(DIST, "essays", `${s}.html`), piece({ title, kicker: kind, md }));
+  fs.writeFileSync(path.join(DIST, "essays", `${s}.html`), piece({ title, kicker: kind, md, route: `/essays/${s}.html` }));
   entries.push({ title, slug: s, url: `/essays/${s}.html`, kind, dek: firstProse(md), pamphlet: FEATURED.includes(file) });
 }
 
@@ -353,15 +371,28 @@ for (const f of ["METHOD.md", "PROVENANCE.md"]) {
   const md = read(path.join(ROOT, f));
   const t = titleOf(md, f);
   const s = f.replace(/\.md$/i, "").toLowerCase();
-  fs.writeFileSync(path.join(DIST, `${s}.html`), piece({ title: t, kicker: "Apparatus", md, backHref: "/", backLabel: "Cover" }));
+  fs.writeFileSync(path.join(DIST, `${s}.html`), piece({ title: t, kicker: "Apparatus", md, backHref: "/", backLabel: "Cover", route: `/${s}.html` }));
   pages.push({ title: t, url: `/${s}.html` });
+}
+
+// ---------- ARTIFACTS (binary research documents — decks, dossiers, briefs) -
+fs.mkdirSync(path.join(DIST, "files"), { recursive: true });
+const artifacts = [];
+if (exists(path.join(ROOT, "research"))) {
+  for (const f of fs.readdirSync(path.join(ROOT, "research")).filter((f) => /\.(pdf|pptx|key)$/i.test(f)).sort()) {
+    fs.copyFileSync(path.join(ROOT, "research", f), path.join(DIST, "files", f));
+    const ext = f.split(".").pop().toUpperCase();
+    const name = f.replace(/\.[^.]+$/, "").replace(/_/g, " ").replace(/\s+\d+\s+Slides$/i, "").trim();
+    artifacts.push({ title: `${name} · ${ext}`, url: `/files/${f}`, kind: "Artifact", dek: "Downloadable research document — part of the Anteriority development set." });
+  }
 }
 
 // ---------- DATABASE (searchable index) -------------------------------------
 const db = [
   ...BOOKS.filter((b) => b.href).map((b) => ({ title: b.title, url: b.href, kind: "Book", dek: b.dek })),
   ...entries.map((e) => ({ title: e.title, url: e.url, kind: e.kind, dek: e.dek })),
-  { title: "The CRD Audit (runnable)", url: "/audit.html", kind: "Instrument", dek: "A deterministic instrument: paste copy, surface where stated confidence outruns architectural reality." },
+  { title: "The CRD Audit (runnable)", url: "/audit.html", kind: "Instrument", dek: "A deterministic instrument: paste copy and architecture, surface where stated confidence outruns reality." },
+  ...artifacts,
   ...pages.map((p) => ({ title: p.title, url: p.url, kind: "Apparatus", dek: "" })),
 ];
 fs.writeFileSync(path.join(DIST, "corpus.json"), JSON.stringify(db));
@@ -369,6 +400,8 @@ fs.writeFileSync(path.join(DIST, "corpus.json"), JSON.stringify(db));
 const kinds = [...new Set(db.map((d) => d.kind))];
 fs.writeFileSync(path.join(DIST, "database.html"), shell({
   title: "The Index",
+  route: "/database.html",
+  desc: "Search and filter the whole corpus — books, pamphlets, essays, dialogues, instruments, and apparatus.",
   body: `<div class="dbwrap">
   <a class="back" href="/">← Cover</a>
   <div class="head reveal"><div class="kicker">Searchable index</div><h1>The Index</h1></div>
@@ -409,6 +442,8 @@ const corpusPicks = entries.filter((e) => !e.pamphlet && ["Method", "Essay", "Di
 const cover = shell({
   title: "An academic journal of interactive media arts",
   bodyClass: "home",
+  route: "/",
+  desc: "How systems read the world into legible categories — and who pays for what stays invisible. Independent research, books, and a runnable audit by Ryann Murphy.",
   body: `
 <section class="cover">
   <div class="issueline reveal"><span>Vol. I</span><span class="dot">●</span><span>An academic journal of interactive media arts</span><span class="dot">●</span><span>Independent research</span></div>
@@ -459,5 +494,29 @@ fs.copyFileSync(path.join(ROOT, "styles.css"), path.join(DIST, "styles.css"));
 if (exists(path.join(ROOT, "tool", "audit.html"))) fs.copyFileSync(path.join(ROOT, "tool", "audit.html"), path.join(DIST, "audit.html"));
 if (exists(path.join(ROOT, "tool", "audit.js"))) fs.copyFileSync(path.join(ROOT, "tool", "audit.js"), path.join(DIST, "audit.js"));
 
-console.log(`Built: ${BOOKS.filter((b) => b.href).length} books, ${entries.length} corpus pieces, ${db.length} index entries.`);
+// favicon — the measure mark
+fs.writeFileSync(path.join(DIST, "favicon.svg"),
+`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" fill="#f4f0e6"/><rect width="32" height="6" fill="#e2300c"/><text x="16" y="26" font-family="Georgia,serif" font-weight="bold" font-size="22" text-anchor="middle" fill="#0e0d0a">R</text></svg>`);
+
+// social card (1200×630) — fierce editorial
+fs.writeFileSync(path.join(DIST, "og.svg"),
+`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+<rect width="1200" height="630" fill="#f4f0e6"/>
+<rect width="1200" height="20" fill="#e2300c"/>
+<text x="80" y="150" font-family="monospace" font-size="26" letter-spacing="6" fill="#6c6557">VOL. I — AN ACADEMIC JOURNAL OF INTERACTIVE MEDIA ARTS</text>
+<text x="76" y="300" font-family="Georgia,serif" font-weight="bold" font-size="120" fill="#0e0d0a">The Ruler</text>
+<text x="76" y="430" font-family="Georgia,serif" font-weight="bold" font-size="120" fill="#0e0d0a">&amp; the <tspan fill="#e2300c">Remainder</tspan></text>
+<text x="80" y="540" font-family="monospace" font-size="28" letter-spacing="3" fill="#0e0d0a">INDEPENDENT RESEARCH · RYANN MURPHY</text>
+</svg>`);
+
+// sitemap + robots
+const routes = ["/", "/database.html", "/audit.html",
+  ...BOOKS.filter((b) => b.href).map((b) => b.href),
+  ...entries.map((e) => e.url), ...pages.map((p) => p.url)];
+fs.writeFileSync(path.join(DIST, "sitemap.xml"),
+`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+  routes.map((r) => `<url><loc>${SITE_URL}${r}</loc></url>`).join("\n") + `\n</urlset>\n`);
+fs.writeFileSync(path.join(DIST, "robots.txt"), `User-agent: *\nAllow: /\nSitemap: ${SITE_URL}/sitemap.xml\n`);
+
+console.log(`Built: ${BOOKS.filter((b) => b.href).length} books, ${entries.length} corpus pieces, ${artifacts.length} artifacts, ${db.length} index entries.`);
 for (const b of BOOKS) if (b.missing) console.log(`  ! missing book source: ${b.src}`);
