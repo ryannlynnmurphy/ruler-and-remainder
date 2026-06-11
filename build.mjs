@@ -529,7 +529,7 @@ if (exists(path.join(ROOT, "tool", "audit.js"))) fs.copyFileSync(path.join(ROOT,
 
 // favicon — the measure mark
 fs.writeFileSync(path.join(DIST, "favicon.svg"),
-`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" fill="#f4f0e6"/><rect width="32" height="6" fill="#e2300c"/><text x="16" y="26" font-family="Georgia,serif" font-weight="bold" font-size="22" text-anchor="middle" fill="#0e0d0a">R</text></svg>`);
+`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" fill="#f4f0e6"/><line x1="11" y1="10" x2="27" y2="10" stroke="#e2300c" stroke-width="2.6"/><path d="M11 10 Q6 16 11 23" fill="none" stroke="#e2300c" stroke-width="2.6"/><text x="18" y="21" font-family="Georgia,serif" font-weight="bold" font-size="11" fill="#0e0d0a">r</text></svg>`);
 
 // social card (1200×630) — fierce editorial
 fs.writeFileSync(path.join(DIST, "og.svg"),
