@@ -15,3 +15,5 @@ secrets/
 # build / scratch
 node_modules/
 .cache/
+dist/
+.vercel/

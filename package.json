@@ -1,0 +1,14 @@
+{
+  "name": "narrative-intelligence",
+  "version": "1.0.0",
+  "description": "Narrative Intelligence — a research corpus and book by Ryann Murphy.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "license": "CC-BY-4.0",
+  "dependencies": {
+    "marked": "^12.0.0"
+  }
+}
