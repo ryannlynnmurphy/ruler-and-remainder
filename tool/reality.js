@@ -35,6 +35,63 @@ function when(d) {
   const dd = Math.round(h / 24); return dd + "d ago";
 }
 
+// ---- composed marks: the long-division grammar, one per card ---------------
+// Deterministic from a seed (a source, a story) so the same subject always
+// draws the same mark. Built only from the corpus's own elements — the divisor
+// bar + bracket (the ruler's red), a measured tick row, and the remainder (the
+// teal leftover). No photographs, no slop; a composed plate per card.
+function hashSeed(s) {
+  let h = 2166136261 >>> 0;
+  s = String(s || "r");
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+function prng(seed) {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function markSVG(seed) {
+  const rnd = prng(hashSeed(seed));
+  const W = 120, H = 64;
+  const ink = "#0e0d0a", measure = "#e2300c", remainder = "#2f4a47", faint = "#a9a18b";
+  const initial = (String(seed || "r").match(/[a-z]/i) || ["r"])[0].toLowerCase();
+
+  const bx = 22, by = 18 + Math.round(rnd() * 6);     // long-division bracket origin
+  const barW = 60 + Math.round(rnd() * 16);           // dividend bar length
+  const depth = 5 + Math.round(rnd() * 5);            // bracket curve depth
+
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" aria-hidden="true">`;
+  // the divisor bar + the bracket curve hugging under it — the ÷ of the favicon
+  s += `<line x1="${bx}" y1="${by}" x2="${bx + barW}" y2="${by}" stroke="${measure}" stroke-width="2.4"/>`;
+  s += `<path d="M${bx} ${by} Q${bx - depth} ${by + 13} ${bx} ${by + 26}" fill="none" stroke="${measure}" stroke-width="2.4"/>`;
+  // the dividend's initial, serif, like the favicon's r
+  s += `<text x="${bx + 9}" y="${by + 20}" font-family="Newsreader,Georgia,serif" font-weight="700" font-size="20" fill="${ink}">${esc(initial)}</text>`;
+  // the quotient — a few small marks above the bar
+  const q = 2 + Math.floor(rnd() * 3);
+  for (let i = 0; i < q; i++) {
+    const qx = bx + 8 + i * (10 + Math.round(rnd() * 6));
+    s += `<line x1="${qx}" y1="${by - 9}" x2="${qx}" y2="${by - 4}" stroke="${remainder}" stroke-width="1.6"/>`;
+  }
+  // the ruler — a measured tick row along the bottom
+  const ticks = 9 + Math.floor(rnd() * 7);
+  const x0 = 12, x1 = W - 16, gap = (x1 - x0) / ticks, baseY = H - 8;
+  for (let i = 0; i <= ticks; i++) {
+    const tx = (x0 + i * gap).toFixed(1);
+    const tall = i % 4 === 0;
+    s += `<line x1="${tx}" y1="${baseY}" x2="${tx}" y2="${(baseY - (tall ? 8 : 4)).toFixed(1)}" stroke="${tall ? ink : faint}" stroke-width="${tall ? 1.4 : 1}"/>`;
+  }
+  // the remainder — the teal leftover the ruler can't divide cleanly
+  const rem = (x0 + (ticks - 1 - Math.floor(rnd() * 2)) * gap).toFixed(1);
+  s += `<rect x="${rem}" y="${baseY - 4}" width="5" height="5" fill="${remainder}"/>`;
+  s += `</svg>`;
+  return s;
+}
+
 const EXAMPLE = `New AI security platform launches with "100% protection against prompt injection." The startup says its deterministic engine blocks every attack before it reaches your model, with a tamper-proof audit log and military-grade encryption. Backed by $40M, it claims to be the first to make enterprise AI "fully secure."`;
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -63,7 +120,8 @@ window.addEventListener("DOMContentLoaded", () => {
         const card = document.createElement("button");
         card.className = "feeditem";
         card.innerHTML =
-          `<span class="src">${it.image ? `<img src="${it.image}" alt="" loading="lazy">` : ""}${esc(it.source || it.domain || "news")}</span>` +
+          `<div class="cardmark">${markSVG(it.source || it.domain || it.title)}</div>` +
+          `<span class="src">${esc(it.source || it.domain || "news")}</span>` +
           `<h4>${esc(it.title)}</h4>` +
           `<span class="when">${when(it.date)}</span>`;
         card.addEventListener("click", () => {
@@ -97,6 +155,7 @@ window.addEventListener("DOMContentLoaded", () => {
         const card = document.createElement("article");
         card.className = "ledgeritem";
         card.innerHTML =
+          `<div class="cardmark">${markSVG(it.source || it.story || String(it.id))}</div>` +
           `<div class="lmeta"><span class="lsrc">${esc(it.source || "pasted")}</span><span class="when">${when(it.at)}</span></div>` +
           `<p class="lstory">${esc(it.story)}</p>` +
           `<p class="lverdict">${esc(it.verdict)}</p>`;
@@ -137,6 +196,7 @@ window.addEventListener("DOMContentLoaded", () => {
         ? "this reading is on the public ledger below."
         : "you kept this reading off the ledger; it was not stored.";
       out.innerHTML =
+        `<div class="cardmark verdictmark">${markSVG(story.slice(0, 80))}</div>` +
         `<div class="reality">${mdToHtml(data.text)}</div>` +
         `<p class="discipline">this is a model's read, not a verdict. it surfaces where confidence outruns reality and which rights are in play — you still check the math. ${note}</p>`;
       if (data.published) loadLedger();
