@@ -1,0 +1,17 @@
+# OS / editor cruft
+.DS_Store
+*.tmp
+*.swp
+*~
+.~lock.*
+
+# environment / secrets — never commit
+.env
+.env.*
+*.key
+*.pem
+secrets/
+
+# build / scratch
+node_modules/
+.cache/

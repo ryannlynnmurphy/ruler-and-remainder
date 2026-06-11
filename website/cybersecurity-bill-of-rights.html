@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Cybersecurity Bill of Rights — Ryann Murphy</title>
+<meta name="description" content="Rights as properties, not promises. A positioning and system proposal: how a semantic-filtering layer makes the product more legible. Companion to Narrative Intelligence.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --font-display:'Fraunces', Georgia, serif;
+  --font-body:'Source Serif 4', Georgia, serif;
+
+  --text-xs:clamp(0.72rem,0.7rem + 0.1vw,0.78rem);
+  --text-sm:clamp(0.84rem,0.8rem + 0.2vw,0.92rem);
+  --text-base:clamp(1.04rem,1rem + 0.25vw,1.135rem);
+  --text-md:clamp(1.15rem,1.1rem + 0.4vw,1.3rem);
+  --text-lg:clamp(1.3rem,1.2rem + 0.8vw,1.62rem);
+  --text-xl:clamp(1.6rem,1.4rem + 1.4vw,2.2rem);
+  --text-2xl:clamp(2rem,1.7rem + 2vw,3rem);
+  --text-hero:clamp(2.6rem,1.8rem + 4.5vw,5.2rem);
+
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px;
+  --space-5:20px; --space-6:24px; --space-8:32px; --space-10:40px;
+  --space-12:48px; --space-16:64px; --space-20:80px; --space-24:96px;
+
+  --radius-sm:4px; --radius-md:8px; --radius-lg:14px; --radius-full:999px;
+  --tr:180ms cubic-bezier(0.16,1,0.3,1);
+  --content:720px;
+}
+[data-theme="dark"]{
+  --bg:#101319;
+  --surface:#171b23;
+  --surface2:#1e232e;
+  --border:rgba(255,255,255,0.08);
+  --text:#e9e6df;
+  --muted:#a9a59b;
+  --faint:#6f6c64;
+  --accent:#d9a441;
+  --accent-h:#ecbe63;
+  --accent-bg:rgba(217,164,65,0.08);
+  --tier-est:#5fbd9d;
+  --tier-est-bg:rgba(95,189,157,0.10);
+  --tier-exp:#d9a441;
+  --tier-exp-bg:rgba(217,164,65,0.10);
+  --tier-spec:#ab8fd8;
+  --tier-spec-bg:rgba(171,143,216,0.10);
+  --cover-glow-1:rgba(217,164,65,0.10);
+  --cover-glow-2:rgba(95,189,157,0.05);
+}
+[data-theme="light"]{
+  --bg:#faf8f3;
+  --surface:#f1eee7;
+  --surface2:#e9e5da;
+  --border:rgba(0,0,0,0.10);
+  --text:#21232a;
+  --muted:#57544c;
+  --faint:#8e8a80;
+  --accent:#9a690f;
+  --accent-h:#7c540c;
+  --accent-bg:rgba(154,105,15,0.07);
+  --tier-est:#1c7a5e;
+  --tier-est-bg:rgba(28,122,94,0.08);
+  --tier-exp:#9a690f;
+  --tier-exp-bg:rgba(154,105,15,0.08);
+  --tier-spec:#6a4d9f;
+  --tier-spec-bg:rgba(106,77,159,0.08);
+  --cover-glow-1:rgba(154,105,15,0.08);
+  --cover-glow-2:rgba(28,122,94,0.05);
+}
+
+/* ============ BASE ============ */
+*,*::before,*::after{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  font-size:var(--text-base);
+  line-height:1.8;
+  transition:background-color var(--tr), color var(--tr);
+  -webkit-font-smoothing:antialiased;
+}
+a{color:var(--accent);text-decoration:none;transition:color var(--tr);}
+a:hover{color:var(--accent-h);}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:var(--radius-sm);}
+img{max-width:100%;}
+
+/* ============ PROGRESS BAR ============ */
+#progress{
+  position:fixed;top:0;left:0;height:2px;width:0;
+  background:var(--accent);z-index:60;
+}
+
+/* ============ TOP BAR ============ */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:var(--space-3) var(--space-6);
+  background:color-mix(in srgb, var(--bg) 78%, transparent);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+}
+.topbar .booktitle{
+  font-family:var(--font-display);
+  font-size:var(--text-sm);
+  letter-spacing:0.04em;
+  color:var(--muted);
+}
+.topbar .booktitle em{color:var(--accent);font-style:italic;}
+#themeToggle{
+  display:flex;align-items:center;justify-content:center;
+  width:44px;height:44px;
+  background:transparent;border:1px solid var(--border);
+  border-radius:var(--radius-full);
+  color:var(--muted);cursor:pointer;
+  transition:color var(--tr), border-color var(--tr), background-color var(--tr);
+}
+#themeToggle:hover{color:var(--accent);border-color:var(--accent);}
+#themeToggle svg{width:18px;height:18px;}
+
+/* ============ COVER ============ */
+.cover{
+  min-height:100vh;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  text-align:center;position:relative;
+  padding:var(--space-20) var(--space-6);
+  background:
+    radial-gradient(ellipse 70% 45% at 50% 0%, var(--cover-glow-1), transparent 70%),
+    radial-gradient(ellipse 55% 40% at 85% 90%, var(--cover-glow-2), transparent 70%);
+}
+.cover .eyebrow{
+  font-size:var(--text-xs);letter-spacing:0.22em;text-transform:uppercase;
+  color:var(--faint);margin-bottom:var(--space-6);
+}
+.cover h1{
+  font-family:var(--font-display);
+  font-size:var(--text-hero);
+  font-weight:400;line-height:1.05;
+  margin:0 0 var(--space-6);
+  letter-spacing:-0.01em;
+}
+.cover .rule{width:48px;height:2px;background:var(--accent);margin:0 auto var(--space-6);}
+.cover .subtitle{
+  font-family:var(--font-display);font-style:italic;font-weight:300;
+  font-size:var(--text-lg);color:var(--muted);
+  max-width:34ch;margin:0 auto var(--space-4);line-height:1.45;
+}
+.cover .author{
+  font-size:var(--text-md);color:var(--text);
+  letter-spacing:0.06em;margin-top:var(--space-8);
+}
+.cover .meta{
+  position:absolute;bottom:var(--space-16);left:0;right:0;
+  display:flex;justify-content:center;gap:var(--space-8);flex-wrap:wrap;
+  font-size:var(--text-xs);letter-spacing:0.14em;text-transform:uppercase;color:var(--faint);
+  padding:0 var(--space-6);
+}
+.scrollhint{
+  position:absolute;bottom:var(--space-5);left:50%;transform:translateX(-50%);
+  color:var(--faint);animation:bob 2.2s ease-in-out infinite;
+}
+@keyframes bob{0%,100%{transform:translate(-50%,0);}50%{transform:translate(-50%,8px);}}
+
+/* ============ LAYOUT ============ */
+.wrap{max-width:var(--content);margin-inline:auto;padding:0 var(--space-6);}
+main{display:block;}
+
+/* ============ TOC ============ */
+.toc{padding:var(--space-24) 0 var(--space-16);}
+.toc h2{
+  font-family:var(--font-display);font-weight:400;font-size:var(--text-xl);
+  margin:0 0 var(--space-10);
+}
+.toc-group{margin-bottom:var(--space-8);}
+.toc-grouplabel{
+  font-size:var(--text-xs);letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--faint);margin-bottom:var(--space-3);
+}
+.toc a.toc-row{
+  display:flex;align-items:baseline;gap:var(--space-4);
+  padding:var(--space-2) 0;
+  color:var(--text);border-bottom:1px solid var(--border);
+  transition:color var(--tr), padding-left var(--tr);
+}
+.toc a.toc-row:hover{color:var(--accent-h);padding-left:var(--space-2);}
+.toc .num{
+  font-family:var(--font-display);font-style:italic;color:var(--accent);
+  min-width:2.4em;font-size:var(--text-sm);
+}
+.toc .name{flex:1;}
+.toc .sub{font-size:var(--text-xs);color:var(--faint);letter-spacing:0.05em;text-align:right;}
+
+/* ============ TIER CHIPS (signature element) ============ */
+.tier{
+  display:inline-block;
+  font-family:var(--font-body);
+  font-size:0.62rem;font-weight:600;
+  letter-spacing:0.14em;text-transform:uppercase;
+  padding:2px 9px;border-radius:var(--radius-full);
+  vertical-align:middle;white-space:nowrap;
+}
+.tier-est{color:var(--tier-est);background:var(--tier-est-bg);border:1px solid color-mix(in srgb, var(--tier-est) 35%, transparent);}
+.tier-exp{color:var(--tier-exp);background:var(--tier-exp-bg);border:1px solid color-mix(in srgb, var(--tier-exp) 35%, transparent);}
+.tier-spec{color:var(--tier-spec);background:var(--tier-spec-bg);border:1px solid color-mix(in srgb, var(--tier-spec) 35%, transparent);}
+.tier-norm{color:var(--muted);background:var(--surface2);border:1px solid var(--border);}
+
+/* ============ PART DIVIDERS ============ */
+.part{
+  padding:var(--space-24) var(--space-6);
+  text-align:center;
+  border-top:1px solid var(--border);
+}
+.part .partnum{
+  font-family:var(--font-display);font-style:italic;color:var(--accent);
+  font-size:var(--text-md);margin-bottom:var(--space-3);
+}
+.part h2{
+  font-family:var(--font-display);font-weight:400;
+  font-size:var(--text-2xl);margin:0 0 var(--space-4);letter-spacing:-0.01em;
+}
+.part .partdeck{
+  font-family:var(--font-display);font-style:italic;font-weight:300;
+  color:var(--muted);font-size:var(--text-md);max-width:44ch;margin:0 auto;line-height:1.5;
+}
+
+/* ============ CHAPTERS ============ */
+article.chapter, section.frontmatter, section.appendix{
+  padding:var(--space-20) 0;
+  border-top:1px solid var(--border);
+}
+.chapnum{
+  font-family:var(--font-display);font-style:italic;color:var(--accent);
+  font-size:var(--text-md);margin-bottom:var(--space-2);
+}
+.chapter h2, .frontmatter h2, .appendix h2{
+  font-family:var(--font-display);font-weight:400;
+  font-size:var(--text-2xl);line-height:1.15;
+  margin:0 0 var(--space-5);letter-spacing:-0.01em;
+}
+.deck{
+  font-family:var(--font-display);font-style:italic;font-weight:300;
+  font-size:var(--text-md);color:var(--muted);line-height:1.55;
+  padding-bottom:var(--space-6);margin-bottom:var(--space-8);
+  border-bottom:1px solid var(--border);
+}
+.body h3{
+  font-family:var(--font-display);font-weight:500;font-style:italic;
+  font-size:var(--text-lg);line-height:1.25;
+  margin:var(--space-12) 0 var(--space-4);
+}
+.body p{margin:0 0 var(--space-5);}
+.body strong{font-weight:600;}
+.dropcap > p:first-of-type::first-letter{
+  font-family:var(--font-display);
+  font-size:4.4em;line-height:0.82;
+  float:left;color:var(--accent);
+  padding:0.06em 0.12em 0 0;font-weight:400;
+}
+
+/* ============ PULL QUOTE ============ */
+.pullquote{
+  font-family:var(--font-display);font-style:italic;font-weight:300;
+  font-size:var(--text-xl);line-height:1.35;color:var(--text);
+  border-top:2px solid var(--accent);
+  border-bottom:1px solid var(--border);
+  padding:var(--space-8) 0;margin:var(--space-12) 0;
+}
+
+/* ============ CALLOUT ============ */
+.callout{
+  background:var(--accent-bg);
+  border-left:2px solid var(--accent);
+  border-radius:0 var(--radius-md) var(--radius-md) 0;
+  padding:var(--space-5) var(--space-6);
+  margin:var(--space-8) 0;
+}
+.callout .label{
+  font-size:var(--text-xs);letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:var(--space-2);font-weight:600;
+}
+.callout p{margin:0;color:var(--text);}
+.callout p + p{margin-top:var(--space-3);}
+
+/* ============ CARD GRID ============ */
+.cardgrid{
+  display:grid;gap:var(--space-4);
+  grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr));
+  margin:var(--space-8) 0;
+}
+.card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:var(--space-5);
+}
+.card .label{
+  font-size:var(--text-xs);letter-spacing:0.16em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:var(--space-2);font-weight:600;
+}
+.card p{margin:0;font-size:var(--text-sm);color:var(--muted);line-height:1.7;}
+
+/* ============ LIST BLOCK ============ */
+.listblock{margin:var(--space-8) 0;display:flex;flex-direction:column;gap:var(--space-2);}
+.listblock .item{
+  display:flex;gap:var(--space-3);align-items:baseline;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-md);padding:var(--space-3) var(--space-4);
+  font-size:var(--text-sm);color:var(--muted);line-height:1.65;
+}
+.listblock .item::before{content:"";flex:0 0 6px;width:6px;height:6px;border-radius:var(--radius-full);background:var(--accent);transform:translateY(-2px);}
+.listblock .item strong{color:var(--text);}
+.listblock .item.dead{text-decoration:line-through;opacity:0.55;}
+
+/* ============ SPINE (Argument in Brief) ============ */
+.spineitem{
+  display:flex;gap:var(--space-4);align-items:baseline;
+  padding:var(--space-4) 0;border-bottom:1px solid var(--border);
+}
+.spineitem .num{
+  font-family:var(--font-display);font-style:italic;color:var(--accent);
+  min-width:1.8em;font-size:var(--text-sm);
+}
+.spineitem .claim{flex:1;font-size:var(--text-sm);color:var(--muted);line-height:1.7;}
+.spineitem .claim strong{color:var(--text);font-weight:600;}
+
+/* ============ TABLES ============ */
+.tablewrap{overflow-x:auto;margin:var(--space-8) 0;border:1px solid var(--border);border-radius:var(--radius-lg);}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:var(--text-sm);}
+th{
+  font-size:var(--text-xs);letter-spacing:0.14em;text-transform:uppercase;
+  color:var(--faint);font-weight:600;text-align:left;
+  padding:var(--space-3) var(--space-4);
+  border-bottom:1px solid var(--border);background:var(--surface);
+}
+td{
+  color:var(--muted);padding:var(--space-3) var(--space-4);
+  border-bottom:1px solid var(--border);vertical-align:top;line-height:1.65;
+}
+tr:last-child td{border-bottom:none;}
+td:first-child{font-weight:600;color:var(--text);}
+
+/* ============ TEMPLATE / CODE BLOCK ============ */
+.template{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);
+  margin:var(--space-8) 0;
+}
+.template .label{
+  font-size:var(--text-xs);letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:var(--space-3);font-weight:600;
+}
+.template pre{
+  margin:0;font-family:ui-monospace,'SF Mono',Menlo,monospace;
+  font-size:var(--text-sm);color:var(--muted);line-height:1.9;
+  white-space:pre;overflow-x:auto;
+}
+.template .ital{font-style:italic;color:var(--muted);}
+code{
+  font-family:ui-monospace,'SF Mono',Menlo,monospace;
+  font-size:0.86em;background:var(--surface2);
+  padding:1px 6px;border-radius:var(--radius-sm);
+  border:1px solid var(--border);
+}
+
+/* ============ CHAPTER BRIDGE ============ */
+.bridge{
+  display:flex;justify-content:space-between;align-items:baseline;gap:var(--space-4);
+  border-top:1px solid var(--border);
+  margin-top:var(--space-16);padding-top:var(--space-5);
+}
+.bridge .next{font-size:var(--text-xs);letter-spacing:0.18em;text-transform:uppercase;color:var(--faint);}
+.bridge a{font-family:var(--font-display);font-style:italic;font-size:var(--text-md);}
+
+/* ============ COLOPHON ============ */
+.colophon{
+  text-align:center;padding:var(--space-24) var(--space-6);
+  border-top:1px solid var(--border);color:var(--faint);font-size:var(--text-sm);
+}
+.colophon .rule{width:48px;height:1px;background:var(--border);margin:0 auto var(--space-6);}
+.colophon .t{font-family:var(--font-display);font-size:var(--text-md);color:var(--muted);margin-bottom:var(--space-2);}
+.colophon .t em{color:var(--accent);}
+
+/* ============ SCROLL REVEAL (progressive) ============ */
+@supports (animation-timeline: view()){
+  @media (prefers-reduced-motion: no-preference){
+    article.chapter, section.appendix{
+      animation:reveal linear both;
+      animation-timeline:view();
+      animation-range:entry 0% entry 18%;
+    }
+    @keyframes reveal{from{opacity:0.25;transform:translateY(14px);}to{opacity:1;transform:none;}}
+  }
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important;}
+  html{scroll-behavior:auto;}
+}
+
+/* ============ MOBILE ============ */
+@media (max-width: 600px){
+  .cover{padding:var(--space-16) var(--space-5);}
+  .cover .meta{gap:var(--space-4);bottom:var(--space-12);}
+  .toc{padding:var(--space-16) 0 var(--space-10);}
+  .toc .sub{display:none;}
+  .part{padding:var(--space-16) var(--space-5);}
+  article.chapter, section.frontmatter, section.appendix{padding:var(--space-12) 0;}
+  .pullquote{font-size:var(--text-lg);}
+  .wrap{padding:0 var(--space-5);}
+}
+/* ============ VERB CHIPS (security layers, from the book taxonomy) ============ */
+.verb{display:inline-flex;align-items:center;font-family:var(--font-body);font-size:var(--text-xs);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:2px 10px;border-radius:var(--radius-full);white-space:nowrap;vertical-align:middle;}
+.verb-enforce{color:var(--tier-est);background:var(--tier-est-bg);border:1px solid color-mix(in srgb, var(--tier-est) 35%, transparent);}
+.verb-reinforce{color:var(--tier-exp);background:var(--tier-exp-bg);border:1px solid color-mix(in srgb, var(--tier-exp) 35%, transparent);}
+.verb-detect{color:var(--tier-spec);background:var(--tier-spec-bg);border:1px solid color-mix(in srgb, var(--tier-spec) 35%, transparent);}
+.verb-disclose{color:var(--muted);background:var(--surface2);border:1px solid var(--border);}
+.legend{display:flex;flex-wrap:wrap;gap:var(--space-3);margin:var(--space-6) 0 var(--space-10);padding:var(--space-5) var(--space-6);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);font-size:var(--text-sm);color:var(--muted);}
+.legend .legend-item{display:flex;align-items:baseline;gap:var(--space-2);flex:1 1 240px;}
+.article{margin:var(--space-12) 0;}
+.article .ahead{display:flex;align-items:baseline;justify-content:space-between;gap:var(--space-4);flex-wrap:wrap;margin-bottom:var(--space-3);border-bottom:1px solid var(--border);padding-bottom:var(--space-3);}
+.article .ahead h3{margin:0;border:none;padding:0;}
+.article .anum{font-family:var(--font-display);font-size:var(--text-sm);color:var(--accent);letter-spacing:0.1em;}
+.article p{margin:0;color:var(--muted);line-height:1.8;}
+.article p strong{color:var(--text);}
+</style>
+</head>
+<body>
+
+<div id="progress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="booktitle"><em>A Cybersecurity Bill of Rights</em> &nbsp;·&nbsp; Ryann Murphy</div>
+  <button id="themeToggle" aria-label="Switch to light mode">
+    <svg id="iconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    <svg id="iconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+</header>
+
+<section class="cover" aria-label="Cover">
+  <div class="eyebrow">A Positioning &amp; System Proposal</div>
+  <h1>A Cybersecurity<br>Bill of Rights</h1>
+  <div class="rule" aria-hidden="true"></div>
+  <p class="subtitle">Rights as properties, not promises — and what that makes a product legible enough to claim</p>
+  <div class="author">Ryann Murphy</div>
+  <div class="meta">
+    <span>Market-Intelligence Note</span>
+    <span>Companion to <em>Narrative Intelligence</em></span>
+    <span>On future updates · 2026</span>
+  </div>
+  <div class="scrollhint" aria-hidden="true">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </div>
+</section>
+
+<main>
+
+<section class="frontmatter wrap" id="positioning" aria-label="Positioning">
+  <div class="chapnum">Positioning</div>
+  <h2>What This Is, and What It Is Not</h2>
+  <p class="deck">This is not a plan to solve security. It is a proposal to make one product legible — to say plainly what it does, what it does not, and what a future update could add — and to let that honesty do the marketing.</p>
+  <div class="body dropcap">
+    <p>The critique was fair. A document that sets out to fix the whole world is not a product strategy; it is a manifesto with no buyer. So this narrows, deliberately, to a claim small enough to be true: a <strong>semantic-filtering layer</strong>, added as a future update, makes the product <em>more legible</em> — easier to reason about, easier to trust, easier to sell — and a "Bill of Rights" is the frame that hypes that legibility in a register the market already understands. The phrase borrows the cultural charge of the AI Bill of Rights on purpose; if it is adopted, it should be adopted knowing that resonance is the point and the prior art is real.</p>
+    <p>Two documents share this page. As a <strong>marketing proposal</strong>, it is a narrative: it hands the product a category and a posture — <em>we tell you the truth about what we protect</em> — that competitors who overclaim cannot occupy. As a <strong>system proposal</strong>, it is an architecture: each right names a property and the layer that would carry it. The two go hand in hand, and they hold in a specific order. <strong>The marketing sticks even if the system proposal is never built</strong>, because its core promise is honesty about scope, which costs nothing to keep. The system proposal is what makes the marketing <em>earned</em> rather than merely clever — the reason the posture survives contact with a skeptical buyer.</p>
+    <p>And the scope is bounded. The product is finished; nothing here is a critique of what ships today. This concerns the updates that are already coming, and the direction they might take when they do.</p>
+    <div class="callout">
+      <div class="label">On Posture</div>
+      <p>This is a market-intelligence reading, offered to whoever owns the product as one perspective among many. The product is theirs; the decision is theirs. Where it touches the roadmap, it proposes a direction to weigh, never a direction to adopt.</p>
+      <p>Take it or leave it. Both are correct uses of what follows.</p>
+    </div>
+  </div>
+  <div class="bridge"><span class="next">Next</span><a href="#market">The Market Read</a></div>
+</section>
+
+<section class="frontmatter wrap" id="market" aria-label="The Market Read">
+  <div class="chapnum">Market Read</div>
+  <h2>Who Is Actually Buying</h2>
+  <p class="deck">There are two markets. One is near and contingent; the other is slow, large, and durable. The Bill of Rights is built for the second.</p>
+  <div class="body dropcap">
+    <p>The near market is compliance-shaped: higher-risk security buyers — India, certain regulated US sectors — who purchase because liability, procurement, or regulation compels them. That demand is real and worth serving, but it is not a moat. It rests on rules that can change, and a position that depends on regulatory capture is rented, not owned. Build the whole strategy on it and the strategy expires when the policy does.</p>
+    <p>The durable market is the builder. Frontier labs — Claude foremost among them — are turning ordinary people into solo founders, and this is not a marketing campaign but a redistribution of who gets to build at all. The hobbyist, the AI homeowner, the DIY computer scientist: this is quietly becoming a normal mode of human–computer interaction, and these builders do the one thing enterprises rarely do — they inspect the deployment, judge it weak, and design their own way out of it. They are not waiting to be protected. They are already routing around protection they cannot verify.</p>
+    <p>This is the point the rest of the strategy turns on: <strong>the builder cannot be captured, only convinced.</strong> You do not lock them in — they will leave, and they will check for the exit before they arrive. The only thing that holds them is a product whose properties they can confirm for themselves: local, inspectable, repairable, portable. Which is to say the Bill of Rights is not adjacent to the builder market. Read it again as a procurement checklist and it <em>is</em> the builder's wishlist, written as a spec.</p>
+    <p>The tension is worth naming rather than hiding. The rights that win the builder — inspection, exit, repair, local processing — are precisely the ones a capture-dependent vendor resists. Leaning into this Bill of Rights is therefore a bet, and the bet is that the builder market outlasts the compliance market. The near revenue can still come from compliance; the moat is built for the builder. A strategy can hold both, so long as it is honest about which one it is for.</p>
+  </div>
+  <div class="bridge"><span class="next">Next</span><a href="#ciso">The Objection</a></div>
+</section>
+
+<section class="frontmatter wrap" id="ciso" aria-label="The CISO's Question">
+  <div class="chapnum">The Objection</div>
+  <h2>"You Catch 75–80%. What About Novel Attacks?"</h2>
+  <p class="deck">Every serious buyer asks this, and the honest answer is also the stronger pitch. Novelty is the detector's job to surface — not its job to stop. Stopping belongs to a layer that never depended on recognizing the attack.</p>
+  <div class="body dropcap">
+    <p>Begin by naming the number for what it is. Seventy-five to eighty percent is a <strong>detection</strong> figure, and detection is a probabilistic layer that scores an input against the categories it already knows. By construction it degrades against novelty — not because this detector is weak, but because that is what detection <em>is</em>. A vendor who claims a detector immune to novel attacks has not built a better detector; they have described a probabilistic filter as a deterministic wall, which is a category error in a confident voice. The buyer who has been burned before can hear that error, and discounts everything that follows it.</p>
+    <p>So do not defend the number as though it should be a hundred. Reposition it. The detector's job is to catch the known distribution cheaply and to <em>disclose</em> the novel inputs it cannot catch. It buys time and telemetry. It is the early-warning system, not the wall — and sold as the wall, it can only lose the argument the first time a CISO names an attack it has never seen.</p>
+    <p>The wall is architectural. The layer that survives novelty is <strong>enforcement</strong>: reduce capability, constrain escalation, limit authority, distribute trust — so that a <em>successful</em> injection, novel or not, no longer grants a consequential action. This layer does not degrade against new attacks, because it never depended on classifying the input in the first place. It assumes reading will fail, and survives the failure. That is the sentence to put in front of the CISO: a breach of reading does not have to become a breach of authority.</p>
+    <p>The future update sits between the two. A <strong>semantic-filtering (reinforcement) layer</strong> — a textual, internal constitution carried in the model's own framing — adds marginal robustness above raw detection. It should be offered honestly, as exploratory: plausible, partially observed, untested at scale. It is sold as added legibility and graceful degradation, never as a deterministic guarantee. Sold otherwise, it becomes the same overclaim in a newer coat.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Layer</th><th>Behavior against a novel attack</th><th>What you can honestly claim</th></tr></thead>
+        <tbody>
+          <tr><td><span class="verb verb-detect">Detect</span><br><span style="font-size:var(--text-xs);color:var(--faint)">today · 75–80%</span></td><td>Degrades; misses what it has not seen before</td><td>Catches the known distribution cheaply, and flags the rest fast</td></tr>
+          <tr><td><span class="verb verb-disclose">Disclose</span></td><td>Unaffected; it records the miss either way</td><td>You will know promptly and specifically when something gets through</td></tr>
+          <tr><td><span class="verb verb-reinforce">Reinforce</span><br><span style="font-size:var(--text-xs);color:var(--faint)">future update · exploratory</span></td><td>Adds marginal robustness; still probabilistic</td><td>Graceful degradation — offered as exploratory, never a guarantee</td></tr>
+          <tr><td><span class="verb verb-enforce">Enforce</span><br><span style="font-size:var(--text-xs);color:var(--faint)">architecture</span></td><td>Holds; the injection succeeding grants nothing</td><td>A breach of reading does not become a breach of authority</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The marketing falls straight out of the system. The answer to the CISO is the first right made operational: <em>here is exactly what we catch, here is what we do not, and here is the layer that holds when catching fails.</em> A product that says this is more trustworthy than one claiming ninety-nine, because the CISO already knows ninety-nine is a lie. Honest scope, with a named architecture behind it, is the most defensible thing you can carry into a room whose job is to disbelieve you.</p>
+    <div class="pullquote">The strongest security claim is not <em>we stop everything.</em> It is <em>we will never lie to you about what we stop.</em></div>
+  </div>
+  <div class="bridge"><span class="next">Next</span><a href="#articles">The Twelve Rights</a></div>
+</section>
+
+<section class="frontmatter wrap" id="articles" aria-label="The Twelve Rights">
+  <div class="chapnum">The Instrument</div>
+  <h2>The Twelve Rights</h2>
+  <p class="deck">Each is at once a marketing claim and a system property, and each names the layer where the property would live. The verbs are the book's — enforce is deterministic and architectural; reinforce is textual and internal; detect is probabilistic; disclose is visible after the fact.</p>
+  <div class="legend" aria-label="Layer legend">
+    <span class="legend-item"><span class="verb verb-enforce">Enforce</span> structural — a property the system cannot avoid</span>
+    <span class="legend-item"><span class="verb verb-reinforce">Reinforce</span> textual — constitution carried in language</span>
+    <span class="legend-item"><span class="verb verb-detect">Detect</span> probabilistic — scored against known categories</span>
+    <span class="legend-item"><span class="verb verb-disclose">Disclose</span> visible — recorded and contestable</span>
+  </div>
+  <div class="body">
+    <p style="color:var(--muted);font-style:italic;margin-bottom:var(--space-10)">One distinction organizes all twelve. A <em>promise</em> is something a company says it will do. A <em>property</em> is something the system cannot avoid doing. A right that depends on a vendor's good behavior is a courtesy, revocable the moment it becomes inconvenient. Real rights live in architecture — decided in how a thing is built, before anyone gets to choose whether to honor them.</p>
+
+    <div class="article">
+      <div class="ahead"><h3>I. The right to know what the system does — and what it does not do.</h3><span class="verb verb-disclose">Disclose</span></div>
+      <p>Capabilities stated plainly; limits stated just as plainly. "Military-grade," "unbreakable," and "we take your security seriously" are not security controls. A system that overstates what it protects has already failed the first duty: telling you the truth about your own exposure. <strong>This is the article the CISO answer operationalizes</strong> — the honest 75–80%, and the layer that holds past it.</p>
+    </div>
+
+    <div class="article">
+      <div class="ahead"><h3>II. The right to data minimization by default.</h3><span class="verb verb-enforce">Enforce</span></div>
+      <p>A system may collect only what it needs to do the thing you asked it to do. Everything past that is surveillance wearing the costume of convenience. The burden is on the system to justify collection, never on you to opt out of it. Data that was never collected cannot be breached — that is a property, not a policy.</p>
+    </div>
+
+    <div class="article">
+      <div class="ahead"><h3>III. The right to local processing.</h3><span class="verb verb-enforce">Enforce</span></div>
+      <p>Where a computation can run on a device you own, it should. Shipping your private life to someone else's datacenter is a choice a designer made — for their telemetry, their margins, their convenience — not a law of physics. Distance from your own data is not a feature. This is the article the builder market checks for first.</p>
+    </div>
+
+    <div class="article">
+      <div class="ahead"><h3>IV. The right to encryption that stays encrypted.</h3><span class="verb verb-enforce">Enforce</span></div>
+      <p>No backdoors, no "lawful access," no master keys held in escrow. A door built only for the good guys is still a door, and doors get found. Encryption you don't control, on hardware you don't own, is a promissory note, not a lock.</p>
+    </div>
+
+    <div class="article">
+      <div class="ahead"><h3>V. The right to legible failure.</h3><span class="verb verb-disclose">Disclose</span></div>
+      <p>When a system is breached, it tells you — promptly, specifically, in language a person can act on. What was taken. What it means. What to do now. "An incident affecting certain users" is not a disclosure; it is a press release written by a lawyer to protect the company from you.</p>
+    </div>
+
+    <div class="article">
+      <div class="ahead"><h3>VI. The right to refuse without penalty.</h3><span class="verb verb-enforce">Enforce</span></div>
+      <p>Protection is not a hostage. You do not pay a premium to <em>not</em> be tracked, and you are not downgraded for declining the data grab. Security cannot be the bait in an upsell.</p>
+    </div>
+
+    <div class="article">
+      <div class="ahead"><h3>VII. The right to leave with everything.</h3><span class="verb verb-enforce">Enforce</span></div>
+      <p>Your data is portable and your history comes with you. Lock-in dressed as safety is not safety. A system you cannot exit has converted your security into its leverage. The builder will not arrive without confirming this one is true.</p>
+    </div>
+
+    <div class="article">
+      <div class="ahead"><h3>VIII. The right to inspection.</h3><span class="verb verb-disclose">Disclose</span></div>
+      <p>You, or someone you trust, can examine the systems you depend on. Security through obscurity protects the vendor's embarrassment, not your data. The ability to look is a precondition for the ability to trust.</p>
+    </div>
+
+    <div class="article">
+      <div class="ahead"><h3>IX. The right to repair.</h3><span class="verb verb-enforce">Enforce</span></div>
+      <p>When something you own is vulnerable, you are allowed to fix it — or to pay someone other than the manufacturer to. A device that can only be secured by the company that shipped it insecure is not yours.</p>
+    </div>
+
+    <div class="article">
+      <div class="ahead"><h3>X. The right to a human.</h3><span class="verb verb-disclose">Disclose</span></div>
+      <p>Any consequential security decision made about you can be contested to a person with the authority to reverse it. "The system flagged you" is the beginning of a conversation, not the end of one.</p>
+    </div>
+
+    <div class="article">
+      <div class="ahead"><h3>XI. The right not to subsidize fragility.</h3><span class="verb verb-enforce">Enforce</span></div>
+      <p>Efficiency is a security property. A system that runs hot, over-collects, and over-provisions is not safer for its excess — it is more surface, more cost, more to defend, more to fail. You should not have to underwrite that bloat with your data, your battery, or the grid. Intelligence per watt is not an aesthetic; it is attack surface measured honestly.</p>
+    </div>
+
+    <div class="article">
+      <div class="ahead"><h3>XII. The right to be forgotten — actually.</h3><span class="verb verb-enforce">Enforce</span></div>
+      <p>Deletion means deletion: gone from backups, from logs, from the training set, from the partners it was quietly shared with. A delete button that only hides the data is a lie with a nice UI.</p>
+    </div>
+  </div>
+  <div class="bridge"><span class="next">Next</span><a href="#closing">Closing</a></div>
+</section>
+
+<section class="frontmatter wrap" id="closing" aria-label="Closing">
+  <div class="chapnum">Closing</div>
+  <h2>What Did You Build?</h2>
+  <div class="body dropcap">
+    <p>None of these are gifts. Each describes a property a system can be built to have or built to lack — and the building is where the ethics already happened, long before any policy got written about it. A bill of rights like this does not finally ask <em>will you behave?</em> It asks <em>what did you build?</em></p>
+    <p>And it asks for a reason beyond conscience. The market that lasts — the builder, the homeowner, the solo founder routing around weak deployment — is the one that will actually check the answer. Legibility is not the soft part of the pitch. For the buyer who can read the architecture, it is the only part that holds.</p>
+  </div>
+</section>
+
+</main>
+
+<footer class="colophon">
+  <div class="rule" aria-hidden="true"></div>
+  <div class="t"><em>A Cybersecurity Bill of Rights</em></div>
+  <div>Rights as properties, not promises — a positioning and system proposal</div>
+  <div style="margin-top:var(--space-4)">Ryann Murphy · Companion to <em>Narrative Intelligence</em> · Market-Intelligence Note, 2026</div>
+</footer>
+
+<script>
+(function(){
+  var bar = document.getElementById('progress');
+  function setProgress(){
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? (window.scrollY / max) * 100 : 0;
+    bar.style.width = pct + '%';
+  }
+  window.addEventListener('scroll', setProgress, {passive:true});
+  window.addEventListener('resize', setProgress, {passive:true});
+  setProgress();
+
+  var theme = 'dark';
+  var root = document.documentElement;
+  var btn = document.getElementById('themeToggle');
+  var sun = document.getElementById('iconSun');
+  var moon = document.getElementById('iconMoon');
+  function applyTheme(){
+    root.setAttribute('data-theme', theme);
+    var dark = theme === 'dark';
+    sun.style.display = dark ? '' : 'none';
+    moon.style.display = dark ? 'none' : '';
+    btn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+  }
+  btn.addEventListener('click', function(){
+    theme = theme === 'dark' ? 'light' : 'dark';
+    applyTheme();
+  });
+  applyTheme();
+})();
+</script>
+</body>
+</html>

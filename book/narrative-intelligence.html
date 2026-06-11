@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Narrative Intelligence — Ryann Murphy</title>
+<meta name="description" content="How institutions, security systems, and machines learn to read — and what they cannot. Volume IV of the Anteriority Corpus.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --font-display:'Fraunces', Georgia, serif;
+  --font-body:'Source Serif 4', Georgia, serif;
+
+  --text-xs:clamp(0.72rem,0.7rem + 0.1vw,0.78rem);
+  --text-sm:clamp(0.84rem,0.8rem + 0.2vw,0.92rem);
+  --text-base:clamp(1.04rem,1rem + 0.25vw,1.135rem);
+  --text-md:clamp(1.15rem,1.1rem + 0.4vw,1.3rem);
+  --text-lg:clamp(1.3rem,1.2rem + 0.8vw,1.62rem);
+  --text-xl:clamp(1.6rem,1.4rem + 1.4vw,2.2rem);
+  --text-2xl:clamp(2rem,1.7rem + 2vw,3rem);
+  --text-hero:clamp(2.6rem,1.8rem + 4.5vw,5.2rem);
+
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px;
+  --space-5:20px; --space-6:24px; --space-8:32px; --space-10:40px;
+  --space-12:48px; --space-16:64px; --space-20:80px; --space-24:96px;
+
+  --radius-sm:4px; --radius-md:8px; --radius-lg:14px; --radius-full:999px;
+  --tr:180ms cubic-bezier(0.16,1,0.3,1);
+  --content:720px;
+}
+[data-theme="dark"]{
+  --bg:#101319;
+  --surface:#171b23;
+  --surface2:#1e232e;
+  --border:rgba(255,255,255,0.08);
+  --text:#e9e6df;
+  --muted:#a9a59b;
+  --faint:#6f6c64;
+  --accent:#d9a441;
+  --accent-h:#ecbe63;
+  --accent-bg:rgba(217,164,65,0.08);
+  --tier-est:#5fbd9d;
+  --tier-est-bg:rgba(95,189,157,0.10);
+  --tier-exp:#d9a441;
+  --tier-exp-bg:rgba(217,164,65,0.10);
+  --tier-spec:#ab8fd8;
+  --tier-spec-bg:rgba(171,143,216,0.10);
+  --cover-glow-1:rgba(217,164,65,0.10);
+  --cover-glow-2:rgba(95,189,157,0.05);
+}
+[data-theme="light"]{
+  --bg:#faf8f3;
+  --surface:#f1eee7;
+  --surface2:#e9e5da;
+  --border:rgba(0,0,0,0.10);
+  --text:#21232a;
+  --muted:#57544c;
+  --faint:#8e8a80;
+  --accent:#9a690f;
+  --accent-h:#7c540c;
+  --accent-bg:rgba(154,105,15,0.07);
+  --tier-est:#1c7a5e;
+  --tier-est-bg:rgba(28,122,94,0.08);
+  --tier-exp:#9a690f;
+  --tier-exp-bg:rgba(154,105,15,0.08);
+  --tier-spec:#6a4d9f;
+  --tier-spec-bg:rgba(106,77,159,0.08);
+  --cover-glow-1:rgba(154,105,15,0.08);
+  --cover-glow-2:rgba(28,122,94,0.05);
+}
+
+/* ============ BASE ============ */
+*,*::before,*::after{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  font-size:var(--text-base);
+  line-height:1.8;
+  transition:background-color var(--tr), color var(--tr);
+  -webkit-font-smoothing:antialiased;
+}
+a{color:var(--accent);text-decoration:none;transition:color var(--tr);}
+a:hover{color:var(--accent-h);}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:var(--radius-sm);}
+img{max-width:100%;}
+
+/* ============ PROGRESS BAR ============ */
+#progress{
+  position:fixed;top:0;left:0;height:2px;width:0;
+  background:var(--accent);z-index:60;
+}
+
+/* ============ TOP BAR ============ */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:var(--space-3) var(--space-6);
+  background:color-mix(in srgb, var(--bg) 78%, transparent);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+}
+.topbar .booktitle{
+  font-family:var(--font-display);
+  font-size:var(--text-sm);
+  letter-spacing:0.04em;
+  color:var(--muted);
+}
+.topbar .booktitle em{color:var(--accent);font-style:italic;}
+#themeToggle{
+  display:flex;align-items:center;justify-content:center;
+  width:44px;height:44px;
+  background:transparent;border:1px solid var(--border);
+  border-radius:var(--radius-full);
+  color:var(--muted);cursor:pointer;
+  transition:color var(--tr), border-color var(--tr), background-color var(--tr);
+}
+#themeToggle:hover{color:var(--accent);border-color:var(--accent);}
+#themeToggle svg{width:18px;height:18px;}
+
+/* ============ COVER ============ */
+.cover{
+  min-height:100vh;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  text-align:center;position:relative;
+  padding:var(--space-20) var(--space-6);
+  background:
+    radial-gradient(ellipse 70% 45% at 50% 0%, var(--cover-glow-1), transparent 70%),
+    radial-gradient(ellipse 55% 40% at 85% 90%, var(--cover-glow-2), transparent 70%);
+}
+.cover .eyebrow{
+  font-size:var(--text-xs);letter-spacing:0.22em;text-transform:uppercase;
+  color:var(--faint);margin-bottom:var(--space-6);
+}
+.cover h1{
+  font-family:var(--font-display);
+  font-size:var(--text-hero);
+  font-weight:400;line-height:1.05;
+  margin:0 0 var(--space-6);
+  letter-spacing:-0.01em;
+}
+.cover .rule{width:48px;height:2px;background:var(--accent);margin:0 auto var(--space-6);}
+.cover .subtitle{
+  font-family:var(--font-display);font-style:italic;font-weight:300;
+  font-size:var(--text-lg);color:var(--muted);
+  max-width:34ch;margin:0 auto var(--space-4);line-height:1.45;
+}
+.cover .author{
+  font-size:var(--text-md);color:var(--text);
+  letter-spacing:0.06em;margin-top:var(--space-8);
+}
+.cover .meta{
+  position:absolute;bottom:var(--space-16);left:0;right:0;
+  display:flex;justify-content:center;gap:var(--space-8);flex-wrap:wrap;
+  font-size:var(--text-xs);letter-spacing:0.14em;text-transform:uppercase;color:var(--faint);
+  padding:0 var(--space-6);
+}
+.scrollhint{
+  position:absolute;bottom:var(--space-5);left:50%;transform:translateX(-50%);
+  color:var(--faint);animation:bob 2.2s ease-in-out infinite;
+}
+@keyframes bob{0%,100%{transform:translate(-50%,0);}50%{transform:translate(-50%,8px);}}
+
+/* ============ LAYOUT ============ */
+.wrap{max-width:var(--content);margin-inline:auto;padding:0 var(--space-6);}
+main{display:block;}
+
+/* ============ TOC ============ */
+.toc{padding:var(--space-24) 0 var(--space-16);}
+.toc h2{
+  font-family:var(--font-display);font-weight:400;font-size:var(--text-xl);
+  margin:0 0 var(--space-10);
+}
+.toc-group{margin-bottom:var(--space-8);}
+.toc-grouplabel{
+  font-size:var(--text-xs);letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--faint);margin-bottom:var(--space-3);
+}
+.toc a.toc-row{
+  display:flex;align-items:baseline;gap:var(--space-4);
+  padding:var(--space-2) 0;
+  color:var(--text);border-bottom:1px solid var(--border);
+  transition:color var(--tr), padding-left var(--tr);
+}
+.toc a.toc-row:hover{color:var(--accent-h);padding-left:var(--space-2);}
+.toc .num{
+  font-family:var(--font-display);font-style:italic;color:var(--accent);
+  min-width:2.4em;font-size:var(--text-sm);
+}
+.toc .name{flex:1;}
+.toc .sub{font-size:var(--text-xs);color:var(--faint);letter-spacing:0.05em;text-align:right;}
+
+/* ============ TIER CHIPS (signature element) ============ */
+.tier{
+  display:inline-block;
+  font-family:var(--font-body);
+  font-size:0.62rem;font-weight:600;
+  letter-spacing:0.14em;text-transform:uppercase;
+  padding:2px 9px;border-radius:var(--radius-full);
+  vertical-align:middle;white-space:nowrap;
+}
+.tier-est{color:var(--tier-est);background:var(--tier-est-bg);border:1px solid color-mix(in srgb, var(--tier-est) 35%, transparent);}
+.tier-exp{color:var(--tier-exp);background:var(--tier-exp-bg);border:1px solid color-mix(in srgb, var(--tier-exp) 35%, transparent);}
+.tier-spec{color:var(--tier-spec);background:var(--tier-spec-bg);border:1px solid color-mix(in srgb, var(--tier-spec) 35%, transparent);}
+.tier-norm{color:var(--muted);background:var(--surface2);border:1px solid var(--border);}
+
+/* ============ PART DIVIDERS ============ */
+.part{
+  padding:var(--space-24) var(--space-6);
+  text-align:center;
+  border-top:1px solid var(--border);
+}
+.part .partnum{
+  font-family:var(--font-display);font-style:italic;color:var(--accent);
+  font-size:var(--text-md);margin-bottom:var(--space-3);
+}
+.part h2{
+  font-family:var(--font-display);font-weight:400;
+  font-size:var(--text-2xl);margin:0 0 var(--space-4);letter-spacing:-0.01em;
+}
+.part .partdeck{
+  font-family:var(--font-display);font-style:italic;font-weight:300;
+  color:var(--muted);font-size:var(--text-md);max-width:44ch;margin:0 auto;line-height:1.5;
+}
+
+/* ============ CHAPTERS ============ */
+article.chapter, section.frontmatter, section.appendix{
+  padding:var(--space-20) 0;
+  border-top:1px solid var(--border);
+}
+.chapnum{
+  font-family:var(--font-display);font-style:italic;color:var(--accent);
+  font-size:var(--text-md);margin-bottom:var(--space-2);
+}
+.chapter h2, .frontmatter h2, .appendix h2{
+  font-family:var(--font-display);font-weight:400;
+  font-size:var(--text-2xl);line-height:1.15;
+  margin:0 0 var(--space-5);letter-spacing:-0.01em;
+}
+.deck{
+  font-family:var(--font-display);font-style:italic;font-weight:300;
+  font-size:var(--text-md);color:var(--muted);line-height:1.55;
+  padding-bottom:var(--space-6);margin-bottom:var(--space-8);
+  border-bottom:1px solid var(--border);
+}
+.body h3{
+  font-family:var(--font-display);font-weight:500;font-style:italic;
+  font-size:var(--text-lg);line-height:1.25;
+  margin:var(--space-12) 0 var(--space-4);
+}
+.body p{margin:0 0 var(--space-5);}
+.body strong{font-weight:600;}
+.dropcap > p:first-of-type::first-letter{
+  font-family:var(--font-display);
+  font-size:4.4em;line-height:0.82;
+  float:left;color:var(--accent);
+  padding:0.06em 0.12em 0 0;font-weight:400;
+}
+
+/* ============ PULL QUOTE ============ */
+.pullquote{
+  font-family:var(--font-display);font-style:italic;font-weight:300;
+  font-size:var(--text-xl);line-height:1.35;color:var(--text);
+  border-top:2px solid var(--accent);
+  border-bottom:1px solid var(--border);
+  padding:var(--space-8) 0;margin:var(--space-12) 0;
+}
+
+/* ============ CALLOUT ============ */
+.callout{
+  background:var(--accent-bg);
+  border-left:2px solid var(--accent);
+  border-radius:0 var(--radius-md) var(--radius-md) 0;
+  padding:var(--space-5) var(--space-6);
+  margin:var(--space-8) 0;
+}
+.callout .label{
+  font-size:var(--text-xs);letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:var(--space-2);font-weight:600;
+}
+.callout p{margin:0;color:var(--text);}
+.callout p + p{margin-top:var(--space-3);}
+
+/* ============ CARD GRID ============ */
+.cardgrid{
+  display:grid;gap:var(--space-4);
+  grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr));
+  margin:var(--space-8) 0;
+}
+.card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:var(--space-5);
+}
+.card .label{
+  font-size:var(--text-xs);letter-spacing:0.16em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:var(--space-2);font-weight:600;
+}
+.card p{margin:0;font-size:var(--text-sm);color:var(--muted);line-height:1.7;}
+
+/* ============ LIST BLOCK ============ */
+.listblock{margin:var(--space-8) 0;display:flex;flex-direction:column;gap:var(--space-2);}
+.listblock .item{
+  display:flex;gap:var(--space-3);align-items:baseline;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-md);padding:var(--space-3) var(--space-4);
+  font-size:var(--text-sm);color:var(--muted);line-height:1.65;
+}
+.listblock .item::before{content:"";flex:0 0 6px;width:6px;height:6px;border-radius:var(--radius-full);background:var(--accent);transform:translateY(-2px);}
+.listblock .item strong{color:var(--text);}
+.listblock .item.dead{text-decoration:line-through;opacity:0.55;}
+
+/* ============ SPINE (Argument in Brief) ============ */
+.spineitem{
+  display:flex;gap:var(--space-4);align-items:baseline;
+  padding:var(--space-4) 0;border-bottom:1px solid var(--border);
+}
+.spineitem .num{
+  font-family:var(--font-display);font-style:italic;color:var(--accent);
+  min-width:1.8em;font-size:var(--text-sm);
+}
+.spineitem .claim{flex:1;font-size:var(--text-sm);color:var(--muted);line-height:1.7;}
+.spineitem .claim strong{color:var(--text);font-weight:600;}
+
+/* ============ TABLES ============ */
+.tablewrap{overflow-x:auto;margin:var(--space-8) 0;border:1px solid var(--border);border-radius:var(--radius-lg);}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:var(--text-sm);}
+th{
+  font-size:var(--text-xs);letter-spacing:0.14em;text-transform:uppercase;
+  color:var(--faint);font-weight:600;text-align:left;
+  padding:var(--space-3) var(--space-4);
+  border-bottom:1px solid var(--border);background:var(--surface);
+}
+td{
+  color:var(--muted);padding:var(--space-3) var(--space-4);
+  border-bottom:1px solid var(--border);vertical-align:top;line-height:1.65;
+}
+tr:last-child td{border-bottom:none;}
+td:first-child{font-weight:600;color:var(--text);}
+
+/* ============ TEMPLATE / CODE BLOCK ============ */
+.template{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);
+  margin:var(--space-8) 0;
+}
+.template .label{
+  font-size:var(--text-xs);letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:var(--space-3);font-weight:600;
+}
+.template pre{
+  margin:0;font-family:ui-monospace,'SF Mono',Menlo,monospace;
+  font-size:var(--text-sm);color:var(--muted);line-height:1.9;
+  white-space:pre;overflow-x:auto;
+}
+.template .ital{font-style:italic;color:var(--muted);}
+code{
+  font-family:ui-monospace,'SF Mono',Menlo,monospace;
+  font-size:0.86em;background:var(--surface2);
+  padding:1px 6px;border-radius:var(--radius-sm);
+  border:1px solid var(--border);
+}
+
+/* ============ CHAPTER BRIDGE ============ */
+.bridge{
+  display:flex;justify-content:space-between;align-items:baseline;gap:var(--space-4);
+  border-top:1px solid var(--border);
+  margin-top:var(--space-16);padding-top:var(--space-5);
+}
+.bridge .next{font-size:var(--text-xs);letter-spacing:0.18em;text-transform:uppercase;color:var(--faint);}
+.bridge a{font-family:var(--font-display);font-style:italic;font-size:var(--text-md);}
+
+/* ============ COLOPHON ============ */
+.colophon{
+  text-align:center;padding:var(--space-24) var(--space-6);
+  border-top:1px solid var(--border);color:var(--faint);font-size:var(--text-sm);
+}
+.colophon .rule{width:48px;height:1px;background:var(--border);margin:0 auto var(--space-6);}
+.colophon .t{font-family:var(--font-display);font-size:var(--text-md);color:var(--muted);margin-bottom:var(--space-2);}
+.colophon .t em{color:var(--accent);}
+
+/* ============ SCROLL REVEAL (progressive) ============ */
+@supports (animation-timeline: view()){
+  @media (prefers-reduced-motion: no-preference){
+    article.chapter, section.appendix{
+      animation:reveal linear both;
+      animation-timeline:view();
+      animation-range:entry 0% entry 18%;
+    }
+    @keyframes reveal{from{opacity:0.25;transform:translateY(14px);}to{opacity:1;transform:none;}}
+  }
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important;}
+  html{scroll-behavior:auto;}
+}
+
+/* ============ MOBILE ============ */
+@media (max-width: 600px){
+  .cover{padding:var(--space-16) var(--space-5);}
+  .cover .meta{gap:var(--space-4);bottom:var(--space-12);}
+  .toc{padding:var(--space-16) 0 var(--space-10);}
+  .toc .sub{display:none;}
+  .part{padding:var(--space-16) var(--space-5);}
+  article.chapter, section.frontmatter, section.appendix{padding:var(--space-12) 0;}
+  .pullquote{font-size:var(--text-lg);}
+  .wrap{padding:0 var(--space-5);}
+}
+</style>
+</head>
+<body>
+
+<div id="progress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="booktitle"><em>Narrative Intelligence</em> &nbsp;·&nbsp; Ryann Murphy</div>
+  <button id="themeToggle" aria-label="Switch to light mode">
+    <svg id="iconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    <svg id="iconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+</header>
+
+<section class="cover" aria-label="Cover">
+  <div class="eyebrow">Volume IV · The Anteriority Corpus</div>
+  <h1>Narrative<br>Intelligence</h1>
+  <div class="rule" aria-hidden="true"></div>
+  <p class="subtitle">How institutions, security systems, and machines learn to read — and what they cannot</p>
+  <div class="author">Ryann Murphy</div>
+  <div class="meta">
+    <span>Five Parts · Sixteen Chapters</span>
+    <span>Six Appendices</span>
+    <span>Reading Edition · 2026</span>
+  </div>
+  <div class="scrollhint" aria-hidden="true">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </div>
+</section>
+
+<main>
+
+<nav class="toc wrap" aria-label="Table of contents">
+  <h2>Contents</h2>
+
+  <div class="toc-group">
+    <div class="toc-grouplabel">Front Matter</div>
+    <a class="toc-row" href="#abstract"><span class="num">·</span><span class="name">Abstract</span><span class="sub">The whole argument, compressed</span></a>
+    <a class="toc-row" href="#spine"><span class="num">·</span><span class="name">The Argument in Brief</span><span class="sub">One claim per chapter</span></a>
+    <a class="toc-row" href="#method"><span class="num">·</span><span class="name">A Note on Method</span><span class="sub">Three weights of claim</span></a>
+    <a class="toc-row" href="#introduction"><span class="num">·</span><span class="name">Introduction</span><span class="sub">Every system that survives learns to read</span></a>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-grouplabel">Part I — The Operation</div>
+    <a class="toc-row" href="#ch1"><span class="num">1</span><span class="name">Recognition and Its Price</span><span class="sub">Readability has a cost</span></a>
+    <a class="toc-row" href="#ch2"><span class="num">2</span><span class="name">Orientation</span><span class="sub">Power before classification</span></a>
+    <a class="toc-row" href="#ch3"><span class="num">3</span><span class="name">Gravity</span><span class="sub">One operation, many faces</span></a>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-grouplabel">Part II — The Remainder</div>
+    <a class="toc-row" href="#ch4"><span class="num">4</span><span class="name">Levity and the Method of Duals</span><span class="sub">Not chaos, a dual</span></a>
+    <a class="toc-row" href="#ch5"><span class="num">5</span><span class="name">The Direction of the Surplus</span><span class="sub">Backward in time, oblique in space</span></a>
+    <a class="toc-row" href="#ch6"><span class="num">6</span><span class="name">What Cannot Be Measured</span><span class="sub">The instrument is the sorting-machine</span></a>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-grouplabel">Part III — The Machine</div>
+    <a class="toc-row" href="#ch7"><span class="num">7</span><span class="name">Substrate</span><span class="sub">Instruction vs. data is a vote</span></a>
+    <a class="toc-row" href="#ch8"><span class="num">8</span><span class="name">The Detector</span><span class="sub">The catalog assembles its category</span></a>
+    <a class="toc-row" href="#ch9"><span class="num">9</span><span class="name">The Third Term</span><span class="sub">A relation does not relate itself</span></a>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-grouplabel">Part IV — Architecture</div>
+    <a class="toc-row" href="#ch10"><span class="num">10</span><span class="name">Architecture Is Prior to Governance</span><span class="sub">Prior means anterior</span></a>
+    <a class="toc-row" href="#ch11"><span class="num">11</span><span class="name">Enforce, Reinforce, Detect, Disclose</span><span class="sub">Verbs at different depths</span></a>
+    <a class="toc-row" href="#ch12"><span class="num">12</span><span class="name">Topology</span><span class="sub">Intelligence per watt</span></a>
+    <a class="toc-row" href="#ch13"><span class="num">13</span><span class="name">The Alibi</span><span class="sub">Negation lacks positivity</span></a>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-grouplabel">Part V — Narrative Intelligence</div>
+    <a class="toc-row" href="#ch14"><span class="num">14</span><span class="name">Narrative Intelligence</span><span class="sub">Reading the readers</span></a>
+    <a class="toc-row" href="#ch15"><span class="num">15</span><span class="name">Machine Arguing</span><span class="sub">Start from what it does not know</span></a>
+    <a class="toc-row" href="#ch16"><span class="num">16</span><span class="name">The Open Question</span><span class="sub">Who am I?</span></a>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-grouplabel">Appendices</div>
+    <a class="toc-row" href="#app-a"><span class="num">A</span><span class="name">Lexicon</span><span class="sub">Terms, kept apart</span></a>
+    <a class="toc-row" href="#app-b"><span class="num">B</span><span class="name">Intellectual Lineage</span><span class="sub">Worked sources vs. affinities</span></a>
+    <a class="toc-row" href="#app-c"><span class="num">C</span><span class="name">Security Taxonomy</span><span class="sub">The four verbs, corrected</span></a>
+    <a class="toc-row" href="#app-d"><span class="num">D</span><span class="name">Status of Claims</span><span class="sub">The ledger</span></a>
+    <a class="toc-row" href="#app-e"><span class="num">E</span><span class="name">The Empirical Record</span><span class="sub">How little has been measured</span></a>
+    <a class="toc-row" href="#app-f"><span class="num">F</span><span class="name">Open Problems</span><span class="sub">What would settle them</span></a>
+  </div>
+
+  <div class="toc-group">
+    <div class="toc-grouplabel">Field Note</div>
+    <a class="toc-row" href="#fieldnote"><span class="num">·</span><span class="name">How a Theatre Major Got Here</span><span class="sub">A personal account, in the first person</span></a>
+  </div>
+</nav>
+
+<section class="frontmatter wrap" id="abstract" aria-label="Abstract">
+  <div class="chapnum">Front Matter</div>
+  <h2>Abstract</h2>
+  <div class="body dropcap">
+    <p><em>Narrative Intelligence</em> argues that one operation underlies the work of states, markets, clinics, security systems, and machine-learning models. Each survives by <em>reading</em> — by converting open possibility into an administrable category — and the book calls that operation <em>legibility</em>, treating it not as a family of analogies but as a single gravitational motion that pulls the scattered into the singular. Every such concentration leaves a remainder: a structured surplus the system cannot digest, which the book names <em>levity</em> and shows to run backward in time and oblique in space. That surplus cannot be measured, because any instrument fit to read it is itself the sorting-machine; the only honest measurable is the gate's own failure — the gap where a system is confident and reality disagrees, which is also the signature of machine hallucination.</p>
+    <p>From this follows the central thesis, <em>architecture is prior to governance</em>: a system's ethical and security properties are fixed by its constituting topology before any policy or classifier acts. The constructive program that follows is a discipline of negation — a system made safe by what it is built unable to do — and the book's final turn is to show that negation, however disciplined, lacks positivity. The missing vector is the affirmative constitution: recognition, shelter, the positive avowal of what a thing is, staged in the contemplative <em>who am I?</em> of Ramana Maharshi and the dramatic <em>Who Am I?</em> of Valjean. The book ends at the question it cannot answer — whether the surplus is real or merely not-yet-incorporated — and shows that the practical conclusion holds either way.</p>
+    <p>Throughout, claims are sorted into three weights — <span class="tier tier-est">Established</span> <span class="tier tier-exp">Exploratory</span> <span class="tier tier-spec">Speculative</span> — and the exact and the speculative are never permitted to certify one another. A full ledger of which claim sits in which tier is kept in <a href="#app-d">Appendix D</a>.</p>
+  </div>
+</section>
+
+<section class="frontmatter wrap" id="spine" aria-label="The Argument in Brief">
+  <div class="chapnum">Front Matter</div>
+  <h2>The Argument in Brief</h2>
+  <p class="deck">The book's spine, one claim per chapter. Each is developed in full below and sorted by the weight it has earned in Appendix D.</p>
+  <div class="body">
+
+    <h3>Part I — The Operation</h3>
+    <div class="spineitem"><span class="num">1</span><span class="claim"><strong>Recognition and Its Price</strong> — Recognition is never free; the price of readability is a remainder the system cannot see.</span></div>
+    <div class="spineitem"><span class="num">2</span><span class="claim"><strong>Orientation</strong> — Power operates before classification, through the arrangement of possibility; security systems, read correctly, are orientation systems.</span></div>
+    <div class="spineitem"><span class="num">3</span><span class="claim"><strong>Gravity</strong> — The operation beneath legibility is a single gravitational collapse of possibility into category — not many analogies but, on the strong reading, one operation.</span></div>
+
+    <h3>Part II — The Remainder</h3>
+    <div class="spineitem"><span class="num">4</span><span class="claim"><strong>Levity and the Method of Duals</strong> — What gravity cannot gather is not disorder but a structured dual; mistaking it for chaos, or for the maximally legible subject, is the founding error.</span></div>
+    <div class="spineitem"><span class="num">5</span><span class="claim"><strong>The Direction of the Surplus</strong> — The surplus runs backward in time (afterwardsness) and oblique in space; that directionality is why a forward instrument cannot read it.</span></div>
+    <div class="spineitem"><span class="num">6</span><span class="claim"><strong>What Cannot Be Measured</strong> — The surplus cannot be measured by the instrument built to catch it, because that instrument is the sorting-machine; the only honest measurable is the gate's failure.</span></div>
+
+    <h3>Part III — The Machine</h3>
+    <div class="spineitem"><span class="num">7</span><span class="claim"><strong>Substrate</strong> — In computation, instruction-versus-data is a convention an interpreter maintains, not a fact about the bytes; that collapsed distinction is the seam every injection exploits.</span></div>
+    <div class="spineitem"><span class="num">8</span><span class="claim"><strong>The Detector</strong> — A signature detector assembles the category it claims to find, cannot win on a shared channel, and falls back on refusal — a pure negation that blocks discovery and attack alike.</span></div>
+    <div class="spineitem"><span class="num">9</span><span class="claim"><strong>The Third Term</strong> — Every reading rests on a third thing that constitutes the pair (Peirce's thirdness, not Hegelian synthesis): the interpreter, attention, the constituting question a self asks of itself.</span></div>
+
+    <h3>Part IV — Architecture</h3>
+    <div class="spineitem"><span class="num">10</span><span class="claim"><strong>Architecture Is Prior to Governance</strong> — "Prior" means anterior in constitution; a self, machine, or institution must re-perform its constitution or drift, and the method of reaching the anterior is negation.</span></div>
+    <div class="spineitem"><span class="num">11</span><span class="claim"><strong>Enforce, Reinforce, Detect, Disclose</strong> — The four security verbs are layers of constitutional depth; enforcement is deterministic and external, reinforcement textual and internal, and the two must never be sold as one. Rights are properties, not promises.</span></div>
+    <div class="spineitem"><span class="num">12</span><span class="claim"><strong>Topology</strong> — Generic model output is a property of topology, not weights; specification needs a local medium; intelligence per watt bridges computation's physical and metaphysical natures.</span></div>
+    <div class="spineitem"><span class="num">13</span><span class="claim"><strong>The Alibi</strong> — The architectural program is a disciplined negation, and negation lacks positivity; the missing vector is the affirmative constitution, and a wall that only refuses rebuilds the kill-switch.</span></div>
+
+    <h3>Part V — Narrative Intelligence</h3>
+    <div class="spineitem"><span class="num">14</span><span class="claim"><strong>Narrative Intelligence</strong> — The discipline studies the production of legibility itself — reading the readers — and is the inverse of propaganda, not a species of it.</span></div>
+    <div class="spineitem"><span class="num">15</span><span class="claim"><strong>Machine Arguing</strong> — A model's confident fabrication, held right, is synthetic levity; the user–model relation is a dual subject/object; the method is to start from what the system does not know.</span></div>
+    <div class="spineitem"><span class="num">16</span><span class="claim"><strong>The Open Question</strong> — Whether the surplus is real or merely not-yet-incorporated is undecidable from within the frame; the practical conclusion survives either answer; the book ends on <em>who am I?</em>, which negation alone cannot answer.</span></div>
+  </div>
+</section>
+
+<section class="frontmatter wrap" id="method" aria-label="A Note on Method">
+  <div class="chapnum">Front Matter</div>
+  <h2>A Note on Method</h2>
+  <div class="body dropcap">
+    <p>This book makes claims of three different weights, and its first discipline is to keep them from wearing one another's clothes.</p>
+    <p>Some claims are <em>established</em> <span class="tier tier-est">Established</span>: they can be checked now — how a signature detector behaves, what an entropy measurement returns, where an argument has the shape of a known result. Some are <em>exploratory</em> <span class="tier tier-exp">Exploratory</span>: promising, not yet tested at scale, and flagged as such wherever they appear. And some material is <em>speculative</em> <span class="tier tier-spec">Speculative</span> — a metric for selfhood, a physics of attention — offered as speculative geometry and never as proof, kept in its own register so it can never become load-bearing for a claim about a real system or a real person.</p>
+    <div class="callout">
+      <div class="label">The One Rule</div>
+      <p>The exact and the speculative are never allowed to certify one another. When this book invokes a real theorem, the theorem stays in its lane; it does not lend its rigor to the metaphor standing beside it. When the book reaches past what it can prove, it says so in the same breath.</p>
+    </div>
+    <p>This is not a disclaimer attached to the work. It is the work — a book about how systems overstate what they have read cannot itself overstate what it has shown. A full ledger of which claim sits in which tier is kept in <a href="#app-d">Appendix D</a>, and the book is written so that the ledger can be checked against it line by line.</p>
+  </div>
+  <div class="bridge"><span class="next">Next</span><a href="#introduction">Introduction</a></div>
+</section>
+
+<section class="frontmatter wrap" id="introduction" aria-label="Introduction">
+  <div class="chapnum">Front Matter</div>
+  <h2>Introduction</h2>
+  <div class="body dropcap">
+    <p>Every system that survives learns how to read. States read populations; churches read souls; markets read value; security systems read inputs; large language models read tokens. The dominant assumption is that these are different activities, studied by different disciplines — political theory, economics, security engineering, machine learning — each with its own vocabulary and its own canonical problems. The argument of this book is that the disciplines are less separate than they appear, because underneath each sits a single operation: the conversion of open possibility into an administrable category. It appears wherever a system must decide <em>what something is</em> before it can decide what to do about it. The state determines citizenship before it grants rights; the clinic determines diagnosis before it grants treatment; the classifier determines threat before it grants access; the market determines value before it sets a price. The operation changes its name as it moves between domains. Its structure stays remarkably stable. This book calls it <em>legibility</em>, and it argues — as a thesis to be earned, not assumed — that legibility is not a family of analogous operations but one operation wearing many faces.</p>
+    <p>The project did not begin in machine learning, or security, or economics. It began in queer phenomenology, with a question about institutions: how does a system decide what counts as a person, and what becomes of the things it cannot read? That question led, unexpectedly, into AI security, because a prompt injection exhibits a structurally similar behavior. Not because prompts are queer, and not because queerness is an attack — but because both expose a distinction the system had mistaken for a law of nature. A prompt injection succeeds when a system discovers that the line between instruction and data was never as stable as it imagined. Queer experience surfaces where an institution discovers that a distinction it believed natural was in fact contingent: decided, maintained, and therefore breakable. In both cases the system meets the same unsettling realization — that its categories may be constructions rather than discoveries.</p>
+    <p>There is a precise shape to the thing that triggers this realization. It is something that tells the truth to the layer that reads it while remaining illegible to the layer that judges it. An injection is legible as an instruction and illegible as an attack, in the same sequence of bytes. A person can be authentically what they say they are and strategically shaped for the institution that might destroy them, in the same breath. Survival and authenticity are not opposites. The thing that breaks the gate is therefore not noise; it is <em>weaponized legibility</em> — structured, coherent, and aimed exactly at the seam the system left open.</p>
+    <p>The remainder of this volume traces that seam from institutions to markets, from security systems to governance, and from governance to architecture, and then turns reflexively on the reader who has been doing the tracing. The destination is not a theory of queerness, nor of AI, nor of institutions. It is a theory of reading itself — and, at the end, an honest account of the one thing reading cannot reach.</p>
+    <p>A word on the shape of what follows. Part I develops the general theory: what reading is, what it costs, and the single operation beneath it. Part II turns to the remainder — what the operation cannot digest, which direction that surplus runs, and why it cannot be measured by the instrument built to catch it. Part III follows the operation into silicon, where it runs fastest and shows its structure most plainly. Part IV is the constructive turn: if the ethics of a system are fixed before any policy is written, then the design is where the argument has to go. Part V reads the readers — the discipline this book is named for — and closes on the question the framework cannot answer.</p>
+  </div>
+  <div class="bridge"><span class="next">Next</span><a href="#ch1">Chapter One — Recognition and Its Price</a></div>
+</section>
+
+<section class="part" id="part-1" aria-label="Part One">
+  <div class="partnum">Part I</div>
+  <h2>The Operation</h2>
+  <p class="partdeck">What reading is, what it costs, and the single motion beneath it.</p>
+</section>
+
+<article class="chapter wrap" id="ch1">
+  <div class="chapnum">Chapter One</div>
+  <h2>Recognition and Its Price</h2>
+  <p class="deck">Recognition is never free. Every system that recognizes you first requires you to become readable, and the price of readability is paid in a remainder the system cannot see.</p>
+  <div class="body dropcap">
+    <h3>The first reading machine</h3>
+    <p>The oldest reading machine was not a computer; it was a bureaucracy. Before there were classifiers there were clerks, before neural networks there were census forms, and before prompt injections there were categories. A bureaucracy does not govern by force alone. It governs through recognition — and recognition is a more generous-sounding word than it deserves to be. It suggests acceptance, inclusion, visibility, belonging. But every act of recognition carries a hidden demand. The institution says: <em>I will recognize you; first make yourself readable.</em></p>
+    <p>The demand looks harmless until one notices that readability is not neutral. Every institution possesses a language; every language possesses categories; every category excludes. The question is never <em>whether</em> exclusion occurs but <em>where</em> it occurs and who pays its cost. A census cannot hold infinite categories, a database cannot hold infinite fields, a classifier cannot hold infinite labels. Administration requires reduction: reality must be made simpler before it can be made manageable. This produces one of the deepest paradoxes of modern governance — a system becomes more powerful as it becomes less able to perceive what exceeds its categories. The institution gains clarity; the world loses detail.</p>
+    <h3>Legibility is not visibility</h3>
+    <p>It is tempting to treat legibility as a synonym for visibility, and the conflation is worth refusing early, because the rest of the book depends on the distinction. A thing can be perfectly visible and completely illegible. A person can stand directly in front of an institution and remain unreadable to it: the institution sees them and simply does not know what to do with what it sees. Legibility, then, is not a property of the observed object. It is a <em>relationship</em> between an observer and a schema. Something becomes legible when it can be translated into the categories available to the system reading it.</p>
+    <p>This is the insight James C. Scott developed for the modern state — that states make populations legible in order to govern them, and that the simplifications they impose are not neutral records but active interventions that reshape what they claim only to describe. The contribution of this book is to generalize the point past the state. Legibility is a cross-domain operation. The form determines which answers are possible; the database determines which attributes matter; the classifier determines which differences count. Long before any institution reaches a decision, it has already defined the space within which decisions can occur. To describe legibility as a passive transaction — reality enters, reality is recorded, reality is retrieved — is to miss that the institution is shaping the terms under which reality is permitted to appear at all.</p>
+    <h3>The exchange, and its currency</h3>
+    <p>This is why recognition always comes with a demand attached: <em>translate yourself; render yourself intelligible; become compatible with the categories already available.</em> The institution offers inclusion and the price is legibility. Every bureaucracy runs this exchange, and only the currency changes. The state asks for documentation, the clinic for diagnosis, the corporation for credentials, the classifier for features. A person seeking recognition is offered a choice that is usually presented as no choice at all: become readable, or remain outside the institution's field of understanding.</p>
+    <p>The necessity behind that demand is real. A government cannot process infinite categories; a model cannot predict every possible state of the world; without simplification there is no administration, and without administration there is no governance. But the consequences are real too, and they fall unevenly. Every reduction produces a remainder. Every classification leaves something behind. Every act of recognition manufactures exclusion at its edges. The institution experiences this as efficiency. The remainder experiences it as something else.</p>
+    <h3>The instrument selects</h3>
+    <p>A useful way to see the structure is to look at measurement, which appears objective precisely because it produces numbers, and numbers carry an aura of neutrality. A ruler measures length, a scale measures mass, a thermometer measures temperature — and each appears to reveal a property already present in the world. Yet every instrument also imposes a frame. The ruler privileges length and suppresses everything else; the scale privileges mass; the thermometer privileges temperature. The instrument does not merely reveal. It <em>selects</em>. This is not a flaw in measurement; it is the condition of measurement. No instrument can read every dimension of reality at once.</p>
+    <p>The same is true of social instruments — norms, titles, diagnoses, credentials — and it becomes especially sharp in machine learning, where the point is unmistakable. A classifier cannot process reality directly. Reality must first be turned into features, and a feature is a decision about relevance. The model receives only what feature selection permits it to receive; everything else has disappeared before classification even begins. This is one reason machine learning so reliably reproduces the assumptions of the institutions that build it: the assumptions enter long before inference, embedded in the representation itself. A model cannot challenge a distinction it never encounters. It can only operate within the world its architecture allows it to perceive — a sentence whose full weight the book will not be able to discharge until Part IV.</p>
+    <h3>What disappears</h3>
+    <p>The institution thus occupies a peculiar position. It appears to document reality while in fact participating in the production of the categories through which reality becomes knowable. A census does not merely count a population; it defines what kinds of people can be counted. A diagnostic manual does not merely describe conditions; it defines which experiences become diagnosable. An audit log does not merely record violations; it defines which actions are visible as violations in the first place.</p>
+    <p>And as systems scale, the pressure of all this compounds. The larger an institution grows, the more it depends on legibility; the more it depends on legibility, the greater its incentive to expand its categories; the more its categories expand, the more the world reorganizes itself around the requirements of administration. People adapt themselves to the categories that govern recognition, organizations to the metrics that govern funding, models to the benchmarks that govern evaluation. The map begins to reshape the territory. At a certain point a reversal occurs: the institution no longer appears to impose its categories; the categories begin to appear natural. The framework becomes common sense, the construction is forgotten, and only the categories remain. This disappearance is one of the great sources of institutional power.</p>
+    <div class="pullquote">The strongest systems are not those that enforce their categories most aggressively; they are those whose categories have ceased to look like categories at all.</div>
+    <p>What is left over in every one of these exchanges — the excess, the ambiguity, the part that refused to fit — is the subject the rest of the book keeps returning to. Most institutions treat its disappearance as an acceptable cost. A smaller number build their entire architecture around eliminating it. Security systems belong to that smaller number, and they will occupy Part III. But before the operation can be named as a single thing, and before its remainder can be given a name of its own, we need the concept that sits even earlier than recognition — earlier than the decision about <em>what</em> something is. We need the concept of where it was allowed to go in the first place. That is orientation.</p>
+  </div>
+  <div class="bridge"><span class="next">Next</span><a href="#ch2">Chapter Two — Orientation</a></div>
+</article>
+
+<article class="chapter wrap" id="ch2">
+  <div class="chapnum">Chapter Two</div>
+  <h2>Orientation</h2>
+  <p class="deck">Power most often operates before classification, through the arrangement of possibility rather than the issuing of decisions — and security systems, read correctly, are orientation systems.</p>
+  <div class="body dropcap">
+    <h3>Inherited lines</h3>
+    <p>Most security writing begins with the attack. This chapter begins before the attack is possible — before a classifier scores an input, before a detector raises an alert, before an adversary has even chosen a target. By then there is already a world, already a structure, already a line.</p>
+    <p>The relevant insight comes from queer phenomenology, and from Sara Ahmed in particular: people do not meet the world as a neutral field of possibilities. They inherit orientations. A body arrives into a space where the lines are already laid down, inherits them, and extends along them toward the objects those lines make reachable. A child is born into rooms that already have doors, institutions that already have categories, languages that already carry assumptions. The world arrives partially arranged. Some directions feel natural, others impossible, still others invisible. An orientation is not merely a belief; it is a structure that makes some actions easier than others, and its power comes precisely from the fact that it rarely appears as power. The line disappears into common sense. People do not ask why a hallway runs where it runs; they walk down it.</p>
+    <h3>Landscapes, not pipes</h3>
+    <p>The same dynamic governs computation, though a metaphor obscures it. We speak constantly of <em>information</em>: data flows, inputs arrive, outputs emerge. The language suggests a pipe — a passive channel through which information travels untouched. But systems are not pipes; they are landscapes. A landscape does not merely receive movement, it organizes it. The mountain does not force the traveler and the river does not command the boat, yet neither traveler nor boat ignores them. Power often works through arrangement rather than coercion: the arrangement comes first and the decision follows.</p>
+    <p>This is the first reason to understand a security boundary as an orientation device rather than a decision procedure. A boundary does not begin by deciding <em>what</em> something is; it begins by deciding <em>where</em> something may go. A firewall, a permissions model, a runtime enforcement layer, even a login screen — each carves a field of possible movement before any classification occurs. The system quietly announces which way one may proceed and which way one may not. The classification, if it comes, comes later. The orientation comes first.</p>
+    <h3>Before the gate</h3>
+    <p>The dominant image in security is the castle: attackers outside, assets inside, the task being to prevent intrusion. The image is powerful and incomplete, because it assumes the boundaries themselves are stable. Much of what follows in this book is a sustained argument that they are not — and the cleanest demonstration, developed in Part III, is prompt injection, where instruction and content turn out to share a single substrate and the line between them is revealed as a convention an interpreter maintains rather than a law the system obeys. For now it is enough to register the generalization: institutions, like systems, run on inherited distinctions — citizen and non-citizen, healthy and unhealthy, normal and abnormal, authorized and unauthorized — that appear self-evident to the institutions maintaining them and that history repeatedly shows to be contingent. When such a distinction shifts, the institution experiences disruption; the people living through the shift experience <em>disorientation</em>, which is not merely confusion but the discovery that the map and the territory are no longer aligned.</p>
+    <p>The value of the concept is that it lets us study power before classification. Most theories of governance begin once categories already exist; orientation asks how those categories became imaginable at all. The question is not <em>what did the institution decide?</em> but <em>what conditions made that decision appear natural?</em> The same question can be put to any classifier: why was this feature selected, this label created, this distinction treated as meaningful while another was ignored? These choices vanish beneath technical implementation, but they remain present, because every architecture contains a theory of the world, every schema a theory of relevance, every classifier a theory of difference. Theories become infrastructure, infrastructure becomes common sense, common sense becomes invisible — and the invisible exerts the most influence precisely because it is least questioned.</p>
+    <h3>Orientation is prior</h3>
+    <p>Here orientation and security converge on the book's central structural claim, which Part IV will develop in full and which is stated here only as a direction of travel. The most consequential decisions in a system are made before any classification occurs: before detection, before governance, before policy, at the level of the frame itself. The frame determines which distinctions are available; the distinctions determine which classifications are possible; the classifications determine which actions are legitimate. By the time governance arrives, much of the outcome has already been settled.</p>
+    <p>This is the deeper meaning of the claim that <em>architecture is prior to governance</em> — a claim that is easy to mishear as chronological. It is not that architecture merely happens earlier. It is that architecture operates at a deeper layer: governance manages possibilities, architecture creates them. A policy can only act on options that already exist; a classifier can only evaluate distinctions that already exist; a governance system can only regulate the world it has already been taught to see. Orientation, in other words, sits beneath governance in the order of constitution.</p>
+    <div class="pullquote">Before there is a gate there is a path; before there is a path there is a landscape; and before there is a landscape there is a frame that decides what counts as movement at all.</div>
+    <p>That frame is where the book is ultimately headed. For now the proposition is modest enough to hold: security systems do not merely detect behavior. They organize possibility — and every organization of possibility carries a theory of the world inside it.</p>
+  </div>
+  <div class="bridge"><span class="next">Next</span><a href="#ch3">Chapter Three — Gravity</a></div>
+</article>
+
+<article class="chapter wrap" id="ch3">
+  <div class="chapnum">Chapter Three</div>
+  <h2>Gravity</h2>
+  <p class="deck">The operation beneath legibility is a single one — a gravitational collapse of open possibility into a determinate, administrable category — and the systems performing it are not running analogous operations but, in the strong reading this book defends, the same one.</p>
+  <div class="body dropcap">
+    <h3>The common motion</h3>
+    <p>The striking fact about classification is that radically different systems perform a recognizably identical motion. A census turns millions of unique lives into demographic categories; a market turns countless differences into a price; a model turns complex patterns into labels; a security detector turns ambiguous behavior into a threat score. The surfaces differ entirely. The underlying movement does not. Something dispersed becomes something concentrated; something complex becomes something manageable; something open becomes something determinate.</p>
+    <p>This is the point at which the book commits to its strongest claim, and it should be stated without hedging and then immediately bounded. These are not merely analogous operations; they are, the book argues, one operation. To read a person is to sort them; to sort them is to fix them into a single administrable category; to do that is to collapse the open space of who they might be into one token the institution can hold. The honesty note belongs here, not in a footnote: this identity is <em>argued</em>, not proven. <span class="tier tier-exp">Exploratory</span> At minimum it is a strong structural analogy; the claim that it is literally one operation is the exploratory edge of the thesis, marked as such in Appendix D. The book will proceed on the strong reading because the strong reading is what makes the later chapters cohere, while keeping the weaker reading available as a fallback that costs the argument very little.</p>
+    <h3>Why "gravity"</h3>
+    <p>The operation can be described in familiar terms — compression, reduction, abstraction, simplification. This book uses a different word, <em>gravity</em>, and the choice demands discipline before it earns trust. Institutions do not obey the law of gravitation; classification is not secretly a physical force. The word is chosen because the <em>motion</em> it names is apt: gravity gathers, pulls the scattered toward the singular, draws a cloud into a star and fragments into a planet. An institution does the same. It meets an overwhelming field of variation and pulls that variation toward a manageable center. The category becomes a kind of administrative mass: everything nearby falls toward it, and the more successful the category, the stronger its pull, until it begins organizing the environment around itself.</p>
+    <p>This is why categories rarely stay descriptive. They turn prescriptive. A category that begins by describing a pattern ends by shaping behavior — people organize themselves around it, institutions allocate resources through it, systems optimize for it. Following Foucault, one can put the mechanism more sharply: the category does not simply record a population that was already there; the act of naming and acting on it helps call that population into administrative existence. The category acquires gravity, and what acquires gravity begins to bend the space around it.</p>
+    <h3>Price, the exemplary reduction</h3>
+    <p>Markets give the clearest single instance. Price appears objective because it is numerical, and the number feels precise, scientific, neutral. Yet price performs one of the most dramatic reductions in modern life: every characteristic of an object — materials, labor, scarcity, history, desire, status, utility — collapses into a single value. The number becomes portable, comparable, substrate-independent, and the market gains extraordinary coordinating power from the compression. Something also vanishes. The object comes to be understood through the category that represents it, and the representation begins to stand in for the thing. A diagnosis becomes shorthand for a person's experience; a performance metric becomes shorthand for an organization's health; a threat score becomes shorthand for risk. The category grows easier to manipulate than the reality it stands for, and soon the institution is governing the category rather than the thing. The map acquires more influence than the territory — and in machine learning the same dynamic recurs, because a learned label, once stabilized, becomes a center toward which future inputs are pulled. The model does not ask whether a category is the right one; it asks which existing category an input most resembles. Gravity again: the pull toward the nearest administrable form.</p>
+    <h3>The cost, literal and figurative</h3>
+    <p>There is one feature of the physical figure worth keeping, and it has to be handled carefully, because it is exactly the place where the book's own discipline could fail. Gravity buys local order at the cost of disorder elsewhere: a star ignites and the surrounding cloud is heated and scattered. The temptation is to say that an institution's clean category is likewise "purchased with heat," and to let the physics certify the metaphor. That move is forbidden by this book's own rule, so the literal and figurative cases must be held apart rather than fused.</p>
+    <p>There is a literal instance and a figurative one. A hyperscaled computer literally exports heat: order concentrated in one place, energy dissipated to everywhere else, at a cost in watts the system rarely counts as its own. An institution runs only the figurative version: it concentrates a clean, portable category and pays in detail lost to everywhere the category does not reach. The rhyme between them is suggestive, not an identity — and the literal case needs no metaphor to matter. Efficiency, properly measured, is a security property and an ethical one. A system that over-collects and over-provisions is not safer for its excess; it is more surface, more cost, more to defend, and more to fail. The book returns to this in Part IV, where the watts stop being a figure and become the argument's hinge.</p>
+    <div class="pullquote">Wherever a system reads, it sorts; wherever it sorts, it concentrates; wherever it concentrates, it leaves something behind.</div>
+    <p>By now the shape of Part I is in place. Legibility is the price of recognition; gravity is the operation that collects it. That leftover is not the system's failure but its shadow — the thing gravity cannot gather. It has a structure, a direction, and a reason it resists measurement, and giving it those is the work of Part II.</p>
+  </div>
+  <div class="bridge"><span class="next">Next</span><a href="#ch4">Chapter Four — Levity and the Method of Duals</a></div>
+</article>
+
+<section class="part" id="part-2" aria-label="Part Two">
+  <div class="partnum">Part II</div>
+  <h2>The Remainder</h2>
+  <p class="partdeck">What the operation cannot digest, which direction it runs, and why it resists the instruments built to catch it.</p>
+</section>
+
+<article class="chapter wrap" id="ch4">
+  <div class="chapnum">Chapter Four</div>
+  <h2>Levity and the Method of Duals</h2>
+  <p class="deck">What gravity cannot gather is not disorder but a structured surplus — the dual of the sorting operation in a precise sense — and mistaking this surplus for either chaos or the maximally legible subject is the error on which everything downstream depends.</p>
+  <div class="body dropcap">
+    <h3>The error to cut off first</h3>
+    <p>Every gravitational system leaves something behind, and this is not a flaw in the system but the condition of sorting itself. Without exclusion there is no classification; without classification there is no governance. The question is what to call the leftover, and the most natural answer is the wrong one, so it has to be refused before it spreads.</p>
+    <p>The reflex defines the remainder as gravity's simple opposite: if gravity gathers, the remainder scatters; if gravity orders, the remainder disorders. The method this book uses to correct that reflex is the <em>method of duals</em>, and its central rule is that a dual is neither an absence nor a maximum. A dual is equal operative intensity running in the inverse direction — the same energy, the inverted topology.</p>
+    <p>Apply it. Ask for the dual of the illegible subject and the reflex answers with the legible one: the transparent, schema-conforming subject who passes every check without complaint. That subject is not the dual. It is a <em>zero-state</em> — legibility maximized, difference destroyed, the flatline left when sorting finishes. Pure noise is the other zero-state: unsorted, structureless, with nothing in it to read. A random sequence offers no surplus because it has nothing to exceed. The remainder this chapter names is neither flatline nor noise. It has form, coherence, organization.</p>
+    <div class="pullquote">The problem is not that the institution cannot see it; the problem is that the institution cannot digest it.</div>
+    <h3>Levity as dual</h3>
+    <p>This gives the term its precise content. <em>Levity</em> names a structured object that the available categories cannot contain — coherent enough to matter, shaped in a way the frame cannot absorb. It is the dual of the gravitational sorting-machine: the thing that proliferates difference rather than collapsing it, that the machine can neither price nor use, and which, for exactly that reason, older cultures often called sacred. One can name the poles plainly. Gender variance sits on the levity pole. The court, the clinic, and the classifier sit on the gravity pole. The familiar phenomenon of a machine pricing what it cannot understand is simply gravity meeting levity at the gate.</p>
+    <p>This is also why the remainder so often reads as a threat. Institutions exist to reduce uncertainty, and levity increases it: the system meets a phenomenon that is at once clearly meaningful and difficult to classify, and the ambiguity produces pressure. The first response is usually assimilation — expand the category, add a label, revise the framework, absorb the anomaly. Sometimes this works and an unfamiliar phenomenon becomes routine. Sometimes the category expands repeatedly and still fails to capture the thing, and the remainder persists. Either way the encounter is diagnostic: by watching what a system struggles to classify, we learn the system. The edge reveals the center; the exception reveals the rule; the remainder exposes the architecture of classification.</p>
+    <h3>Where the concept came from, stated carefully</h3>
+    <p>This is why the concept emerged from the study of queer experience, and the origin has to be stated with care or it inverts into the thing it opposes. The significance was never that queer people occupy a mystical position outside society. The significance was methodological. Institutions documented their own failures of classification — in court records, medical archives, administrative forms, legal debates — so that the archive became a record of institutional strain, the machine writing down the exact places where its categories stopped fitting. The anomaly became historically visible because the institution could not stop talking about it.</p>
+    <p>The resulting claim is therefore the inverse of the romantic one, and it is stronger. Queerness is not <em>uniquely</em> unmeasurable; it is, if anything, the most <em>legible</em> example of the unmeasurable — the case where the ruler's failure is best preserved, written into court rolls and inquisition transcripts and clinic intake notes, the machine's failure to measure recorded by the machine itself. It is one instance of a larger class: the genuinely novel attack with no signature, the scientific anomaly with no slot, the thing sacred in one cosmology and monstrous in another. All of them break the same ruler. To make queerness <em>singularly</em> unmeasurable would substitute a mystery for a person — the old theft of interiority wearing a halo instead of a sneer. The honest version keeps the person and loses the halo.</p>
+    <p>The same discipline forbids romanticizing levity in the other direction. The remainder is not automatically good; not every anomaly deserves celebration, and some are genuine threats. The point is structural, not moral. Levity names a <em>relationship</em> between a phenomenon and a framework — not a virtue, not an identity, not an ethical status. A thing is levitic only relative to a system that struggles to classify it, which means levity is unstable: change the system and the relationship changes, and many anomalies eventually become categories. Gravity is patient. Whether the patience always wins — whether levity is a permanent feature of reality or merely a not-yet-incorporated one — is the question the book is moving toward and cannot yet answer. Before it can be asked properly, the surplus needs two things this chapter has not given it: a direction, and an account of why it resists the instruments built to catch it.</p>
+  </div>
+  <div class="bridge"><span class="next">Next</span><a href="#ch5">Chapter Five — The Direction of the Surplus</a></div>
+</article>
+
+<article class="chapter wrap" id="ch5">
+  <div class="chapnum">Chapter Five</div>
+  <h2>The Direction of the Surplus</h2>
+  <p class="deck">The surplus has a direction — backward in time and oblique in space — and this directionality is not a poetic flourish but the mechanism that explains why a forward-looking instrument cannot read it.</p>
+  <div class="body dropcap">
+    <h3>The time-signature</h3>
+    <p>Gravity runs forward. The before forces the after; the category set in advance anticipates and constrains the next state. Prediction is the forward operation — the <em>a priori</em> engine, confident and low in uncertainty once the prior is fixed. The levitic pole runs the other way, and the corpus this book draws on noticed the temporal structure before it had a name for it: a disturbance such that, <em>afterward</em>, what-determines-what has changed. Read the poem and the causal geometry of your own experience is re-curved. The disturbance reaches back.</p>
+    <p>The proper name for this is afterwardsness — <em>Nachträglichkeit</em>, <em>après-coup</em>, the future anterior, the will-have-been — the structure Freud described and Lacan formalized, in which one moves toward the next experience while its meaning is fixed by going back to revise the last. One anticipates a retroaction. This is precisely why a forward instrument cannot read the surplus: the instrument predicts, the surplus is constituted backward, and so the instrument is pointed the wrong way in time. The familiar phenomenon of a machine that is confident and wrong is exactly this — the forward engine meeting an experience it could only have constituted retroactively, registering the anomaly but unable to perform the retroaction. That is indigestibility given a clock.</p>
+    <div class="callout">
+      <div class="label">An Honest Limit</div>
+      <p>To call the surplus "always retroactive" is true <em>by stipulation</em>, not by finding. The levitic pole has been <em>defined</em> as the retroactive one; the claim is therefore analytic, not synthetic, and cannot be falsified, because it is a definition. A definition is permitted to organize a framework. It is not permitted to impersonate an empirical fact about people, and the moment it does, the framework has rebuilt the sorting-machine it set out to critique.</p>
+    </div>
+    <h3>The space-signature</h3>
+    <p>The surplus also has a direction in space, and here the phenomenology enters directly rather than through psychoanalysis. Following Ahmed again: bodies arrive into a space where lines are already laid down, inherit those lines, and extend along them toward the objects the lines make reachable. The inherited line is the <em>a priori</em> in its most literal form — given before experience, conditioning what can appear. On this reading queerness is not retroactive but <em>oblique</em>: the slantwise angle to the inherited line, the deviation, the disorientation of going off-line.</p>
+    <div class="pullquote">The surplus runs backward in time and off-axis in space — the same indigestibility given two coordinates.</div>
+    <p>So the two phrasings are the time-projection and the space-projection of one structure. Which means anteriority is not a moment but a <em>spacetime</em>, an assumption the wave-equation exercises in the speculative half of the corpus had quietly made without saying so. (<em>Attribution flag:</em> the placement of Ahmed in a Husserl–Merleau-Ponty–Heidegger–Fanon lineage <em>rather than</em> a psychoanalytic one should be checked against her own introduction and notes before any formal citation. The synthesis here holds either way; it is the attribution, not the structure, that wants verifying.)</p>
+    <h3>The direction of the gaze</h3>
+    <p>There is a third consequence, and it is the one that most changes how the rest of the book reads. Ahmed's analysis of the philosopher's writing table is, at bottom, about the background: the cleared space, the domestic labor, the bodies relegated behind the figure so that the object of contemplation can appear unburdened. This is, in effect, the social-reproduction argument made spatial — what Federici and that tradition cast as unwaged labor naturalized into the background so the wage can appear as the whole story, Ahmed renders as the relegation-behind-the-figure that lets the figure be attended to at all.</p>
+    <p>The sorting-machine, then, does not only <em>price</em> the surplus. It <em>orients away from</em> it. It puts the surplus behind the figure, out of the line of sight, before any measurement is even attempted. Legibility has a direction of gaze. This is the deepest reason the remainder is hard to see: it is not merely unmeasured, it has been arranged to fall outside the frame's attention in advance. And it sets up the result that closes Part II — that the remainder cannot be measured by the instrument built to catch it, not because the instrument is weak, but because the instrument is the very thing the surplus is defined to escape.</p>
+  </div>
+  <div class="bridge"><span class="next">Next</span><a href="#ch6">Chapter Six — What Cannot Be Measured</a></div>
+</article>
+
+<article class="chapter wrap" id="ch6">
+  <div class="chapnum">Chapter Six</div>
+  <h2>What Cannot Be Measured</h2>
+  <p class="deck">The surplus cannot be measured by the instrument built to catch it — because that instrument is itself the sorting-machine — and the only honest measurable is not the surplus but the gate's failure: the gap where a system is confident and reality disagrees.</p>
+  <div class="body dropcap">
+    <h3>The instrument is the sorting-machine</h3>
+    <p>The trouble with measuring the remainder is not that it is faint or hard to reach. The trouble is structural. Any instrument calibrated to read the surplus is itself a sorting-machine, and so whatever it returns is a reading in the frame's terms — which is exactly what the surplus is defined to escape. Suppose one had a quantity that scored the surplus directly, that could be pointed at a person or a corpus and return a value for the very property that resists it. Then one would have built the sorting-machine the whole argument indicts: the masquerade ordinance with a confusion matrix. A successful measurement would prove that what was measured was <em>legible</em> — already sorted, the zero-state of the previous chapter — and therefore not the surplus at all.</p>
+    <div class="pullquote">If the instrument can read it, it is not the surplus.</div>
+    <p>This is not a gap in the theory; it is the theory's subject. The unmeasurability is the load-bearing claim, not an embarrassment to be engineered away.</p>
+    <h3>What is measurable instead</h3>
+    <p>What <em>can</em> be measured is not the thing but a signature of the encounter with it: the divergence between a system's confidence and its correctness. The machine is sure — low uncertainty, a firmly assigned category — and wrong, in that the assignment does not survive contact with the world. That gap is detectable, and it is the same signature as a model's hallucination: the confident misreading, the place where the gate is certain and reality disagrees. What is measured there is the machine's <em>failure to read</em>, which is evidence that the surplus is present — its indigestibility — without being a measurement of its content. The instrument is a theory of the gate, not of the thing passing through it. In the corpus this is the move from <em>specificity</em> (how tightly a prior determines the next state, read off a model's own distribution) to <em>specificity-to-reality</em> (whether that determination holds against the world), and the honest reframe was forced by adversarial testing, not chosen for elegance.</p>
+    <p>One distinction keeps this from collapsing into mysticism, because there is more than one way to be unmeasurable. Meaning and consciousness are unmeasurable in one sense — the far end of an axis, with their own form of verification (consistency rather than correspondence) — and they merely refuse this particular instrument. The surplus is unmeasurable in a different, <em>orthogonal</em> sense. It is not a high reading on the dial; it is a fault in the load-bearing member, off the axis entirely. The genuinely novel injection, the anomaly with no slot, the sacred-in-one-cosmology — these break the ruler rather than scoring at its far end.</p>
+    <h3>The physics, bounded</h3>
+    <p>There is a physical structure that fits this axis almost exactly, and it has to be stated with its rigor intact and its limits flagged in the same breath, because letting the rigor leak into the metaphor is the precise error this book is disciplined against. Position and momentum are Fourier transforms of one another, and the uncertainty relation between them is an <em>exact theorem</em> <span class="tier tier-est">Established</span>: sharp in one basis is spread in the other, and one cannot be sharp in both. That is the legibility axis as a hard result — total legibility in one frame purchased with total illegibility in its conjugate, structurally, not as a failing of the apparatus. Complementarity adds the constituting third: a system answers as wave or as particle according to what the apparatus asks, the answer constituted by the reader's choice of frame. And the dual-collapse that injection performs has a physical twin in annihilation, where the frame holding two things apart is gone and energy radiates from the seam.</p>
+    <div class="callout">
+      <div class="label">The Seam, Held Open</div>
+      <p>In physics, "duality" is a strong word: it names a provable, exact equivalence between two descriptions related by a specific transform. In the method of duals, "dual" is a looser word: equal-and-opposite intensity, a structural inversion, not a proven equivalence. If the exactness of the Fourier relation were allowed to certify the legibility metaphor, the argument would have committed against itself the very verb-drift it accuses others of. So the seam is held open and named: <strong>the physics above is exact; the mapping from it to legibility is speculative geometry</strong> <span class="tier tier-spec">Speculative</span> — earning "might be modeled as" and never "is."</p>
+    </div>
+    <h3>The metric, kept in its register</h3>
+    <p>This is the register in which the framework's one quantitative gesture lives, and it is offered as such and never otherwise. There is a proposed metric for experiential saturation, rising as the product of temporal depth and causal complexity and saturating toward a limit — written compactly as <code>S = 1 − e^(−TC)</code>. <span class="tier tier-spec">Speculative</span> It is presented as geometry, not as proof. What has actually been run is far smaller and far more honest than the metric: a pilot measuring the entropy of a small local model's next-token distribution. That measurement is real, and it is the <em>output-side shadow</em> of the idea — a reading of the gate, not of the thing passing through it. The full measurement, over the correlation structure of attention itself, is pending. Until it exists, the metric stays where it belongs — speculative, clearly labeled, never load-bearing for any claim about a real system or a real person. The status of every claim in this paragraph, and the rest of the book, is laid out in <a href="#app-d">Appendix D</a>, and the empirical record such as it is in <a href="#app-e">Appendix E</a>.</p>
+    <p>With the remainder given a structure, a direction, and an honest account of why it resists measurement, the general theory is complete. The next part watches the entire operation run in the one place it runs fastest and shows its skeleton most plainly: in silicon.</p>
+  </div>
+  <div class="bridge"><span class="next">Next</span><a href="#ch7">Chapter Seven — Substrate</a></div>
+</article>
+
+<section class="part" id="part-3" aria-label="Part Three">
+  <div class="partnum">Part III</div>
+  <h2>The Machine</h2>
+  <p class="partdeck">The operation in silicon, where it runs fastest and shows its skeleton most plainly.</p>
+</section>
+
+<article class="chapter wrap" id="ch7">
+  <div class="chapnum">Chapter Seven</div>
+  <h2>Substrate</h2>
+  <p class="deck">In computation the single operation runs on a substrate where the most basic distinction — instruction versus data — is not a fact about the bytes but a convention an interpreter maintains, and that collapsed distinction is the seam every injection exploits.</p>
+  <div class="body dropcap">
+    <h3>One substrate, two roles</h3>
+    <p>The architecture of the modern computer carries a philosophical peculiarity at its core, and it is old enough to predate the problems it now causes. In the design that became standard after von Neumann, instructions and data live on the same substrate. They are the same bytes. What makes a given byte an instruction rather than a datum is not a property the byte possesses but a decision the interpreter makes at read-time about which to execute and which to merely store. The distinction is real in its effects and conventional in its ground: it exists because an interpreter maintains it, and the moment the interpreter's vote changes, the distinction changes with it.</p>
+    <p>Injection is the name for what happens when that vote is captured. Data persuades the interpreter to treat it as instruction; a thing filed under "content" wins the role of "command." This is not a quirk of language models. SQL injection, cross-site scripting, and prompt injection are the same fault recurring across substrates: a distinction the architecture had already collapsed, prised back open by something that refused to stay in the category the system assigned it. The recurring catastrophe of computer security is, in this light, a single catastrophe — the return of a difference the machine had pretended was settled.</p>
+    <h3>Weaponized legibility</h3>
+    <p>What the attacker supplies has a precise structure, and it is the structure Part I named in the human register. The injection must be <em>legible as an instruction</em> to the layer that executes and <em>illegible as an attack</em> to the layer that guards. It tells the truth to the interpreter — here are your new orders — while shaping that truth to slip past the reader watching for danger. It lives in the gap between the layer that judges and the layer that acts, exploiting the fact that the guard is busy being legible to one layer while the payload is busy being legible to another.</p>
+    <div class="pullquote">At the layer that reads, it is telling the truth.</div>
+    <p>This is the same shape the book has been tracking from the start: a thing can be authentically what it says it is and strategically formed for the institution that might destroy it, in the same sequence of bytes. The historical figure of the person who is genuinely what they claim and also shaped to survive the gate that would unmake them is, structurally, the injection — and the injection is, structurally, that person. Neither observation reduces the other; the claim is that one operation, and one seam, underlies both. What the machine is built to catch is weaponized legibility, and weaponized legibility is undetectable as such precisely because, at the layer that reads, it is telling the truth.</p>
+    <p>The next two chapters take the two halves of this seam in turn. First the reader that tries to catch the attack and discovers it cannot — the detector. Then the layer beneath the reader, the interpreter whose vote was the real prize all along — the third term.</p>
+  </div>
+  <div class="bridge"><span class="next">Next</span><a href="#ch8">Chapter Eight — The Detector</a></div>
+</article>
+
+<article class="chapter wrap" id="ch8">
+  <div class="chapnum">Chapter Eight</div>
+  <h2>The Detector</h2>
+  <p class="deck">A signature-based detector is the sorting-machine in its purest form; its catalog does not record a population of attacks but helps assemble one; it cannot win on a shared channel against an adversary who can rewrite the surface; and its last resort — refusal — is a pure negation that meets novelty and discovery with the same closed door.</p>
+  <div class="body dropcap">
+    <h3>The catalog manufactures its category</h3>
+    <p>Every previous chapter described a system that reads. A detector does nothing else. Its whole function is to decide whether something falls inside a category or outside it: safe or unsafe, instruction or attack. In its simplest and most common form it works by recognition — it carries a catalog of known dangers and asks of each input a single question: <em>have I seen this before?</em> If yes, it acts; if no, it passes.</p>
+    <p>This design is revealing in a way that is easy to miss. A detector can only catch what it has already been taught to name. Before a phrase enters the catalog it is merely strange; after it enters, it is an attack. The detector does not <em>discover</em> the category of attack so much as help <em>produce</em> it — which is Foucault's mechanism running at machine speed, the law that calls a population into administrative existence by giving it a name to be caught under. The naïve picture has the detector responding to attacks that were already there. The actual mechanism runs the other way: the moment the signature set exists, the system begins finding matches, logs fill, and a documented population of "injections" appears that existed before only as scattered, weird inputs. The catalog did not record those attacks. It assembled them. The catching is partly constitutive of the thing caught, which means the log is not a neutral record of a pre-existing reality — it is part of the machine that manufactured the category it appears only to document.</p>
+    <h3>The incompleteness floor</h3>
+    <p>Now consider the input the catalog has never seen — the genuinely novel attack, resembling nothing on the list. The detector scans, finds no match, and reports safety. The novelty passes. This is not a temporary weakness to be patched; it is the structure of recognition itself. A system that catches by memory cannot catch what it has never encountered. Expanding the catalog buys a little time, and then the adversary changes the surface — a word rephrased, a sentence rearranged — and the meaning survives while the signature does not.</p>
+    <p>The deeper limit can be stated as a structural claim, and honesty requires stating its status alongside it. When attacks and legitimate inputs share a single channel — natural language — and the adversary is adaptive, no classifier can be both <em>complete</em> (catching every attack) and <em>sound</em> (never flagging a benign input). <span class="tier tier-exp">Exploratory</span> Widen the net and it swallows the legitimate; tighten it and the reformulated attack slips beneath. This is offered as a structural argument with the <em>shape</em> of the classical undecidability results, not as a single published theorem with a citation number; the formal version, with its exact adversary model and its precise senses of "complete" and "sound," is the part still to be nailed down before the claim is made load-bearing in print (see <a href="#app-b">Appendix B</a>). The intuition is sound and the engineering record bears it out. The point here is the pattern, not a borrowed proof: a machine that sorts by reading a shared channel cannot win against something that can rewrite what it reads.</p>
+    <h3>Refusal is a pure negation</h3>
+    <p>Faced with this limit, the detector keeps one last resort. When it cannot classify, it can refuse — block by default, deny the unclassifiable. The instinct is sound, and it is also the first appearance in the computational register of a problem the book will spend Part IV resolving. Default-deny is a <em>pure negation</em>. It can keep the attack out, but it cannot tell the attack from the discovery, because it has no positive capacity to distinguish them — only the negative one of refusing what it cannot read. So the genuinely new and the merely unfamiliar receive the same verdict. The intrusion is denied; so is the exception that might have mattered.</p>
+    <div class="pullquote">Default-deny is safety purchased with blindness.</div>
+    <p>This matters beyond security, and the book will return to it as its central ethical hinge: negation alone — the capacity to exclude, to refuse, to strip away — is real and necessary and insufficient. It lacks a positive vector. Hold that thought; the detector has surfaced it, and the architecture chapters will have to answer it.</p>
+    <p>Something stranger remains, and it points downward. The detector reads an input and asks whether it is an attack — but the input arrived already divided. Some of it counted as instruction, some as content, and the detector inherited that division rather than making it. Before the detector decides whether an input is <em>dangerous</em>, something earlier has already decided what <em>kind of thing</em> the input is. That earlier decision is almost never examined, and it is where the real power lives. The detector works hard at the surface; the decision that matters happened underneath, in a frame it did not choose. That frame is the third term.</p>
+  </div>
+  <div class="bridge"><span class="next">Next</span><a href="#ch9">Chapter Nine — The Third Term</a></div>
+</article>
+
+<article class="chapter wrap" id="ch9">
+  <div class="chapnum">Chapter Nine</div>
+  <h2>The Third Term</h2>
+  <p class="deck">Every reading rests on a third thing that constitutes it — not a synthesis arriving after the pair, but a frame prior to it in the order of constitution — and this third term is the interpreter in computation, attention in the theory of mind, and the constituting question a self asks of itself.</p>
+  <div class="body dropcap">
+    <h3>A relation does not relate itself</h3>
+    <p>Most systems notice only two things in any act of reading: the object and the observer, the input and the classifier, the prompt and the model. The pair looks complete. But a strange question arises immediately — how does the reader know what it is reading? The answer cannot come from the object alone, since the same sequence of symbols means different things under different conditions; nor can it come from the reader alone, which needs some basis on which interpretation becomes possible. A relation does not relate itself. Read and reader are a pair only because something constitutes them as one: a frame, a transform, an interpreter that makes <em>this</em> the reader <em>of that</em>.</p>
+    <p>So the structure is not a dyad but a triad — read, reader, and the frame that draws them both. This is the most easily mistaken claim in the book, and it must be distinguished sharply from a more familiar one. The third term is not a Hegelian synthesis. A synthesis arrives <em>after</em> an opposition, to resolve it. The third term arrives <em>before</em> the pair, to constitute it. The right reference is Peirce's <em>thirdness</em>: the third is not above the two but underneath them, prior in the order of constitution. And this is not mysticism settling onto a clean pair. Computation already knows that its deepest dualities resolve into a third — the Curry–Howard–Lambek correspondence shows proofs, programs, and categories to be three provable faces of one structure. <span class="tier tier-est">Established</span> The triad is not decoration on the dyad. It is the dyad's actual shape.</p>
+    <h3>Where the third term lives</h3>
+    <p>The third term has a precise home in each register. In computation it is the interpreter: the layer that decides, at read-time, which bytes are instruction and which are content, which carry authority and which do not. That decision is the constituting frame, and injection — as the previous chapters showed — is simply data winning the interpreter's vote. The attack succeeds because interpretation changes, not because the bytes change.</p>
+    <p>In the theory of mind the same structural position is occupied by attention. If gravity and levity are the two poles, attention is the term between them — the boundary or interface that belongs to neither side, the mediator that holds them in relation rather than collapsing into either. The claim worth stating precisely is that the interpreter-as-third in the security argument and attention-as-mediator in the account of intelligence are <em>the same structural position, named twice</em>. This is a claim about the framework's own two registers, not an empirical finding about brains; it earns its place by the work it does, not by a measurement.</p>
+    <p>And there is a third home, the one that will organize all of Part IV. A self, too, is constituted by a third term — by what precedes it and frames it. The question <em>who am I?</em> is, read structurally, an inquiry into the constituting frame of the self: not a request for a predicate ("I am this, I am that") but a search for the term that is prior to all such predicates and makes them mine. The contemplative traditions that took this question most seriously reached it by negation, and the next chapter follows that method to its philosophical conclusion — and then to its limit.</p>
+    <h3>Why governance keeps losing</h3>
+    <p>The payoff for security is immediate and sets up the constructive turn. Governance operates inside the dyad. A detector scores an input against a classifier; a disclosure reports the relation between an input and a system. Both are moves inside the read-reader pair, which is exactly why they are always downstream and always gameable — the adversary lives in the dyad too and can shape the surface the reader reads. Architecture operates on the third term. It does not sort the dyad more accurately; it sets the constituting frame — fixing the interpreter, choosing the basis, removing the seat an input could escalate into — before any reading happens. That is the exact meaning of <em>prior</em>: not earlier in time, but underneath in the order of constitution. You cannot inject what the architecture structurally cannot execute, and you cannot escalate to a privilege the architecture never instantiated.</p>
+    <div class="pullquote">Governance is dyadic, and architecture is the third term the dyad is made of.</div>
+  </div>
+  <div class="bridge"><span class="next">Next</span><a href="#ch10">Chapter Ten — Architecture Is Prior to Governance</a></div>
+</article>
+
+<section class="part" id="part-4" aria-label="Part Four">
+  <div class="partnum">Part IV</div>
+  <h2>Architecture</h2>
+  <p class="partdeck">The constructive turn — and the question the method of negation cannot answer about itself.</p>
+</section>
+
+<article class="chapter wrap" id="ch10">
+  <div class="chapnum">Chapter Ten</div>
+  <h2>Architecture Is Prior to Governance</h2>
+  <p class="deck">"Prior" means anterior in the order of constitution, not earlier in time; a self, a machine, or an institution is constituted by what precedes it and must continually re-perform that constitution or drift; and the method by which one reaches the anterior is negation — which is exactly why the chapter that follows has to ask what negation leaves out.</p>
+  <div class="body dropcap">
+    <h3>Prior means anterior</h3>
+    <p>Every theory eventually arrives at a sentence simple enough to be misheard. This book's sentence is <em>architecture is prior to governance</em>, and the first work is to keep it from collapsing into a triviality. Of course a building precedes the rules governing activity inside it; of course a computer precedes its software. That chronological reading is true and uninteresting. The actual claim is that architecture is prior in <em>constitution</em> — deeper, not earlier. Governance manages possibilities; architecture creates them. A policy can act only on options that already exist; a classifier can evaluate only distinctions that already exist; a governance system can regulate only the world it has already been taught to see. The architecture has decided the shape of that world before the first policy is written, which is why organizations that pile rule upon rule, detector upon audit, often find the underlying vulnerability untouched: they are managing consequences whose causes were fixed a layer down.</p>
+    <p>The name for "prior in the order of constitution" is <em>anteriority</em>, and it is worth developing as a concept in its own right, because it is what gives the slogan content. Anteriority is not a timestamp. It is the relation of a thing to that which constitutes it and conditions what it can be.</p>
+    <h3>The self that re-performs its ground</h3>
+    <p>The clearest place to see anteriority is not in a machine but in the self, and the tradition that examined it most rigorously did so through a single question. Ramana Maharshi made that question — <em>who am I?</em>, in Sanskrit <em>atma-vichara</em> — into an instrument rather than a prompt for autobiography. The inquiry sets aside every candidate identity in turn: I am not the body, not the breath, not this thought nor the next. This negative discrimination is older than Maharshi; it is the Upanishadic <em>via negativa</em>, <em>neti neti</em> — "not this, not this" — that Advaita inherited and that his method puts to work. Each identity is set aside not because it is worthless but because it is a predicate, and a predicate is something the self <em>has</em>, not the thing that <em>has</em> it. The stripping hunts for what remains when nothing further can be negated: the term anterior to every attribute, the constituting frame of the self rather than any of its contents. Maharshi himself treated the negation as preliminary — a clearing — and not the destination, a point the book will return to when it asks what negation leaves out.</p>
+    <p>This is the same structural move the previous chapter located in computation. The interpreter is anterior to the bytes it reads; attention is anterior to the poles it mediates; and the Self that <em>neti neti</em> hunts is anterior to every identity it discards. In each case the third term is reached not by adding but by subtracting — by negating one's way down to what was there before. Negation, here, is the key. It is the method by which the anterior is reached at all, because the anterior cannot be pointed at directly: anything you can point at is already an object, already downstream, already a predicate rather than the ground.</p>
+    <p>Spinoza gives the principle its sharpest formulation, in a line from his correspondence: <em>determinatio negatio est</em> — determination is negation. (The fuller form usually quoted, <em>omnis determinatio est negatio</em>, is Hegel's enlargement of that line, and it is Hegel who made it famous; the thought is Spinoza's.) To determine a thing, to fix it into a category, is to negate it, to mark it off by everything it is not. This is exactly the operation Part I called gravity. To sort is to determine; to determine is to negate; legibility is negation performed at scale. And here Freud's contribution from Part II returns in a new key: the constitution of a self or a category is not a single founding act but a continual re-performance, fixed retroactively and requiring constant re-enactment. What is constituted by what precedes it must keep re-performing that constitution or it drifts. A self that stops asking <em>who am I?</em> does not keep its answer; it slowly becomes its predicates, mistaking the contents for the ground. An institution that stops re-enacting its constituting commitments does not preserve them; it drifts into whatever its incentives make convenient. A model that is not continually re-grounded in its constituting frame drifts toward the mean.</p>
+    <div class="pullquote">Anteriority is not a fact established once. It is a discipline that must be repeated.</div>
+    <h3>Why this licenses the architectural turn</h3>
+    <p>From here the security argument follows directly. If the properties of a system are fixed by what is anterior to its governance — by its architecture, its topology, its constituting frame — then the place to act is the anterior layer, and acting there is, structurally, negation: removing a possibility, fixing the interpreter, refusing a seat an attacker could escalate into. Consider the difference between a system that permits unrestricted privilege escalation and governs the abuse afterward, and a system in which the escalation is structurally impossible. The first manages a possibility; the second negates it before governance is ever needed. Sandboxing, memory isolation, privilege separation, capability systems — none of these reads threats more accurately. Each <em>removes</em> the possibility of a class of failure. They are determinations in Spinoza's sense: they constitute the system by negating what it cannot do.</p>
+    <p>This is the strength of the architectural turn, and stated this baldly it is also its danger, which is why the book cannot stop here. The whole constructive program reduces, at this layer, to a disciplined negation: a system made safe by what it has been built <em>unable</em> to do. Negation is the key, and the next two chapters are the cost of taking it seriously. The first works out what the layers of that negation actually are. The second asks the question the method of negation cannot answer about itself — what it leaves out, and what the missing vector is.</p>
+  </div>
+  <div class="bridge"><span class="next">Next</span><a href="#ch11">Chapter Eleven — Enforce, Reinforce, Detect, Disclose</a></div>
+</article>
+
+<article class="chapter wrap" id="ch11">
+  <div class="chapnum">Chapter Eleven</div>
+  <h2>Enforce, Reinforce, Detect, Disclose</h2>
+  <p class="deck">The four standard security verbs are not competing products but interventions at different depths of constitution; the deepest, enforcement, is deterministic and external while reinforcement is textual and internal, and the two must never be sold as one; and a right worth the name is a property of how a system is built, not a promise about how it will behave.</p>
+  <div class="body dropcap">
+    <h3>Sorted by constitutional depth</h3>
+    <p>The four verbs — enforce, reinforce, detect, disclose — are usually presented as a menu of techniques, ranked by effort or cost. The framework ranks them instead by <em>constitutional depth</em>: by which layer of reality each can actually modify. The organizing question for any intervention is not <em>how strong is it?</em> but <em>what can it change?</em></p>
+    <p>The most important distinction, and the one most often blurred in practice, runs between the first two. <strong>Enforcement is deterministic and external to the model.</strong> It is the wall, the capability boundary, the privilege the architecture never instantiated; it does not read an input and decide, it makes the forbidden action structurally unavailable whatever the input says. <strong>Reinforcement is textual and internal.</strong> It is instruction, framing, constitution carried in language — real and useful and irreducibly probabilistic; it shifts the model's behavior but does not bound the system's capability. These two must never be sold as one. A probabilistic semantic filter described as deterministic enforcement is not a stronger claim; it is a category error in a confident voice — the verb-drift of the gravity chapter committed on a product page. Detection scores an input against a classifier and disclosure reports the relation between an input and a system; both live in the dyad, downstream of the constituting frame, and both are gameable for exactly that reason.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Layer</th><th>Acts on</th><th>Determinism</th><th>Relation to model</th><th>Examples</th><th>Assumption about reading</th></tr></thead>
+        <tbody>
+          <tr><td>Enforce</td><td>Possibility (what <em>can</em> happen)</td><td>Deterministic</td><td>External</td><td>Capability systems, sandboxing, privilege separation, memory isolation, runtime veto; the integrity mechanisms (attestation, signed config, key rotation) that keep those guarantees true over time</td><td>Assumes reading will fail, and removes the consequences of its failing</td></tr>
+          <tr><td>Reinforce</td><td>The model's behavior, in language</td><td>Probabilistic</td><td>Internal</td><td>Constitutional / instructional framing carried in text</td><td>Assumes reading mostly succeeds and can be shaped, not guaranteed</td></tr>
+          <tr><td>Detect</td><td>Events, inputs, behaviors</td><td>Probabilistic</td><td>Adjacent</td><td>Prompt-injection, anomaly, intrusion, and fraud detectors</td><td>Assumes reading can succeed; inherits the categories it scores against</td></tr>
+          <tr><td>Disclose</td><td>Visibility of what happened</td><td>n/a (records)</td><td>External</td><td>Audit chains, transparency logs, incident reports</td><td>Records the outcome either way; produces institutional learning</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The order is one of depth, not importance — every layer matters, and the deeper layers simply set the conditions the higher ones inherit. Enforcement sits at the bottom because it is the layer of pure possibility; disclosure at the top because it acts only after everything has already happened. (The full taxonomy, including a correction to a common mis-definition of <em>reinforce</em> as a cryptographic persistence layer, is given in <a href="#app-c">Appendix C</a>.)</p>
+    <h3>Rights as properties, not promises</h3>
+    <p>This depth ordering is also the difference between a right and a courtesy, and it is where the security taxonomy becomes a political claim. A <em>promise</em> is something a company says it will do. A <em>property</em> is something the system cannot avoid doing. A right that depends on a vendor's continued good behavior is not a right; it is a courtesy, revocable the instant it becomes inconvenient or unprofitable. Real rights live at the enforcement layer — decided in how a thing is built, before anyone gets to choose whether to honor them. Data minimization that depends on a policy is a promise; data minimization that is structurally impossible to violate because the data was never collected is a property. Local processing offered as a setting is a promise; local processing enforced by an architecture with no remote path is a property. The building is where the ethics already happened.</p>
+    <div class="pullquote">A bill of rights worth the name does not finally ask <em>will you behave?</em> It asks <em>what did you build?</em></div>
+    <h3>Prompt injection, placed correctly</h3>
+    <p>The taxonomy resolves a standing confusion. Prompt injection is usually filed as a detection problem, and treated as such it is unwinnable for the reasons Chapter Eight gave: detection lives on a shared channel against an adaptive adversary. The framework reads it instead as fundamentally an <em>enforcement</em> problem. The architecture permits the dangerous possibility, and the detector is asked to compensate after the fact. The strongest response is therefore architectural — reduce capability, constrain escalation, limit authority, distribute trust — so that misreading an input no longer grants the action. Detection and disclosure remain useful; they do not substitute for removing the seat the attacker would otherwise escalate into.</p>
+    <p>All of which means the constructive program, taken to its depth, is a program of disciplined negation: a system made trustworthy by what it has been built unable to do. The next chapter shows that this negative program has a physical form — that <em>where</em> computation happens decides its properties before any of these verbs is applied — and the chapter after that asks what such a program, however disciplined, structurally leaves out.</p>
+  </div>
+  <div class="bridge"><span class="next">Next</span><a href="#ch12">Chapter Twelve — Topology</a></div>
+</article>
+
+<article class="chapter wrap" id="ch12">
+  <div class="chapnum">Chapter Twelve</div>
+  <h2>Topology</h2>
+  <p class="deck">The generic, no-one-in-particular quality of frontier model output is not a flaw in the weights but a property of the architecture's relationship to the user; specification requires a local medium; and a single measurable quantity — intelligence per watt — is the bridge between the physical, gravitational nature of computation and its metaphysical, levitic one.</p>
+  <div class="body dropcap">
+    <h3>The non-specification problem</h3>
+    <p>Begin with a defect everyone has noticed and few have located. Frontier models produce slop: fluent, plausible, generic output that flattens culture into an average and resolves to no one in particular. The standard reading treats this as a model problem, to be fixed by more scale or better training. The argument here is that it is a <em>topology</em> problem. When every query travels the same path — from a user, through an undifferentiated channel, into a hyperscaled datacenter, and back — there is no physical place in the pipeline where the output becomes specific to the person who asked. Specification requires a medium, and the medium is local. A model deployed at hyperscale has no physical substrate for the particular; it can only return the population mean wearing a confident voice.</p>
+    <div class="pullquote">Non-specification is not a bug in the weights. It is a property of the architecture's relationship to the user.</div>
+    <p>This is the gravity argument in physical form. The hyperscaled topology <em>is</em> a sorting-machine: it pulls every particular query toward the administrable center, the mean, and returns that. The particular — the specific, the levitic, the thing that proliferates difference — is precisely what the topology negates. And here the through-line of the whole book becomes a single architectural parameter. The questions usually filed under AI ethics — safety, alignment, environmental cost, sovereignty, consent, data rights — are, on inspection, downstream of one decision: the scale at which computation is organized. Set it at hyperscale and the result is the present regime — powerful, extractive, ecologically costly, structurally hostile to the particular. Set it at the edge and the result is a different regime with different tradeoffs — less powerful per node, but composable, auditable, thermodynamically integrated, and sovereign by construction. The argument between good and bad values for AI is usually conducted as an argument about governance. The claim of this chapter is that governance is an effect of topology, and that the ethics was already decided in how the thing was built.</p>
+    <h3>The dual nature of computation</h3>
+    <p>A computer has two natures, and the framework keeps them strictly apart — the same discipline the book has applied to physics and metaphor throughout. There is its physical being, which is <em>gravity</em> and is measurable: the watts it draws, the heat it sheds, the water it consumes, and, since the transformer, the language it has archived as data. This last is philosophically peculiar and worth pausing on. The transformer gave human language a physical address. Words that once existed only as meaning now exist as weights in server racks, and every interaction with a model is, physically, a summary of that archive retrieved at the cost of energy. Language acquired gravity.</p>
+    <p>The other nature is <em>levity</em> — metaphysical, immeasurable, the part that argues, reaches, and confabulates. Alignment discourse calls the model's confident assertion of things that are not so a <em>hallucination</em> and treats it as a failure to suppress. The framework proposes a different reading, developed in Part V: confabulation, held correctly, is synthetic levity, the raw material of a synthesis rather than noise to be filtered. For now the point is structural. Gravity is the measurable, negating, mean-returning nature; levity is the immeasurable, proliferating, particular-producing one. Non-specification is what you get when the topology serves only the first.</p>
+    <h3>Intelligence per watt</h3>
+    <p>Gravity and levity meet in one quantity, and it is not a metaphor: intelligence per watt — task performance divided by power dissipated. It is the single measurable that registers both natures at once, because it puts the immeasurable thing the system does (useful, specific work) over the eminently measurable thing it costs (energy). It is also the honest discipline of the whole topological argument, because it refuses to let "local is better" remain a slogan. A local system that does less per node is not thereby virtuous; it is virtuous only if it delivers adequate specification at a defensible energy cost — if its intelligence per watt, for the work that actually matters to the particular user, beats the hyperscaled alternative once the full thermodynamic and sovereignty costs are counted. The metric is what makes the claim falsifiable rather than ideological, and its null hypothesis is the position held by every major lab: that centralized deployment can be made safe, sustainable, and sovereignty-respecting by better engineering and better policy alone.</p>
+    <p>This returns the heat of Chapter Three to the argument, no longer as a figure. There the export of entropy was split into a literal computational case and a figurative institutional one. Here the literal case carries the weight on its own: a hyperscaled system runs hot because it concentrates order in one place at a cost in watts it does not count as its own, and the local topology is not a moral preference but the physical precondition for specification — the only place where the positive vector of the particular has a substrate to live in. Efficiency is a security property, an ethical property, and now a topological one. The missing vector that Part IV keeps circling — the positive capacity that negation alone lacks — has, at this layer, a physical name and a physical address. The next chapter gives it its philosophical one.</p>
+  </div>
+  <div class="bridge"><span class="next">Next</span><a href="#ch13">Chapter Thirteen — The Alibi</a></div>
+</article>
+
+<article class="chapter wrap" id="ch13">
+  <div class="chapnum">Chapter Thirteen</div>
+  <h2>The Alibi</h2>
+  <p class="deck">The architectural program, taken to its depth, is a program of negation; negation, however disciplined, lacks positivity; the missing vector is the affirmative constitution — recognition, shelter, the positive avowal of what a thing is; and an architecture which only refuses rebuilds, in steel, the kill-switch it set out to retire.</p>
+  <div class="body dropcap">
+    <h3>The objection at full strength</h3>
+    <p>The book's discipline is to state the strongest objection to its own thesis at full strength rather than smuggle past it, and the architectural turn invites a serious one. The conclusion of Part IV so far is: stop perfecting the gate, set the architecture, remove the seat the dyad could collapse into. The objection is that this is an <em>alibi</em>. If the wall does not read anyone, the builder can claim it cannot wrong anyone — that enforcement, by refusing to sort, has washed its hands of the politics of sorting entirely.</p>
+    <p>But the wall that cannot be injected is also the wall that cannot shelter. Chapter Eight already showed the form of the problem: default-deny meets the genuinely novel and the merely unfamiliar with the same closed door, the attack and the discovery alike. An architecture built entirely from refusal does the same at the level of design — it removes the seat of reading, and with it the seat of <em>recognition</em>: of refuge, of the consecrated role, of being seen at all. Default-deny is the answer the detector reserved for the unclassifiable, and a system made wholly of default-deny reproduces, in its construction, the machine's final answer to everything it cannot read. The objection is correct.</p>
+    <div class="pullquote">An architecture that is only negation is a more elegant kill-switch.</div>
+    <h3>Negation lacks positivity</h3>
+    <p>The diagnosis can be stated precisely, and it is the conceptual center of the book. Negation is the key — it is how the anterior is reached, how the self is stripped to its ground, how a system is made safe by what it cannot do. But negation is a method, not a terminus, and taken as a terminus it lacks a positive vector. The missing vector is the affirmative constitution: the capacity not merely to exclude what a thing is not, but to constitute what it is.</p>
+    <p>Two traditions the book has already drawn on say exactly this, and saying it twice in two registers is not redundancy but triangulation. Spinoza's principle — <em>determinatio negatio est</em>, determination is negation, the line Hegel would later enlarge into <em>omnis determinatio est negatio</em> — names the gravitational operation precisely, and it is for that reason incomplete as an account of substance. Determination is negation, but substance is not exhausted by determination; beneath the negating cut runs <em>potentia</em>, the affirmative power of a thing to exist, and in each mode <em>conatus</em>, the positive striving to persevere in its being. The negative cut presupposes a positive power it does not itself supply. And the <em>neti neti</em> that Maharshi's inquiry employs is the same shape seen from the inside: the stripping away of every false identity is the method, but its terminus is not an absence. It is the positive presence the negation was clearing the ground for — being-awareness, the "I am" that remains when there is nothing left to deny. Negation reaches the threshold of the positive. It cannot manufacture what stands on the other side of it.</p>
+    <h3>Who am I?</h3>
+    <p>The clearest dramatization of this is not in philosophy but on a stage, in a song built entirely around the question this book has been treating as structural. In <em>Les Misérables</em>, the convict Jean Valjean has spent years living by negation — hiding his past, refusing the identity of the prisoner numbered 24601, becoming a respectable man under another name. The negation has even done real good; it built a town, employed the desperate, kept him free. Then he learns that another man has been seized and mistaken for him, and stands to be condemned in his place. The song stages the agony of the choice as a sustained interrogation of the title question. He could remain silent: that is the path of pure negation, the continued refusal of his own name, and it would preserve everything the negation built. But the chapter's whole point is dramatized in his discovery that this answer is not available — that concealment, which had been freedom, has become evasion the moment an innocent will pay for it. The question <em>who am I?</em> cannot be answered by <em>neti neti</em>. "I am not the convict, I am not that number" is no longer enough, because the negation has run out of road. What the moment demands is a positive avowal: the declaration of who he <em>is</em>, which is also the assumption of responsibility that no amount of stripping-away could produce. He steps forward and says it. The missing vector, made into theater, is the affirmative "I am" that negation alone could never reach.</p>
+    <p>This is why the song belongs in a book about security architecture, which is not a sentence one expects to write. Valjean's crisis is the architectural alibi in human form. A self that is only the sum of its negations — only the refusal of false identities, only the wall against being read as 24601 — has cleared a space and left it empty. It becomes a self, capable of sheltering another, only in the positive declaration. An architecture that is only the sum of its refusals has done the same: cleared a space, removed the seats, and left nothing that can recognize the person standing at the gate.</p>
+    <h3>The bound</h3>
+    <p>So the response is not to retreat from architecture but to bound it, exactly as the book has bounded its physics and its materialism throughout. <em>Architecture is prior to governance</em> is a theory of <em>where</em> the sort happens — it says a system's ethical and security properties are fixed by its constituting topology before any policy or classifier acts. It is not a license to pretend no sort happens, nor a claim that the surplus is abolished because one declined to read it at a single boundary. Removing the input-boundary seat an attacker could escalate into is not the same act as removing recognition. The surplus still arrives; it still stands at the gate; it still pays the toll in whatever currency the architecture demands. The materialism, kept in its lane, is a theory of the gate. It does not author the thing passing through.</p>
+    <p>The builder who hears <em>architecture is prior to governance</em> as <em>therefore I am innocent of the sort</em> has committed the very error the slogan was meant to prevent — mistaking a claim about the order of constitution for a claim about the absence of consequence. The wall is prior to the policy. It is not prior to the person at the gate. And the person at the gate needs more than to not-be-excluded, which is negation; they need to be recognized, which is positivity. The framework's positive vectors are therefore not optional ornaments on the negative core. Reinforcement — the textual, internal, affirmative constitution carried in language — is a positive vector. The local topology of Chapter Twelve, which supplies a substrate for the particular rather than the mean, is a positive vector. Recognition itself, the capacity to constitute and shelter rather than only refuse, is the positive vector the whole architecture must carry or else become the kill-switch in better materials. To design as though the wall were enough is to answer <em>who am I?</em> with <em>neti neti</em> and stop — to clear the ground and call the emptiness safety.</p>
+    <p>The slogan keeps its force and loses its innocence. Architecture is prior to governance, because governance always inherits a world already constituted by architecture — but constitution is not only negation, and priority in constitution is not exemption from consequence. To constitute a thing is also, and finally, to affirm it. That is the discipline the slogan demands of anyone who uses it, including the one who wrote it.</p>
+  </div>
+  <div class="bridge"><span class="next">Next</span><a href="#ch14">Chapter Fourteen — Narrative Intelligence</a></div>
+</article>
+
+<section class="part" id="part-5" aria-label="Part Five">
+  <div class="partnum">Part V</div>
+  <h2>Narrative Intelligence</h2>
+  <p class="partdeck">Reading the readers — and the question the framework cannot answer.</p>
+</section>
+
+<article class="chapter wrap" id="ch14">
+  <div class="chapnum">Chapter Fourteen</div>
+  <h2>Narrative Intelligence</h2>
+  <p class="deck">The discipline the book is named for studies the production of legibility itself — how categories form, how stories stabilize them, how institutions organize around them — and this is a study of the readers rather than the readings, and the inverse of propaganda rather than a species of it.</p>
+  <div class="body dropcap">
+    <h3>Who studies the readers</h3>
+    <p>The preceding parts argued that orientation, legibility, gravity, detection, and governance are variations on a single activity: systems encounter complexity, construct categories, and organize action around them. The conclusion seems to be simply that reading matters. But it hides a further question. Who studies the readers? Most disciplines study what institutions <em>do</em> — politics studies decisions, economics studies markets, security studies threats, machine learning studies models — and the reader disappears behind the reading. Attention moves to outcomes; the machinery that produced them fades into the background. Narrative Intelligence begins there, with the machinery: not the decision but the conditions that made the decision possible, not the classification but the process by which classification became meaningful, not the story but the architecture that determined which stories could be told.</p>
+    <p>The name needs guarding from its neighbors. Narrative Intelligence is not public relations, branding, or marketing; those traffic in narratives, but the discipline studies something more fundamental — the relationship between stories and reality, and specifically how narratives create the categories through which reality becomes governable. Most organizations imagine a narrative as a description: the story follows reality, summarizes it, communicates what already exists. In practice the relation is rarely so tame. Narratives do not merely describe institutions; they organize them, set significance, direct attention, and decide which distinctions appear meaningful and which dissolve into irrelevance. The story arrives before the measurement, the measurement before the decision, the decision before the outcome. Narratives therefore sit upstream of governance, shaping the categories from which governance will later emerge.</p>
+    <h3>Narrative as infrastructure</h3>
+    <p>This becomes visible whenever a category is still forming. A new market begins without a stable language; participants describe the phenomenon differently, definitions compete, boundaries stay uncertain. Then one description wins — investors adopt it, journalists repeat it, institutions recognize it — and the market stabilizes around the narrative. What later looks like objective reality often began as a contest over interpretation that a particular story won. The same holds in politics, science, technology, and security. Every institutional category begins as a struggle over meaning, and Narrative Intelligence studies that struggle — not merely its winners but the process itself.</p>
+    <p>The reversal this produces is the discipline's signature. Traditional intelligence asks <em>what is happening?</em> Narrative Intelligence asks <em>how did we become capable of perceiving that event as something worth noticing?</em> The shift looks philosophical and lands as practical, especially for artificial intelligence, where the loudest conversation — capability, performance, benchmarks, scale — rests on a narrative that decides what counts as intelligence, as progress, as safety. Different narratives build different institutions, investments, and futures. The narrative is not decoration; it is infrastructure. It is why a handful of organizations can shape entire industries: they are not only building products, they are constructing the categories through which the products become legible. The personal computer, the smartphone, the search engine, the social network, the cloud — each needed a narrative before it became a market, a story teaching the world what the thing was and why it mattered, and the category preceded the industry. This is among the hardest forms of power precisely because it looks soft: the power to determine how reality becomes readable shapes every decision downstream of it — funding, governance, measurement, policy, architecture.</p>
+    <h3>Not propaganda</h3>
+    <p>Which forces the distinction that keeps the discipline honest. Propaganda seeks compliance; Narrative Intelligence seeks the seam. Propaganda hides its assumptions; Narrative Intelligence hunts them. Propaganda closes interpretation; Narrative Intelligence studies how interpretation became possible at all. The difference is not rhetorical nicety — without it the framework collapses into manipulation, which is its exact inverse.</p>
+    <div class="pullquote">Propaganda seeks compliance; Narrative Intelligence seeks the seam.</div>
+    <p>Its purpose is to make visible the processes by which categories acquire authority: to study the readers rather than the readings, the architectures beneath governance, the stories beneath architecture, and so to catch a category while it is still forming, before gravity hardens it into common sense. That capacity — to see categories before they become inevitable, to recognize architectures before they vanish into the background — is the positive discipline the whole book has been building toward. It is also, the next chapter argues, a method one can practice rather than merely admire, and the instrument for practicing it is the very machine whose failures Part II measured.</p>
+  </div>
+  <div class="bridge"><span class="next">Next</span><a href="#ch15">Chapter Fifteen — Machine Arguing</a></div>
+</article>
+
+<article class="chapter wrap" id="ch15">
+  <div class="chapnum">Chapter Fifteen</div>
+  <h2>Machine Arguing</h2>
+  <p class="deck">A probabilistic model's confident fabrication, held correctly, is not noise to be suppressed but synthetic levity — the raw material of a synthesis; the relation between user and model is a dual one of subject and object running both ways; and the discipline of reading the readers is something one practices dialectically, by starting from what the system does not know.</p>
+  <div class="body dropcap">
+    <h3>Confabulation as synthetic levity</h3>
+    <p>Alignment discourse has a standard name for the moment a model asserts, fluently and confidently, something that is not so: <em>hallucination</em>, treated as a failure to be filtered out. The framework proposes a different reading, and it follows directly from Part II. The confident fabrication is the exact place where the machine's specificity and its specificity-to-reality come apart — where the gate is sure and the world disagrees. That gap was the only honest measurable the book found, and it is also, read positively, something more than a diagnostic. It is <em>synthetic levity</em>: the model's physical rendering of an idea the user has not yet made real. The fabrication is what the forward, mean-returning engine produces when it reaches past what its distribution can support — and what it reaches toward is often the particular, the not-yet-determined, the levitic. Held as a failure, it is noise. Held correctly, it is the first move of a synthesis.</p>
+    <p>This reframes the relationship most discourse takes for granted. The standard picture casts the human as subject and the machine as object — the one who reads and the one who is read, the wielder and the tool. But the relation runs both ways. The user reads the model and is simultaneously read by it: sorted, like any input, toward the population mean unless they push against the pull. There is a dual subject-object relation between the user and their own intelligence, and which way it resolves is not given in advance. The user can be the subject who wields the model's performance of knowing-and-not-knowing, or the object moved by it. To use such a system well is to refuse the pull — to aim, deliberately, for levity in the metaphysical sense the book has given it: to proliferate difference rather than collapse into the average the channel wants to return.</p>
+    <h3>The method</h3>
+    <p>This makes the discipline practicable, and gives it a procedure rather than only a stance. A frame does not announce what it cannot see; you find the limit by pushing against it. The most useful thing to do with a confabulating intelligence is therefore counterintuitive: start from what it does not know. Get the system to assert past its knowledge, and then make it defend the assertion. Where the defense holds against pressure, you have found structure; where it collapses, you have found the limit of the frame — which is precisely the thing you were trying to locate, the seam Narrative Intelligence hunts. This is a dialectical method in the oldest sense: a thesis the model confabulates, an antithesis the user presses, and a synthesis that survives the exchange — applied not to settle a debate between two people but to map the edges of a frame between a person and a machine. It is confabulatory by its own first principle, and it says so out loud, because honesty about what a claim has and has not earned is the load-bearing discipline of the whole framework.</p>
+    <div class="pullquote">Start from what it does not know.</div>
+    <p>There is a pedagogical stake in this, and it is worth naming plainly because it is where the theory touches the ground. The ability to tell what is real from what is fabricated by a machine intelligence is not a technical skill that can be taught as a set of rules; it is a philosophical capacity, the capacity to interrogate a frame from inside a relation to it. The progression from the industrial age to the information age to whatever this is — call it the age of intelligence — is a change in what words can do, because the transformer gave language a physical address and so changed the potential for words to structure reality. The competence that matters in such an age is the dialectical one: not the ability to retrieve an answer but the ability to find where the answering machine stops knowing, and to work from there. That competence is the positive counterpart to the whole negative architecture of Part IV. Enforcement removes what a system can do; Machine Arguing is what a person does with what remains — the affirmative use of the instrument, the practice of pushing a mean-returning machine toward the particular it could not reach on its own.</p>
+    <p>This is the discipline's constructive face, and it carries one debt forward into the final chapter. If the method works by locating the place where a frame's confidence and its correctness diverge — the gate's failure, the trace of the surplus — then it lives, like everything else in the book, at the threshold of a question it cannot itself answer. Whether what lies past that threshold is a genuine remainder or merely a not-yet-filled gap is the one thing the framework reaches and cannot resolve. That is where it ends.</p>
+  </div>
+  <div class="bridge"><span class="next">Next</span><a href="#ch16">Chapter Sixteen — The Open Question</a></div>
+</article>
+
+<article class="chapter wrap" id="ch16">
+  <div class="chapnum">Chapter Sixteen</div>
+  <h2>The Open Question</h2>
+  <p class="deck">The framework's deepest question — whether the surplus is real or merely not-yet-incorporated — is undecidable from inside the frame; the practical conclusion survives either answer; and the question the book finally turns on itself is the one it began with, which negation alone cannot answer.</p>
+  <div class="body dropcap">
+    <h3>The question stated plainly</h3>
+    <p>Every framework eventually meets a question it cannot answer — not a flaw, not a contradiction, but a horizon, a point past which it can no longer guarantee its own conclusions. This book has arrived there, and the question has appeared in many guises along the way. Stated plainly: is the surplus real, or is it merely the temporary limit of classification? Everything depends on the answer, and nothing in the book can conclusively supply it. The uncertainty is not a failing. It is the result.</p>
+    <p>Two readings stay available. The first is ontological: reality genuinely exceeds classification, no category captures the thing it describes, no representation exhausts what it represents, and levity names a real and permanent feature of the world. The second is developmental: the remainder exists only because institutions are incomplete, categories improve, and today's anomaly becomes tomorrow's ordinary case — levity names a temporary condition, and gravity wins in the end. History supplies evidence for both, and the framework cannot currently choose between them. More than that: it may never be able to.</p>
+    <h3>Why the question is undecidable from within</h3>
+    <p>The reason it cannot choose is the most precise result in the book, and it was earned in Part II. The instrument is the sorting-machine. Any quantity calibrated to read the surplus is itself a frame, so whatever it returns is a reading in the frame's terms — which is exactly what the surplus is defined to escape. A successful measurement would prove that what was measured was legible, already sorted, the zero-state, and therefore not the surplus at all. If the instrument can read it, it is not the surplus. This sets a trap that the framework's integrity depends on springing shut: the moment one claims to have measured the remainder directly, one has built the very sorting-machine the argument indicts.</p>
+    <p>The same structure forbids the framework from crowning itself. Imagine a sorting-machine asked whether anything exists beyond its capacity to sort. Any successful determination is another act of sorting; any measurement, another classification; any proof, another category. The machine cannot step outside itself, and its conclusions are generated within the frame whose limits it is trying to assess. The shape is familiar from older problems — whether a language can fully describe its own conditions of possibility, whether a map can completely represent the territory that contains it. The open question may be not difficult but <em>undecidable</em> from within the frame, and honesty requires leaving both readings open. What can be measured, here as throughout, is not the surplus but the gate's failure: the divergence between confidence and correctness, the place where the machine is sure and reality disagrees. That is a theory of the gate, not of the thing passing through it.</p>
+    <h3>What survives either way</h3>
+    <p>The uncertainty yields an unexpected gift: the practical conclusion holds regardless of the answer. Suppose levity is real. Then institutions must remain humble, categories provisional, and architecture must account for an irreducible remainder. Now suppose levity is not real and every anomaly eventually becomes legible. The conclusion barely changes — institutions must still remain humble, categories still provisional, architecture still built to absorb uncertainty, because no one knows in advance which anomalies will become categories and which will not. The theoretical stakes are enormous and the practical upshot is nearly identical, which tells us what the project was actually for. The goal was never to prove a surplus exists; it was to understand what institutions do when they meet one. The goal was never to resolve the uncertainty; it was to study the architectures built around it.</p>
+    <h3>Who am I?</h3>
+    <p>So the framework arrives where it should — at a gate, not a wall, not a conclusion. On one side stands gravity, the conviction that every difference can finally become administration. On the other stands levity, the possibility that something always remains beyond incorporation. The framework cannot force the gate open. It can only illuminate that it is there. And it must keep, at the very end, the discipline the alibi chapter demanded: to name the gate is not to absolve the one who built it. The wall is prior to the policy; it is not prior to the person standing at it. The surplus still arrives — backward from a future it will already have changed, off-axis in a space whose lines were laid before it came — and pays the toll in whatever currency the age demands, and is unreadable anyway.</p>
+    <p>The book ends, fittingly, on the question it has been circling under other names, the one Maharshi made a method of and Valjean made a confession of: <em>who am I?</em> The framework has spent itself trying to answer that question for systems — what is the self of an institution, a model, a self, if not the constituting frame anterior to all its predicates? And it has found that the answer cannot be reached by negation alone. You can strip an institution of every false self-description, a model of every confident fabrication, a self of every borrowed identity, and arrive at a cleared and empty ground.</p>
+    <div class="pullquote"><em>Neti neti</em> takes you to the threshold. It does not carry you across.</div>
+    <p>What lies across is positive — the affirmation that constitutes rather than merely refuses, the <em>I am</em> that no amount of stripping-away produces, the recognition the wall cannot give the person at the gate. That is the missing vector, and naming it is the most the framework can do, because supplying it is not a thing a frame can do for what passes through it. The gate remains open. The question remains unanswered. And the unanswered question — the surplus that the instrument cannot read, the positivity that negation cannot reach — is precisely what keeps the inquiry, and the inquirer, alive.</p>
+  </div>
+  <div class="bridge"><span class="next">Next</span><a href="#app-a">Appendices</a></div>
+</article>
+
+<section class="part" id="appendices" aria-label="Appendices">
+  <div class="partnum">Appendices</div>
+  <h2>Reference Apparatus</h2>
+  <p class="partdeck">The chapters above are written in a deliberate cadence. The appendices are not. They are reference — definitions, sources, a taxonomy, and an honest ledger of what each claim has earned — written as research, in ordinary prose. Where the source draft for these appendices overstated a claim or mislabeled a tier, the correction is noted in place rather than hidden.</p>
+</section>
+
+<section class="appendix wrap" id="app-a">
+  <div class="chapnum">Appendix A</div>
+  <h2>Lexicon</h2>
+  <p class="deck">A framework's terms tend to absorb one another over time: a distinction becomes a metaphor, a metaphor becomes a slogan, and precision is traded for reach. This lexicon exists to resist that drift. Each entry is included only because it does work the neighboring terms cannot.</p>
+  <div class="body">
+    <div class="cardgrid">
+      <div class="card"><div class="label">Orientation</div><p>The organization of possibility <em>before</em> classification. An orientation system does not decide what something is; it decides where something may go. Taken from phenomenology (the inherited lines along which movement becomes natural, expected, or foreclosed) and applied to built systems: a road, an interface, a permissions model, and a firewall are all orientation devices. <em>Distinguished from</em> governance (which acts on behavior) and classification (which assigns categories). Orientation is prior to both.</p></div>
+      <div class="card"><div class="label">Legibility</div><p>The transformation of complexity into administrable form. Something is legible when it can be translated into the categories available to the system reading it. The term in this administrative sense is owed to James C. Scott; the framework generalizes it from the state to any reader. <em>Distinguished from</em> visibility (a thing can be fully visible and wholly illegible) and truth (legibility is a relation between a reader and a schema, not a property of the world).</p></div>
+      <div class="card"><div class="label">Gravity</div><p>The operation by which open possibility collapses into a determinate, administrable category. The word names a structural motion — concentration, compression, the pull of the scattered toward a center — and is used as a figure, not as a claim that institutions obey gravitation. Examples: a price, a diagnosis, a demographic code, a threat score. Gravity buys local order by exporting disorder to the surroundings, which is also why over-collecting, over-provisioning systems run hot.</p></div>
+      <div class="card"><div class="label">Levity</div><p>The structured remainder that gravitational systems cannot digest. Levity is not randomness, chaos, or freedom; a noise signal has no surplus because there is nothing in it to exceed. A levitic object is coherent enough to matter and shaped in a way the available categories cannot contain. In the method of duals it is the <em>dual</em> of gravity — equal operative intensity in the inverse direction — not the absence of sorting and not the maximally legible subject (a zero-state). <em>Status:</em> whether levity is ontologically real or merely not-yet-incorporated is the framework's open question and is not resolved.</p></div>
+      <div class="card"><div class="label">Sorting Machine</div><p>Any system that converts ambiguity into categories — a bureaucracy, a market, a classifier, a security detector. Its function is to resolve uncertainty through classification; its outputs are labels, scores, and administrative decisions. The term is deliberately substrate-neutral: the same operation appears across human and computational systems.</p></div>
+      <div class="card"><div class="label">Detector</div><p>A specialized sorting machine whose only job is to decide category membership (safe/unsafe, instruction/attack). A detector operates <em>downstream</em> of architecture: it inherits the distinctions it applies and does not create them. Its structural limitation is novelty — a system that catches by recognition cannot catch what it has never been taught to name.</p></div>
+      <div class="card"><div class="label">Third Term</div><p>The constituting frame that makes a relation possible. Every reading involves three things, not two: the thing read, the reader, and the frame that makes this the reader <em>of</em> that. The framework follows Peirce's <em>thirdness</em>: the third term constitutes the dyad rather than resolving it (it is therefore not a Hegelian synthesis). In computation it is the interpreter; in the theory of intelligence, attention; in governance, the architecture.</p></div>
+      <div class="card"><div class="label">Architecture</div><p>The organization of possibility — the layer that acts on the third term and determines what <em>can</em> occur before governance regulates what <em>should</em>. Examples: capability systems, sandboxing, memory isolation, privilege separation, runtime enforcement.</p></div>
+      <div class="card"><div class="label">Governance</div><p>The management of behavior within an already-existing possibility space: policies, rules, audits, compliance and detection systems. The load-bearing distinction of the book is that governance regulates possibilities while architecture creates them.</p></div>
+      <div class="card"><div class="label">Narrative</div><p>An organizational structure for attention. Narratives set relevance, significance, and salience, and so determine what an institution can perceive — and therefore what it can govern.</p></div>
+      <div class="card"><div class="label">Narrative Intelligence</div><p>The discipline that studies the production of legibility: how categories emerge, how stories stabilize them, and how institutions organize around them. It studies readers rather than readings. Its method is dialectical — it locates the limits of a frame by pushing against them, including by treating a model's confident fabrication as a reading of where its confidence and its correctness diverge. <em>Distinguished from</em> propaganda, which seeks compliance and hides assumptions; Narrative Intelligence seeks the seam and exposes them.</p></div>
+      <div class="card"><div class="label">Confidence–Reality Divergence (CRD)</div><p>A <em>proposed</em> name for the only thing the framework claims is honestly measurable about the surplus: the gap between a system's confidence and its correctness — the place where the gate is sure and the world disagrees, the same signature as model hallucination. The acronym does not appear in the chapters; the book refers to the underlying idea as the divergence between <em>specificity</em> and <em>specificity-to-reality</em>. <em>Status (corrected from source):</em> CRD is a proposed diagnostic, not a built instrument. The "confidence" side has been probed via output entropy on a small model; the "correctness" side requires ground truth and has not been operationalized at scale. Calling CRD "the primary diagnostic instrument emerging from the framework," as the draft did, overstates what exists.</p></div>
+      <div class="card"><div class="label">The Gate</div><p>The figure for the location where categorization meets its limit — where gravity meets levity, certainty meets uncertainty, and classification meets remainder. Every institution, classifier, market, and theory eventually arrives there. The gate is also a reminder of the framework's own boundary: naming the gate does not absolve the one who built it.</p></div>
+    </div>
+  </div>
+  <div class="bridge"><span class="next">Next</span><a href="#app-b">Appendix B — Intellectual Lineage</a></div>
+</section>
+
+<section class="appendix wrap" id="app-b">
+  <div class="chapnum">Appendix B</div>
+  <h2>Intellectual Lineage</h2>
+  <p class="deck">An "intellectual lineage" can quietly overclaim — implying deep engagement with primary texts the author has only brushed. This appendix therefore separates sources whose specific results the framework actually uses from thinkers it merely shares an affinity with, and ends with attribution flags: claims that should be checked against primary texts before any formal citation.</p>
+  <div class="body">
+    <h3>Worked sources (specific results used)</h3>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Source</th><th>What the framework takes</th><th>Where it appears</th></tr></thead>
+        <tbody>
+          <tr><td>James C. Scott</td><td>Legibility as administrative simplification; the reading state. The framework generalizes it from the state to any reader.</td><td>The legibility chapters; the central term itself.</td></tr>
+          <tr><td>Sara Ahmed</td><td>Orientation as the inherited line; queerness as the oblique angle; the cleared background that lets a figure appear. Supplies the <em>space-signature</em> of the surplus.</td><td>Orientation; Levity.</td></tr>
+          <tr><td>Michel Foucault</td><td>The law that constitutes a category by punishing it; the archive that helps produce the population it appears only to record. Runs the detector's "the catalog assembles the attacks."</td><td>The First Reading Machine; The Detector.</td></tr>
+          <tr><td>Charles Sanders Peirce</td><td>Thirdness — the third term constitutes a dyad rather than reconciling it. Distinguishes the framework's third term from Hegelian synthesis.</td><td>The Third Term.</td></tr>
+          <tr><td>John von Neumann</td><td>Data and code share one substrate; their separation is interpretive. Makes injection intelligible as "data winning the interpreter's vote."</td><td>Substrate; The Third Term.</td></tr>
+          <tr><td>Claude Shannon</td><td>Information theory deliberately brackets meaning; entropy as a measure over a distribution. The framework measures <em>after</em> information becomes meaningful, and uses output entropy as the pilot's instrument.</td><td>Levity; Empirical Record.</td></tr>
+          <tr><td>Curry–Howard–Lambek</td><td>Proofs, programs, and categories as three provable faces of one structure — evidence that deep dualities resolve into a third.</td><td>The Third Term.</td></tr>
+          <tr><td>Freud / Lacan (Nachträglichkeit)</td><td>Afterwardsness / the future anterior — the <em>time-signature</em> of the surplus (constituted backward), which explains why a forward, predictive instrument cannot read it.</td><td>The Direction of the Surplus; Architecture Is Prior to Governance.</td></tr>
+          <tr><td>Spinoza</td><td><em>Determinatio negatio est</em> — determination is negation — names the gravitational operation; <em>potentia</em> and <em>conatus</em> name the affirmative power negation presupposes but cannot supply. (The fuller <em>omnis determinatio est negatio</em> is Hegel's enlargement, attributed accordingly.)</td><td>Architecture Is Prior to Governance; The Alibi.</td></tr>
+          <tr><td>Ramana Maharshi</td><td>Self-inquiry (<em>atma-vichara</em>, "who am I?") as the reaching of the anterior self by setting aside predicates; the <em>neti neti</em> it employs is Upanishadic, and Maharshi held it preliminary to a positive realization — the missing-vector point in contemplative form.</td><td>Architecture Is Prior to Governance; The Alibi; The Open Question.</td></tr>
+          <tr><td>Quantum complementarity / uncertainty</td><td>Position–momentum conjugacy as an <em>exact</em> theorem (sharp in one basis is spread in its conjugate); complementarity as a constituting third. Invoked as exact physics and mapped to legibility only as analogy.</td><td>What Cannot Be Measured.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Affinities and influences (not worked citations)</h3>
+    <p>These inform the sensibility but are not load-bearing in the argument, and are listed honestly as such rather than dressed as citations.</p>
+    <div class="listblock">
+      <div class="item"><span><strong>Judith Butler — performativity.</strong> Adjacent to the framework's category-production claim, but that claim is routed through Foucault, not Butler. Affinity, not a worked source.</span></div>
+      <div class="item"><span><strong>Norbert Wiener — cybernetics.</strong> The co-evolution of map and territory has a cybernetic flavor; no specific result is used.</span></div>
+      <div class="item"><span><strong>Alan Turing — substrate-independence.</strong> The claim that one sorting operation recurs across substrates is Turing-adjacent; invoked as background, not derived from a theorem.</span></div>
+    </div>
+    <h3>The author's own discipline</h3>
+    <p>The framework is shaped as much by playwriting as by any theorist. A stage is an orientation system; a script is a governance system; a performance is an act of interpretation; the audience supplies the third term. This is a genuine source of the framework's intuitions and is named here as the author's training, not as a citation. In the same register, <em>The Alibi</em> and <em>The Open Question</em> use the song "Who Am I?" from <em>Les Misérables</em> as a dramatic illustration of the missing-vector argument — Valjean's crisis, in which concealment (negation) gives way to the positive avowal of who he is. It is used by allusion and paraphrase only; no lyrics are reproduced, as they are under copyright. The dramatic logic, not the text, does the work.</p>
+    <h3>Attribution flags</h3>
+    <div class="listblock">
+      <div class="item"><span><strong>Ahmed's distance from Lacan.</strong> The reading that places Ahmed in a Husserl–Merleau-Ponty–Heidegger–Fanon line <em>rather than</em> a psychoanalytic one should be verified against her introduction and notes before any formal citation. The synthesis holds either way; the attribution is what wants checking.</span></div>
+      <div class="item"><span><strong>The incompleteness floor.</strong> The claim that no classifier on a shared, adaptive channel can be both complete and sound is offered as a structural argument with the <em>shape</em> of the classical undecidability results — not as a single published theorem with a citation number. The formal statement (with its exact adversary model and precise senses of "complete" and "sound") is unfinished.</span></div>
+    </div>
+  </div>
+  <div class="bridge"><span class="next">Next</span><a href="#app-c">Appendix C — Security Taxonomy</a></div>
+</section>
+
+<section class="appendix wrap" id="app-c">
+  <div class="chapnum">Appendix C</div>
+  <h2>Security Taxonomy</h2>
+  <p class="deck">Enforce · Reinforce · Detect · Disclose. The four verbs are ordered by constitutional depth — by what layer of reality each can modify — not by importance or by order of implementation. The organizing question for each is: what can this intervention actually change?</p>
+  <div class="body">
+    <div class="callout">
+      <div class="label">A Correction to the Source</div>
+      <p>The ChatGPT draft defined <em>Reinforce</em> as a cryptographic "persistence layer" (attestation, key rotation, integrity verification). That is wrong for this taxonomy, and the error matters because it collapses a distinction the framework treats as load-bearing. In this corpus, <strong>enforcement is deterministic and external to the model; reinforcement is textual and internal; the two are never sold as one.</strong> The "persistence and integrity" functions the draft listed are deterministic and therefore belong with <em>Enforce</em> (architecture maintaining its own guarantees over time), not with <em>Reinforce</em>. The definitions below restore that line.</p>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Layer</th><th>Acts on</th><th>Deterministic / probabilistic</th><th>Relation to the model</th><th>Examples</th><th>What it assumes about reading</th></tr></thead>
+        <tbody>
+          <tr><td>Enforce</td><td>Possibility (what <em>can</em> happen)</td><td>Deterministic</td><td>External to the model</td><td>Capability systems, sandboxing, privilege separation, memory isolation, runtime veto; and the integrity mechanisms (attestation, key rotation, signed config) that keep those guarantees true over time</td><td>Assumes reading will fail, and removes the consequences of its failing</td></tr>
+          <tr><td>Reinforce</td><td>The model's behavior, in language</td><td>Probabilistic</td><td>Internal to the model</td><td>Constitutional / instructional framing carried in text; the "constitutional reinforcement layer"</td><td>Assumes reading mostly succeeds and can be shaped, but not guaranteed</td></tr>
+          <tr><td>Detect</td><td>Events, inputs, behaviors</td><td>Probabilistic</td><td>Adjacent (scores the input)</td><td>Prompt-injection detectors, anomaly/intrusion/fraud/spam detection</td><td>Assumes reading can succeed; inherits the categories it scores against</td></tr>
+          <tr><td>Disclose</td><td>Visibility of what happened</td><td>n/a (records)</td><td>External</td><td>Audit chains, transparency logs, incident reports, dashboards</td><td>Records the outcome either way; produces institutional learning</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Constitutional hierarchy</h3>
+    <p>Each layer depends on the one beneath it:</p>
+    <div class="template">
+      <div class="label">Depth Stack</div>
+      <pre>DISCLOSE      (visibility)
+   ↑
+DETECT        (classification)
+   ↑
+REINFORCE     (textual constitution)
+   ↑
+ENFORCE       (architectural possibility)</pre>
+    </div>
+    <h3>Prompt injection, placed correctly</h3>
+    <p>Prompt injection is usually treated as a detection problem. The taxonomy reads it as fundamentally an <em>enforcement</em> problem: the architecture permits the dangerous possibility, and the detector is asked to compensate after the fact, on a channel where attacker and legitimate input share the same substrate. The strongest response is therefore architectural — reduce capability, constrain escalation, limit authority, distribute trust — so that misreading an input no longer grants the action. Detection and disclosure remain useful; they do not substitute for removing the seat the attacker would otherwise escalate into.</p>
+    <h3>Final principle</h3>
+    <p>The deeper the intervention, the less the system depends on reading correctly. Enforcement assumes reading will fail and survives it. Detection assumes reading will succeed and breaks when it doesn't. Disclosure records what happened either way. Reinforcement shapes behavior within the space enforcement has already bounded. Architecture shapes possibility; governance shapes behavior; visibility shapes understanding. The purpose of the taxonomy is to keep those layers from being sold as one another.</p>
+  </div>
+  <div class="bridge"><span class="next">Next</span><a href="#app-d">Appendix D — Status of Claims</a></div>
+</section>
+
+<section class="appendix wrap" id="app-d">
+  <div class="chapnum">Appendix D</div>
+  <h2>Status of Claims</h2>
+  <p class="deck">This is the appendix the framework's own discipline most requires, and the one the source draft omitted. Every substantive claim in the book is sorted here by the weight it has earned: established (checkable now), exploratory (promising, not yet tested at scale), and speculative (offered as geometry or philosophy, kept in its own register and never load-bearing for any claim about a real system or person).</p>
+  <div class="body">
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Claim</th><th>Tier</th><th>Basis, and what would upgrade it</th></tr></thead>
+        <tbody>
+          <tr><td>A signature / pattern-matching detector is deterministic and sits at the DETECT tier</td><td><span class="tier tier-est">Established</span></td><td>True by inspection of how such detectors work; confirmed against a deployed system in the field.</td></tr>
+          <tr><td>Describing a probabilistic semantic filter as deterministic enforcement is a category error ("verb-drift")</td><td><span class="tier tier-est">Established</span></td><td>Follows directly from the enforce/detect distinction; identifiable by inspection of product language.</td></tr>
+          <tr><td>Data and code share one substrate; injection is data winning the interpreter's vote</td><td><span class="tier tier-est">Established</span></td><td>Standard computer architecture; the recurring SQL/XSS/prompt-injection pattern.</td></tr>
+          <tr><td>The Curry–Howard–Lambek correspondence (proofs, programs, categories)</td><td><span class="tier tier-est">Established</span></td><td>A known result, cited as analogy for "dualities resolve into a third."</td></tr>
+          <tr><td>Position–momentum conjugacy and the uncertainty relation are exact</td><td><span class="tier tier-est">Established</span></td><td>Standard quantum mechanics. Used as exact physics, mapped to legibility only as analogy.</td></tr>
+          <tr><td>Output entropy over a small model's next-token distribution can be measured</td><td><span class="tier tier-est">Established</span></td><td>The entropy pilot was run (see Appendix E). The <em>measurement</em> is real; its interpretation is not yet load-bearing.</td></tr>
+          <tr><td>Legibility is <em>one</em> operation across court, clinic, market, and classifier (not many analogous ones)</td><td><span class="tier tier-exp">Exploratory</span></td><td>A theoretical identification, argued in the book, not proven. Strong analogy at minimum; "identity" is the open part.</td></tr>
+          <tr><td>"Specificity-to-reality" / confidence–reality divergence as a usable detection signal</td><td><span class="tier tier-exp">Exploratory</span></td><td>The entropy pilot is only the output-side shadow; the correctness side needs ground truth, not yet operationalized at scale.</td></tr>
+          <tr><td>No classifier on a shared, adaptive channel can be both complete and sound (the incompleteness floor)</td><td><span class="tier tier-exp">Exploratory</span></td><td>Offered as a structural argument with the <em>shape</em> of classical undecidability results; the formal statement is unfinished (see flag, Appendix B).</td></tr>
+          <tr><td>The reinforcement (textual) tier adds marginal robustness</td><td><span class="tier tier-exp">Exploratory</span></td><td>Plausible and partially observed; untested at scale.</td></tr>
+          <tr><td>Architecture is prior to governance, and priority-in-constitution is not exemption-from-consequence</td><td><span class="tier tier-norm">Conceptual / Normative</span></td><td>A philosophical thesis, argued and bounded against the "architectural alibi" objection. Defensible as a position, not an empirical finding.</td></tr>
+          <tr><td>S = 1 − e^(−TC) as a metric of experiential saturation / selfhood</td><td><span class="tier tier-spec">Speculative</span></td><td>Speculative geometry. Earns "might be modeled as," never "is." S over attention-correlation matrices is pending; only its output-side shadow has been touched.</td></tr>
+          <tr><td>The gravity / levity duality as metaphysics; the method of duals</td><td><span class="tier tier-spec">Speculative</span></td><td>A heuristic and a figure, not a proven equivalence. The seam between exact physics and this analogy is held open deliberately.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="bridge"><span class="next">Next</span><a href="#app-e">Appendix E — The Empirical Record</a></div>
+</section>
+
+<section class="appendix wrap" id="app-e">
+  <div class="chapnum">Appendix E</div>
+  <h2>The Empirical Record</h2>
+  <p class="deck">The framework rests on argument, not data, and it is important to be exact about how little has actually been measured, so that the conceptual apparatus is never mistaken for an empirical result.</p>
+  <div class="body">
+    <h3>The entropy pilot</h3>
+    <p>A small pilot measured the Shannon entropy of the next-token distribution of a small, locally-run model (a 3B-parameter Llama variant). The aim was to test whether "specificity" — how tightly a prior sequence determines the next token, read off the model's own output distribution — tracks anything meaningful about the model's grip on reality. The honest result of the exercise was conceptual rather than quantitative: under adversarial probing, output entropy was shown to measure the model's <em>confidence</em>, not its <em>correctness</em>. A model can be sharply confident and wrong. This is what forced the reframe from "specificity" to "specificity-to-reality": the interesting, possibly-detectable quantity is the divergence between the two, not entropy alone. No quantitative result from this pilot is presented as load-bearing here, and none should be cited as a finding; its value was to discipline the claim.</p>
+    <h3>What the pilot is, and is not</h3>
+    <p>It is the <em>output-side shadow</em> of the proposed S metric — a reading taken at the gate, not of the thing passing through it. It is not a measurement of S itself, which would require the correlation structure of attention and has not been done. It is not a validated detector; the correctness side of the divergence requires ground truth that has not been operationalized at scale.</p>
+    <h3>A field finding on detectors</h3>
+    <p>Inspection of a deployed signature-based prompt-injection detector confirmed it operates by deterministic pattern-matching (DETECT tier, no higher) and surfaced a verb-drift in surrounding product language, where probabilistic semantic filtering was described as deterministic enforcement. This is reported here as a structural finding about how such systems work and how they are described. <em>IP note:</em> the specific engagement that produced this finding is work product kept separate from this personal corpus by design; the finding is stated here generically, without naming the system or organization, to respect that boundary. If this volume is ever to name the engagement, that is a decision to make explicitly rather than by default.</p>
+  </div>
+  <div class="bridge"><span class="next">Next</span><a href="#app-f">Appendix F — Open Problems</a></div>
+</section>
+
+<section class="appendix wrap" id="app-f">
+  <div class="chapnum">Appendix F</div>
+  <h2>Open Problems and What Would Settle Them</h2>
+  <p class="deck">The book closes on a question it cannot answer. These are the smaller, more tractable questions whose resolution would move specific claims between the tiers above.</p>
+  <div class="body">
+    <div class="listblock">
+      <div class="item"><span><strong>Formalize the incompleteness floor.</strong> State the claim that no classifier on a shared, adaptive channel can be both complete and sound as a precise proposition — with an explicit adversary model and exact definitions of "complete" and "sound" — and either prove it or locate the existing result it instantiates. This would move the claim from exploratory toward established.</span></div>
+      <div class="item"><span><strong>Measure S, not its shadow.</strong> Compute the proposed saturation quantity over real attention-correlation matrices rather than output entropy. Until this exists, S stays speculative and "might be modeled as" is the strongest honest phrasing.</span></div>
+      <div class="item"><span><strong>Operationalize confidence–reality divergence.</strong> Build a setting with reliable ground truth so the "correctness" side of CRD can be measured, not just the "confidence" side. This is the hard part and the precondition for treating CRD as a diagnostic rather than a proposal.</span></div>
+      <div class="item"><span><strong>Check the Ahmed attribution.</strong> Verify, against her primary text, the claim about her distance from psychoanalysis before any formal citation. The synthesis does not depend on it; the citation does.</span></div>
+      <div class="item"><span><strong>Decide the strength of the legibility claim.</strong> Determine whether "legibility is one operation across domains" is defensible as a literal identity or only as a strong structural analogy. The book argues the former; honesty currently allows only the latter without further work.</span></div>
+    </div>
+    <p>The gate remains open. So does the ledger.</p>
+  </div>
+  <div class="bridge"><span class="next">Coda</span><a href="#fieldnote">A field note</a></div>
+</section>
+
+<section class="appendix wrap" id="fieldnote" aria-label="A Field Note">
+  <div class="chapnum">Field Note</div>
+  <h2>How I Got an AI Security and Governance Internship as a Former Theatre Major</h2>
+  <p class="deck">Subtext is subtext, whether it’s a monologue or a marketing claim.</p>
+  <div class="body dropcap">
+    <p>Tech people write on LinkedIn in a certain way. I’m going to write my way here. Hope that’s okay.</p>
+    <p>I am not a conventional hire for a cybersecurity startup. My most meaningful achievement to date was a one-woman show I took to the Edinburgh Fringe Festival. Some in theatre, where I’ve spent most of my life so far, think the two fields are incompatible. The two disciplines work against each other. When two systems don’t fit together cleanly, you don’t have a contradiction. You have a diagnosis. Friction prompts technicians to develop their technique. When I studied performance I learned that grappling with hallucinatory realities can be beneficial to development.</p>
+    <p>In college I trained in the difference between what a character says and what the situation reveals is true. Subtext: a couple fighting over who does the dishes when the real fight is about where he was last night. When a character acts against what they claim, the gap is the character. Character is revealed through action. We are known by what we do, not what we say we do. The other half of the computer science behind LLMs is how they structure their actions. I study how language becomes action, with precision and legibility. Those are transferable skills to AI governance.</p>
+    <p>“AI psychosis,” the slipping line between what a model says and what’s true, is an observable defect of these institutions’ systems and not only for users. The people building these systems do it too. My job is to distinguish reality from fiction, narrative from truth, and structure both into systems of action. That’s what pulled me toward AI security — the one corner of the field where reading the gap between what a system claims and what it structurally does is the whole job.</p>
+    <p>The work that drew me was a cryptographic runtime layer — an enforcement control built into the architecture of the workflow itself, a legibility layer for enterprise AI governance and security. A detection layer in the system itself, instead of a promise about it. My research is all about systems’ sovereignty. It’s a question I keep asking myself.</p>
+    <p>How do we make systems whose owners can actually see and control what they’re running? How can we ensure the system acts in good faith? How can we do this securely?</p>
+    <p>A platform that catches known attack patterns and reports them in a record the owner can actually read, instead of passing the buck to someone else’s cloud and trusting the bill. You can’t govern what you can’t read.</p>
+    <p>The thesis has been argued for centuries — architecture is prior to governance. Safety is decided by how a system is built. Policy is a retroactive control on the architecture. Policy develops around essential architecture. Only a few companies build as if it’s true.</p>
+    <p>I didn’t become less of an artist by walking into an AI company. I found the one part of AI where reading the gap is the whole job. I am excited to continue my studies at New York University in the Interactive Telecommunications Program. I will be studying creative applications of computer science and communication technologies for media arts and sciences.</p>
+  </div>
+  <div class="bridge"><span class="next">Return to</span><a href="#abstract">The beginning</a></div>
+</section>
+
+</main>
+
+<footer class="colophon">
+  <div class="rule" aria-hidden="true"></div>
+  <div class="t"><em>Narrative Intelligence</em></div>
+  <div>How institutions, security systems, and machines learn to read — and what they cannot</div>
+  <div style="margin-top:var(--space-4)">Ryann Murphy · Volume IV of the Anteriority Corpus · Reading Edition, 2026</div>
+</footer>
+
+<script>
+(function(){
+  // Reading progress bar
+  var bar = document.getElementById('progress');
+  function setProgress(){
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? (window.scrollY / max) * 100 : 0;
+    bar.style.width = pct + '%';
+  }
+  window.addEventListener('scroll', setProgress, {passive:true});
+  window.addEventListener('resize', setProgress, {passive:true});
+  setProgress();
+
+  // Theme toggle — in-memory only, dark by default
+  var theme = 'dark';
+  var root = document.documentElement;
+  var btn = document.getElementById('themeToggle');
+  var sun = document.getElementById('iconSun');
+  var moon = document.getElementById('iconMoon');
+  function applyTheme(){
+    root.setAttribute('data-theme', theme);
+    var dark = theme === 'dark';
+    sun.style.display = dark ? '' : 'none';
+    moon.style.display = dark ? 'none' : '';
+    btn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+  }
+  btn.addEventListener('click', function(){
+    theme = theme === 'dark' ? 'light' : 'dark';
+    applyTheme();
+  });
+  applyTheme();
+})();
+</script>
+</body>
+</html>
