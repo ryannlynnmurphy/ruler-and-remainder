@@ -482,7 +482,7 @@ const cover = shell({
 <section class="cover">
   <div class="issueline reveal"><span>a personal research corpus</span><span class="dot">●</span><span>ryann murphy</span></div>
   <h1 class="title reveal">the<br>ruler <span class="amp">&amp;</span><br>the <span class="longdiv"><span class="house">remainder</span></span></h1>
-  <p class="statement reveal">a humanities cross-disciplinary buffet — philosophy, queer theory, phenomenology, anteriority — put to work in software. how systems read the world into legible categories, and who pays for what stays invisible. the measure is the ruler; what it cannot hold is the remainder.</p>
+  <p class="statement reveal"><span class="thesis">putting the soft sciences in software.</span> a humanities cross-disciplinary buffet — philosophy, queer theory, computational phenomenology, anteriority — brought to how systems read the world into legible categories, and who pays for what stays invisible. the measure is the ruler; what it cannot hold is the remainder.</p>
   <p class="by reveal">ryann murphy — seemingly unreasonably good at vibe coding &amp; talking to chatbots (ai research, idk). i argue with the model until something true falls out; i call it machine arguing. it's gifted — that this is also a skill is the hard part to prove.</p>
   <p class="enter reveal"><a href="#books">↓ enter ↓</a></p>
 </section>

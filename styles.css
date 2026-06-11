@@ -95,6 +95,7 @@ main { padding-left: 36px; }
 /* long division: the remainder sits under the division house */
 .cover h1.title .longdiv { border-top: 0.055em solid var(--measure); padding-top: 0.05em; }
 .cover h1.title .longdiv::before { content: ")"; color: var(--measure); font-weight: 400; display: inline-block; transform: scaleY(1.35) scaleX(0.78); margin: 0 0.06em 0 0.2em; vertical-align: 0.04em; }
+.cover .statement .thesis { font-family: var(--display); font-weight: 600; color: var(--ink); }
 .cover .statement {
   font-family: var(--serif); font-weight: 400; font-style: normal;
   font-size: clamp(1.15rem, 2.4vw, 1.5rem); line-height: 1.5; max-width: 34rem; color: var(--ink-soft); margin: 0 0 2rem;
