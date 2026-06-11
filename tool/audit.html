@@ -21,21 +21,27 @@
 <article class="piece toolpage">
   <a class="back" href="/#instruments">← Instruments</a>
   <div class="head"><div class="kicker">Instrument · runs in your browser</div><h1>The CRD Audit</h1></div>
-  <p class="lede">A runnable instrument. It treats a piece of marketing or technical copy as a
-  model output and tests one condition: does the stated confidence exceed the architectural
-  reality? It surfaces candidates — you complete the two-sentence test. It is calibrated to
-  fire on the gap, not on the existence of something critical to say.</p>
+  <p class="lede">The method needs two sentences. <strong>A:</strong> the claim, from the copy.
+  <strong>B:</strong> the architectural reality, from the spec or the code. It fires where A's
+  confidence contradicts B — and it runs a second pass, checking the same copy against the
+  twelve articles of the <a href="/essays/cybersecurity-bill-of-rights.html">Cybersecurity Bill of Rights</a>.
+  Paste both; the audit does real work only once it has B.</p>
   <p class="privacy">Runs entirely in your browser. Nothing you paste leaves the page — no server, no API, no log.
   <a href="/essays/the-crd-audit-confidence-reality-divergence-as-narrative-intelligence.html">Read the method →</a></p>
 
   <div class="examples">
-    <span>Try a case:</span>
+    <span>Load a paired case:</span>
     <button data-example="determinism">Determinism claim</button>
     <button data-example="integrity">Tamper-proof claim</button>
     <button data-example="honest">The honest version</button>
   </div>
 
-  <textarea id="input" rows="7" placeholder="Paste marketing or technical copy here — a product page, a security claim, a press line — and run the audit."></textarea>
+  <label class="field"><span class="fk">A — the copy</span>
+  <textarea id="copy" rows="5" placeholder="The marketing or technical copy. A product page, a security claim, a press line."></textarea></label>
+
+  <label class="field"><span class="fk">B — the architecture / code</span>
+  <textarea id="arch" rows="6" placeholder="What the system actually is. Paste the spec, the design doc, or the real code — the audit checks the copy against this."></textarea></label>
+
   <button id="run" class="run">Run the audit</button>
 
   <section id="results" class="results"></section>

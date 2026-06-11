@@ -217,8 +217,16 @@ main { padding-left: 34px; }
 .examples span { font-family: var(--mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
 .examples button, .run { font-family: var(--mono); font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.04em; cursor: pointer; border: 1px solid var(--ink); background: transparent; color: var(--ink); padding: 0.4rem 0.85rem; border-radius: 2px; }
 .examples button:hover { border-color: var(--measure); color: var(--measure); }
-#input { width: 100%; font-family: var(--mono); font-size: 0.88rem; line-height: 1.5; padding: 1rem; border: 1px solid var(--ink); border-radius: 2px; background: var(--paper); color: var(--ink); resize: vertical; }
-#input:focus { outline: none; border-color: var(--measure); }
+.field { display: block; margin: 1rem 0; }
+.field .fk { display: block; font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--measure); margin-bottom: 0.4rem; }
+#copy, #arch, #input { width: 100%; font-family: var(--mono); font-size: 0.88rem; line-height: 1.5; padding: 1rem; border: 1px solid var(--ink); border-radius: 2px; background: var(--paper); color: var(--ink); resize: vertical; }
+#copy:focus, #arch:focus, #input:focus { outline: none; border-color: var(--measure); }
+.section-h { font-family: var(--mono); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink); border-bottom: 1px solid var(--ink); padding-bottom: 0.5rem; margin: 2.5rem 0 1.2rem; }
+.section-h em { font-style: normal; text-transform: none; letter-spacing: 0; color: var(--muted); font-family: var(--serif); font-size: 0.95rem; }
+.finding .sb { color: var(--ink); }
+.finding .ev { margin: 0 0 0.7rem; }
+.finding .ev blockquote { font-family: var(--mono); font-size: 0.82rem; line-height: 1.5; margin: 0.3rem 0 0; padding: 0.5rem 0.7rem; background: var(--paper-2); border-left: 2px solid var(--remainder); }
+.finding.billf { border-left: 3px solid var(--measure); }
 .run { margin-top: 0.9rem; background: var(--ink); color: var(--paper); }
 .run:hover { background: var(--measure); border-color: var(--measure); }
 .results { margin-top: 2rem; }
