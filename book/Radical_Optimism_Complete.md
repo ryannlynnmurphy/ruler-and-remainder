@@ -43,7 +43,6 @@ A Case for Intelligence Per Watt
 Why Extraction Cannot Produce Alignment,
 
 Why Centralized AI Is Thermodynamically Insolvent,
-
 and Why the Edge Is the Only Architecture Left
 
 A Seven-Paper Research Series
@@ -57,7 +56,6 @@ New York, NY
 April 2026
 
 Scatter Computing is a nonprofit organization
-
 focused on AI safety through decentralization.
 
 Foreword: Why Radical Optimism

@@ -175,7 +175,7 @@ main{display:block;}
 /* ============ TOC ============ */
 .toc{padding:var(--space-24) 0 var(--space-16);}
 .toc h2{
-  font-family:var(--font-display);font-weight:400;font-size:var(--text-xl);
+  font-family:var(--font-display);font-weight:600;font-size:var(--text-xl);
   margin:0 0 var(--space-10);
 }
 .toc-group{margin-bottom:var(--space-8);}
@@ -222,7 +222,7 @@ main{display:block;}
   font-size:var(--text-md);margin-bottom:var(--space-3);
 }
 .part h2{
-  font-family:var(--font-display);font-weight:400;
+  font-family:var(--font-display);font-weight:700;
   font-size:var(--text-2xl);margin:0 0 var(--space-4);letter-spacing:-0.01em;
 }
 .part .partdeck{
@@ -240,9 +240,9 @@ article.chapter, section.frontmatter, section.appendix{
   font-size:var(--text-md);margin-bottom:var(--space-2);
 }
 .chapter h2, .frontmatter h2, .appendix h2{
-  font-family:var(--font-display);font-weight:400;
-  font-size:var(--text-2xl);line-height:1.15;
-  margin:0 0 var(--space-5);letter-spacing:-0.01em;
+  font-family:var(--font-display);font-weight:700;
+  font-size:var(--text-2xl);line-height:1.12;
+  margin:0 0 var(--space-5);letter-spacing:-0.02em;
 }
 .deck{
   font-family:var(--font-body);font-style:italic;font-weight:300;
@@ -251,12 +251,31 @@ article.chapter, section.frontmatter, section.appendix{
   border-bottom:1px solid var(--border);
 }
 .body h3{
-  font-family:var(--font-display);font-weight:500;font-style:italic;
-  font-size:var(--text-lg);line-height:1.25;
-  margin:var(--space-12) 0 var(--space-4);
+  font-family:var(--font-display);font-weight:600;font-style:normal;
+  font-size:var(--text-lg);line-height:1.2;letter-spacing:-0.01em;
+  margin:var(--space-12) 0 var(--space-4);scroll-margin-top:var(--space-12);
+}
+.body h3 .secmark{color:var(--accent);font-style:italic;font-weight:400;margin-right:0.5em;}
+.body h4{
+  font-family:var(--font-body);font-style:italic;font-weight:400;
+  font-size:var(--text-md);color:var(--muted);
+  margin:var(--space-8) 0 var(--space-3);
 }
 .body p{margin:0 0 var(--space-5);}
 .body strong{font-weight:600;}
+.body ul, .body ol{margin:0 0 var(--space-5);padding-left:1.4em;}
+.body li{margin-bottom:var(--space-2);line-height:1.55;padding-left:0.2em;}
+.body li::marker{color:var(--faint);}
+.body li > ul, .body li > ol{margin:var(--space-2) 0 0;}
+/* TOC: section sub-rows under a chapter */
+.toc a.toc-sec{
+  display:flex;align-items:baseline;gap:var(--space-3);
+  padding:1px 0 1px var(--space-10);color:var(--muted);font-size:var(--text-sm);
+  border-bottom:1px solid color-mix(in srgb, var(--border) 50%, transparent);
+  transition:color var(--tr), padding-left var(--tr);
+}
+.toc a.toc-sec:hover{color:var(--accent-h);padding-left:calc(var(--space-10) + var(--space-2));}
+.toc a.toc-sec .secnum{font-family:var(--font-body);font-style:italic;color:var(--faint);min-width:1.9em;font-size:var(--text-xs);}
 .dropcap > p:first-of-type::first-letter{
   font-family:var(--font-display);
   font-size:4.4em;line-height:0.82;
