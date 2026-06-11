@@ -22,7 +22,7 @@
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; overflow-x: hidden; }
 body {
   margin: 0; background: var(--paper); color: var(--ink);
   font-family: var(--serif); font-size: 20px; line-height: 1.6;
@@ -238,8 +238,8 @@ footer .colophon .lead { color: var(--measure); font-weight: 700; }
   .cover { padding: 1.4rem 1.1rem 1rem; }
   .cover h1.title { font-size: clamp(2.1rem, 12.5vw, 3.2rem); line-height: 1.0; }
   .cover .statement { font-size: 1.12rem; }
-  .cover .manifesto { font-size: 0.72rem; line-height: 1.9; }
-  .issueline { font-size: 0.62rem; letter-spacing: 0.1em; }
+  .issueline { font-size: 0.62rem; letter-spacing: 0.08em; flex-direction: column; align-items: flex-start; gap: 0.15rem; }
+  .issueline .dot { display: none; }
   .contents, .dbwrap { padding-left: 1.1rem; padding-right: 1.1rem; }
   .dept-head .no { font-size: 1.2rem; }
   .dept-head .gloss { display: none; }

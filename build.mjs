@@ -104,7 +104,7 @@ ${body}
 </main>
 <footer><div class="colophon">
   <span class="lead">${SITE}</span> — an academic journal of interactive media arts.
-  Independent research by Ryann Murphy. The credential is the argument.<br>
+  Independent research by Ryann Murphy.<br>
   Set in Bodoni Moda, Newsreader, and Space Mono. Text released under
   <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
   Source on <a href="https://github.com/ryannlynnmurphy/ruler-and-remainder">GitHub</a>.
@@ -454,7 +454,6 @@ const cover = shell({
   <div class="issueline reveal"><span>Vol. I</span><span class="dot">●</span><span>An academic journal of interactive media arts</span><span class="dot">●</span><span>Independent research</span></div>
   <h1 class="title reveal">The<br>Ruler <span class="amp">&amp;</span><br>the <span class="block" aria-hidden="true">▟</span> Remainder</h1>
   <p class="statement reveal">How systems read the world into legible categories — and who pays for what stays invisible. The measure is the ruler. What it cannot hold is the remainder.</p>
-  <div class="manifesto reveal">Independent research.<br><span class="r">No lab signs these pages.</span><br>The credential is the argument.</div>
   <p class="enter reveal"><a href="#books">↓ Enter ↓</a></p>
 </section>
 
