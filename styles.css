@@ -16,7 +16,7 @@
   --measure: #e2300c;      /* fierce vermillion — the ruler's red */
   --remainder: #2f4a47;    /* the deep leftover */
   --maxw: 39rem;
-  --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --display: "Space Grotesk", "Helvetica Neue", Arial, sans-serif;
   --serif: "Newsreader", Georgia, serif;
   --mono: "Space Mono", ui-monospace, monospace;
 }
@@ -87,8 +87,8 @@ main { padding-left: 36px; }
 }
 .issueline .dot { color: var(--measure); }
 .cover h1.title {
-  font-family: var(--display); font-weight: 900; font-size: clamp(2.3rem, 7.5vw, 5rem);
-  line-height: 0.92; letter-spacing: -0.035em; margin: 0 0 1.8rem; text-transform: lowercase;
+  font-family: var(--display); font-weight: 700; font-size: clamp(2.3rem, 7.5vw, 5rem);
+  line-height: 0.96; letter-spacing: -0.02em; margin: 0 0 1.8rem; text-transform: lowercase;
   max-width: 100%;
 }
 .cover h1.title .amp { color: var(--measure); font-style: italic; font-weight: 800; }

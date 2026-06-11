@@ -37,6 +37,12 @@ function firstProse(md) {
   return "";
 }
 
+// strip LaTeX/typesetting artifacts left in manuscripts (\newpage, \vspace{...}, etc.)
+const cleanMd = (s) =>
+  s.replace(/\\(newpage|clearpage|pagebreak|bigskip|medskip|smallskip|noindent|hfill|par|centering)\b[ \t]*/g, "")
+   .replace(/\\vspace\*?\{[^}]*\}/g, "")
+   .replace(/^\s*\\\\\s*$/gm, "");
+
 // footnote apparatus: pull [^n] refs + [^n]: defs into a journal footnotes block
 function footnotes(md) {
   const defs = {};
@@ -88,7 +94,7 @@ function shell({ title, body, bodyClass = "", desc = "", route = "" }) {
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/styles.css">
 </head>
 <body class="${bodyClass}">
@@ -132,7 +138,7 @@ function piece({ title, kicker, md, bodyClass = "", backHref = "/#corpus", backL
   const { withRefs, block } = footnotes(md);
   // strip the leading H1 (we render our own head)
   const noH1 = withRefs.replace(/^\s*#\s+.+?\n/, "");
-  const html = marked.parse(noH1);
+  const html = marked.parse(cleanMd(noH1));
   return shell({
     title,
     bodyClass,
@@ -230,7 +236,7 @@ function xhtml(title, body) {
 }
 function makeEpub(b, md) {
   // render body, inject heading ids, collect a nav
-  let html = marked.parse(md);
+  let html = marked.parse(cleanMd(md));
   const headings = [];
   let i = 0;
   html = html.replace(/<(h[1-3])>([\s\S]*?)<\/\1>/g, (m, tag, inner) => {
