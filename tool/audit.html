@@ -47,11 +47,12 @@
     <button data-example="honest">The honest version</button>
   </div>
 
-  <label class="field"><span class="fk">A — the copy</span>
-  <textarea id="copy" rows="5" placeholder="The marketing or technical copy. A product page, a security claim, a press line."></textarea></label>
-
-  <label class="field"><span class="fk">B — the architecture / code</span>
-  <textarea id="arch" rows="6" placeholder="What the system actually is. Paste the spec, the design doc, or the real code — the audit checks the copy against this."></textarea></label>
+  <div class="twofields">
+    <label class="field"><span class="fk">A — the copy</span>
+    <textarea id="copy" placeholder="The marketing or technical copy. A product page, a security claim, a press line."></textarea></label>
+    <label class="field"><span class="fk">B — the architecture / code</span>
+    <textarea id="arch" placeholder="What the system actually is. Paste the spec, the design doc, or the real code — the audit checks the copy against this."></textarea></label>
+  </div>
 
   <button id="run" class="run">Run the audit</button>
 

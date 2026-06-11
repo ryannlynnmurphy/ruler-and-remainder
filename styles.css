@@ -259,7 +259,14 @@ main { padding-left: 36px; }
 .dbrow a:hover { color: var(--measure); }
 .dbrow .dek { font-size: 0.92rem; color: var(--muted); line-height: 1.45; }
 
-/* ---------- instrument ---------- */
+/* ---------- instrument (wide dashboard, not the reading column) ---------- */
+.piece.toolpage { max-width: 62rem; }
+.toolpage .lede, .toolpage .privacy { max-width: 46rem; }
+#story, #copy, #arch { min-height: 9.5rem; }
+#story { min-height: 12rem; }
+.twofields { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; align-items: start; }
+.twofields .field { margin: 1.1rem 0 0; }
+@media (max-width: 760px) { .twofields { grid-template-columns: 1fr; } }
 .toolpage .lede { font-family: var(--display); font-weight: 400; font-size: 1.3rem; line-height: 1.35; color: var(--ink); }
 .toolpage .lede strong { font-weight: 800; }
 .toolpage .privacy { font-family: var(--mono); font-size: 0.72rem; line-height: 1.7; text-transform: lowercase; letter-spacing: 0.04em; color: var(--muted); border-left: 2px solid var(--measure); padding-left: 0.9rem; margin: 1.2rem 0 2rem; }
