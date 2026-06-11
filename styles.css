@@ -204,6 +204,23 @@ main { padding-left: 36px; }
 .facecell .face { font-family: var(--display); font-size: 2.6rem; font-weight: 700; color: var(--measure); letter-spacing: 0.05em; }
 .facecell .facenote { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.08em; color: var(--muted); }
 
+/* ---------- reality check (bring-your-own-key) ---------- */
+.keyrow { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem; }
+.keyrow .keyfield { flex: 1 1 16rem; margin: 0; }
+.keyrow .modelfield { flex: 0 0 12rem; margin: 0; }
+#key, #model { width: 100%; font-family: var(--mono); font-size: 0.84rem; padding: 0.7rem; border: 2px solid var(--ink); background: var(--paper); color: var(--ink); }
+#key:focus, #model:focus { outline: none; border-color: var(--measure); }
+#model { cursor: pointer; }
+.remember { display: flex; align-items: center; gap: 0.5rem; font-family: var(--mono); font-size: 0.72rem; color: var(--muted); margin: 0.8rem 0 0; }
+.reality { font-family: var(--serif); font-size: 1.05rem; }
+.reality h3 { font-family: var(--display); font-weight: 700; font-size: 1.12rem; margin: 1.9rem 0 0.6rem; color: var(--ink); border-bottom: 1px solid var(--rule); padding-bottom: 0.3rem; }
+.reality p { margin: 0 0 0.9rem; line-height: 1.62; }
+.reality ul { margin: 0 0 0.9rem; padding-left: 1.2rem; }
+.reality li { margin-bottom: 0.4rem; line-height: 1.55; }
+.reality strong { font-weight: 600; }
+.tierflag { font-family: var(--mono); font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 0.1rem 0.35rem; background: var(--paper-2); color: var(--remainder); white-space: nowrap; }
+.tierflag.t-established { color: #3c5a37; } .tierflag.t-exploratory { color: #8a6d1f; } .tierflag.t-speculative { color: var(--measure); }
+
 /* ---------- index / search ---------- */
 .dbwrap { max-width: 50rem; margin: 0 auto; padding: clamp(2rem,6vh,4rem) clamp(1.1rem,5vw,2rem) 5rem; }
 .searchbox { width: 100%; font-family: var(--display); font-weight: 700; font-size: 1.6rem; padding: 0.6rem 0; border: none; border-bottom: 1px solid var(--ink); background: transparent; color: var(--ink); }

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script>document.documentElement.className+=' js';</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Reality Check · The Ruler and the Remainder</title>
+<meta name="description" content="Paste an AI news story; it tells you the likely reality, reading the gap against the corpus and the Cybersecurity Bill of Rights. Bring your own key; runs from your browser.">
+<link rel="canonical" href="https://ruler-and-remainder.vercel.app/reality.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="The Ruler and the Remainder">
+<meta property="og:title" content="The Reality Check · The Ruler and the Remainder">
+<meta property="og:description" content="Paste an AI news story; it tells you the likely reality, against the corpus and the Cybersecurity Bill of Rights. Bring your own key.">
+<meta property="og:url" content="https://ruler-and-remainder.vercel.app/reality.html">
+<meta property="og:image" content="https://ruler-and-remainder.vercel.app/og.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#e2300c">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body class="tool">
+<a class="skip" href="#main">Skip to content</a>
+<div id="measure" aria-hidden="true"></div>
+<div class="ruler-gutter" aria-hidden="true"></div>
+<header class="topbar">
+  <a class="home" href="/">the ruler &amp; the remainder<small>vibe coding &amp; vibe research · r. murphy</small></a>
+  <nav aria-label="Primary"><a href="/#books">Books</a><a href="/#corpus">Corpus</a><a href="/database.html">Index</a><a href="/#instruments">Instruments</a><a href="/method.html">Method</a></nav>
+</header>
+<main id="main">
+<article class="piece toolpage">
+  <a class="back" href="/#instruments">← Instruments</a>
+  <header class="head"><div class="kicker">Instrument · bring your own key</div><h1>The Reality Check</h1></header>
+  <p class="lede">Paste an AI news story. It reads the gap between what the story claims and what is
+  probably true — using the corpus's method (confidence–reality divergence, the three tiers, the
+  remainder) and the twelve articles of the <a href="/essays/cybersecurity-bill-of-rights.html">Cybersecurity Bill of Rights</a> —
+  and tells you the likely reality.</p>
+  <p class="privacy">This one calls a model, so it needs a key. <strong>Bring your own.</strong> The call goes
+  straight from your browser to Anthropic with your key; the key is stored only in your browser (if you tick remember).
+  Nothing — not the story, not the key — touches this site. Data leaves consciously: you opt in, every time.</p>
+
+  <div class="examples"><span>Try one:</span><button id="loadex">A hype-y launch story</button></div>
+
+  <label class="field"><span class="fk">the ai news story</span>
+  <textarea id="story" rows="7" placeholder="Paste a headline + story, or a press release, or a product announcement."></textarea></label>
+
+  <div class="keyrow">
+    <label class="field keyfield"><span class="fk">your anthropic api key</span>
+    <input id="key" type="password" placeholder="sk-ant-…" autocomplete="off"></label>
+    <label class="field modelfield"><span class="fk">model</span>
+    <select id="model">
+      <option value="claude-sonnet-4-6">sonnet 4.6 (balanced)</option>
+      <option value="claude-opus-4-8">opus 4.8 (deepest)</option>
+      <option value="claude-haiku-4-5-20251001">haiku 4.5 (cheapest)</option>
+    </select></label>
+  </div>
+  <label class="remember"><input id="remember" type="checkbox"> remember my key in this browser</label>
+
+  <button id="run" class="run">run the reality check</button>
+  <section id="out" class="results"></section>
+</article>
+</main>
+<footer><div class="colophon">
+  <span class="lead">The Ruler and the Remainder</span> — a personal research corpus.
+  Independent research by Ryann Murphy. Text released under
+  <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+</div></footer>
+<script>
+(function(){var m=document.getElementById('measure');function p(){var h=document.documentElement;var s=h.scrollTop||document.body.scrollTop;var mx=(h.scrollHeight-h.clientHeight)||1;m.style.width=(100*s/mx)+'%';}document.addEventListener('scroll',p,{passive:true});p();})();
+</script>
+<script src="/reality.js"></script>
+</body>
+</html>

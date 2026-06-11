@@ -109,7 +109,7 @@ function shell({ title, body, bodyClass = "", desc = "", route = "" }) {
 ${body}
 </main>
 <footer><div class="colophon">
-  <span class="lead">${SITE}</span> — a personal research corpus. independent research by ryann murphy in ai governance, ai sovereignty &amp; computational neuroscience.<br>
+  <span class="lead">${SITE}</span> — a personal research corpus. independent research by ryann murphy in ai governance, ai sovereignty, computational neuroscience &amp; computational phenomenology.<br>
   Set in Bodoni Moda, Newsreader, and Space Mono. Text released under
   <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
   Source on <a href="https://github.com/ryannlynnmurphy/ruler-and-remainder">GitHub</a>.
@@ -424,6 +424,7 @@ const db = [
   ...BOOKS.filter((b) => b.href).map((b) => ({ title: b.title, url: b.href, kind: "Book", dek: b.dek })),
   ...entries.map((e) => ({ title: e.title, url: e.url, kind: e.kind, dek: e.dek })),
   { title: "The CRD Audit (runnable)", url: "/audit.html", kind: "Instrument", dek: "A deterministic instrument: paste copy and architecture, surface where stated confidence outruns reality." },
+  { title: "The Reality Check (runnable)", url: "/reality.html", kind: "Instrument", dek: "Paste an AI news story; it tells you the likely reality against the corpus and the Cybersecurity Bill of Rights. Bring your own key." },
   ...artifacts,
   ...pages.map((p) => ({ title: p.title, url: p.url, kind: "Apparatus", dek: "" })),
 ];
@@ -500,7 +501,8 @@ const cover = shell({
   <section class="dept" id="instruments">
     <div class="dept-head reveal"><span class="no" aria-hidden="true">03</span><h2>Instruments</h2><span class="gloss">runnable research tools</span></div>
     <div class="items">
-      <a class="item" href="/audit.html"><span class="kicker">Tool · runs in browser</span><h3>The CRD Audit</h3><p>Paste marketing or technical copy; surface where stated confidence outruns architectural reality. Nothing leaves the page.</p></a>
+      <a class="item" href="/audit.html"><span class="kicker">Tool · runs in browser</span><h3>The CRD Audit</h3><p>Paste copy and the architecture; surface where stated confidence contradicts what the system is. Nothing leaves the page.</p></a>
+      <a class="item" href="/reality.html"><span class="kicker">Tool · bring your own key</span><h3>The Reality Check</h3><p>Paste an AI news story; get the likely reality, read against the corpus and the Cybersecurity Bill of Rights.</p></a>
       <a class="item" href="/database.html"><span class="kicker">Tool · searchable</span><h3>The Index</h3><p>Search and filter the whole corpus — books, pamphlets, essays, dialogues, apparatus.</p></a>
     </div>
   </section>
@@ -524,8 +526,9 @@ fs.writeFileSync(path.join(DIST, "index.html"), cover);
 
 // ---------- static assets ----------------------------------------------------
 fs.copyFileSync(path.join(ROOT, "styles.css"), path.join(DIST, "styles.css"));
-if (exists(path.join(ROOT, "tool", "audit.html"))) fs.copyFileSync(path.join(ROOT, "tool", "audit.html"), path.join(DIST, "audit.html"));
-if (exists(path.join(ROOT, "tool", "audit.js"))) fs.copyFileSync(path.join(ROOT, "tool", "audit.js"), path.join(DIST, "audit.js"));
+for (const f of ["audit.html", "audit.js", "reality.html", "reality.js"]) {
+  if (exists(path.join(ROOT, "tool", f))) fs.copyFileSync(path.join(ROOT, "tool", f), path.join(DIST, f));
+}
 
 // favicon — the measure mark
 fs.writeFileSync(path.join(DIST, "favicon.svg"),
