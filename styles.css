@@ -29,13 +29,14 @@ body {
   text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased;
   background-image: radial-gradient(rgba(14,13,10,0.02) 1px, transparent 1px);
   background-size: 4px 4px;
+  overflow-wrap: break-word;
 }
 a { color: var(--ink); text-decoration-thickness: 1px; text-underline-offset: 2px; }
 a:hover { color: var(--measure); }
 
 ::selection { background: var(--measure); color: var(--paper); }
 
-.skip { position: absolute; left: -9999px; top: 0.5rem; z-index: 200; background: var(--ink); color: var(--paper); padding: 0.6rem 1rem; font-family: var(--mono); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.skip { position: absolute; left: -9999px; top: 0.5rem; z-index: 200; background: var(--ink); color: var(--paper); padding: 0.6rem 1rem; font-family: var(--mono); font-size: 0.78rem; text-transform: lowercase; letter-spacing: 0.06em; }
 .skip:focus { left: 0.5rem; }
 
 #measure { position: fixed; top: 0; left: 0; height: 4px; width: 0%; background: var(--measure); z-index: 100; transition: width 0.08s linear; }
@@ -53,7 +54,7 @@ a:hover { color: var(--measure); }
   content: "remainder"; position: absolute; bottom: 1.5rem; left: 50%;
   transform: rotate(180deg); writing-mode: vertical-rl;
   font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.34em;
-  text-transform: uppercase; color: var(--faint);
+  text-transform: lowercase; color: var(--faint);
 }
 @media (max-width: 980px) { .ruler-gutter { display: none; } }
 
@@ -64,10 +65,10 @@ a:hover { color: var(--measure); }
   border-bottom: 2px solid var(--ink); position: sticky; top: 0; z-index: 50;
   background: color-mix(in srgb, var(--paper) 92%, transparent); backdrop-filter: blur(8px);
 }
-.topbar .home { font-family: var(--display); font-weight: 800; font-size: 1.05rem; letter-spacing: -0.01em; text-decoration: none; color: var(--ink); text-transform: uppercase; }
-.topbar .home small { font-family: var(--mono); font-weight: 400; font-size: 0.56rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--measure); display: block; margin-top: 1px; }
+.topbar .home { font-family: var(--display); font-weight: 800; font-size: 1.05rem; letter-spacing: -0.01em; text-decoration: none; color: var(--ink); text-transform: lowercase; }
+.topbar .home small { font-family: var(--mono); font-weight: 400; font-size: 0.56rem; letter-spacing: 0.2em; text-transform: lowercase; color: var(--measure); display: block; margin-top: 1px; }
 .topbar nav { display: flex; gap: 1.1rem; flex-wrap: wrap; }
-.topbar nav a { font-family: var(--mono); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); text-decoration: none; }
+.topbar nav a { font-family: var(--mono); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: lowercase; color: var(--ink); text-decoration: none; }
 .topbar nav a:hover { color: var(--measure); }
 
 main { padding-left: 36px; }
@@ -76,25 +77,25 @@ main { padding-left: 36px; }
 /* ---------- COVER — the statement ---------- */
 .cover { max-width: 64rem; margin: 0 auto; padding: clamp(1.5rem, 5vh, 3.5rem) clamp(1.1rem, 5vw, 3rem) 1.5rem; }
 .issueline {
-  font-family: var(--mono); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+  font-family: var(--mono); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.18em; text-transform: lowercase;
   color: var(--ink); display: flex; gap: 0.8rem; flex-wrap: wrap; align-items: center;
   border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); padding: 0.6rem 0; margin-bottom: 2.5rem;
 }
 .issueline .dot { color: var(--measure); }
 .cover h1.title {
   font-family: var(--display); font-weight: 800; font-size: clamp(2.3rem, 7.5vw, 5rem);
-  line-height: 0.96; letter-spacing: -0.015em; margin: 0 0 1.8rem; text-transform: uppercase;
+  line-height: 0.96; letter-spacing: -0.015em; margin: 0 0 1.8rem; text-transform: lowercase;
   max-width: 100%;
 }
 .cover h1.title .amp { color: var(--measure); font-style: italic; font-weight: 800; }
 .cover h1.title .block { color: var(--measure); }
 .cover .statement {
-  font-family: var(--display); font-weight: 400; font-style: italic;
-  font-size: clamp(1.3rem, 3.4vw, 2rem); line-height: 1.3; max-width: 32rem; color: var(--ink); margin: 0 0 2rem;
+  font-family: var(--serif); font-weight: 400; font-style: normal;
+  font-size: clamp(1.15rem, 2.4vw, 1.5rem); line-height: 1.5; max-width: 34rem; color: var(--ink-soft); margin: 0 0 2rem;
 }
-.cover .manifesto { font-family: var(--mono); font-size: 0.8rem; font-weight: 700; line-height: 2.1; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink); border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); padding: 1rem 0; margin: 0 0 2rem; }
+.cover .manifesto { font-family: var(--mono); font-size: 0.8rem; font-weight: 700; line-height: 2.1; letter-spacing: 0.1em; text-transform: lowercase; color: var(--ink); border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); padding: 1rem 0; margin: 0 0 2rem; }
 .cover .manifesto .r { color: var(--measure); }
-.cover .enter { font-family: var(--mono); font-size: 0.74rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink); }
+.cover .enter { font-family: var(--mono); font-size: 0.74rem; font-weight: 700; letter-spacing: 0.2em; text-transform: lowercase; color: var(--ink); }
 .cover .enter a { color: var(--ink); text-decoration: none; }
 .cover .enter a:hover { color: var(--measure); }
 
@@ -104,13 +105,13 @@ main { padding-left: 36px; }
 .dept-head { display: flex; align-items: baseline; gap: 0.9rem; border-bottom: 1px solid var(--ink); padding-bottom: 0.5rem; margin-bottom: 1.6rem; }
 .dept-head .no { font-family: var(--display); font-weight: 800; font-size: 1.5rem; line-height: 1; color: var(--measure); }
 .dept-head h2 { font-family: var(--display); font-weight: 700; font-size: clamp(1.5rem, 3.4vw, 2rem); letter-spacing: -0.01em; margin: 0; }
-.dept-head .gloss { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-left: auto; text-align: right; }
+.dept-head .gloss { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; text-transform: lowercase; letter-spacing: 0.1em; color: var(--muted); margin-left: auto; text-align: right; }
 
 .items { display: grid; grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
 .item { background: var(--paper); padding: 1.4rem 1.4rem 1.6rem; text-decoration: none; color: var(--ink); display: flex; flex-direction: column; gap: 0.4rem; transition: background 0.15s; }
 .item:hover { background: var(--paper-2); }
 .item:hover h3 { color: var(--measure); }
-.item .kicker { font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--measure); }
+.item .kicker { font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: lowercase; color: var(--measure); }
 .item h3 { font-family: var(--display); font-weight: 700; font-size: 1.25rem; line-height: 1.12; margin: 0; letter-spacing: -0.01em; transition: color 0.15s; }
 .item p { font-size: 0.85rem; line-height: 1.4; color: var(--muted); margin: 0.1rem 0 0; font-family: var(--serif); }
 
@@ -118,10 +119,10 @@ main { padding-left: 36px; }
 .feature { background: var(--paper); padding: 2rem 1.8rem 2.2rem; text-decoration: none; color: var(--ink); display: block; transition: background 0.15s; }
 .feature:hover { background: var(--paper-2); }
 .feature:hover h3 { color: var(--measure); }
-.feature .kicker { font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--measure); }
+.feature .kicker { font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.14em; text-transform: lowercase; color: var(--measure); }
 .feature h3 { font-family: var(--display); font-weight: 800; font-size: clamp(1.7rem, 3.6vw, 2.3rem); line-height: 1.02; letter-spacing: -0.02em; margin: 0.5rem 0 0.7rem; transition: color 0.15s; }
 .feature p { font-size: 0.92rem; color: var(--muted); margin: 0 0 0.9rem; font-family: var(--serif); }
-.feature .read { font-family: var(--mono); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
+.feature .read { font-family: var(--mono); font-size: 0.7rem; font-weight: 700; text-transform: lowercase; letter-spacing: 0.08em; }
 @media (max-width: 680px) { .features { grid-template-columns: 1fr; } }
 
 .tiernote, .by { font-family: var(--mono); font-size: 0.78rem; line-height: 1.6; color: var(--muted); }
@@ -129,12 +130,12 @@ main { padding-left: 36px; }
 
 /* ---------- article / piece ---------- */
 .piece { max-width: var(--maxw); margin: 0 auto; padding: clamp(2rem,6vh,4rem) clamp(1.1rem,5vw,2rem) 5rem; }
-.piece .back, .piece .foot a { font-family: var(--mono); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); text-decoration: none; }
+.piece .back, .piece .foot a { font-family: var(--mono); font-size: 0.7rem; font-weight: 700; text-transform: lowercase; letter-spacing: 0.08em; color: var(--muted); text-decoration: none; }
 .piece .head { border-bottom: 1px solid var(--ink); padding-bottom: 1.4rem; margin: 1.2rem 0 2.2rem; }
-.piece .head .kicker { font-family: var(--mono); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--measure); }
+.piece .head .kicker { font-family: var(--mono); font-size: 0.7rem; font-weight: 700; text-transform: lowercase; letter-spacing: 0.12em; color: var(--measure); }
 .piece h1 { font-family: var(--display); font-weight: 800; font-size: clamp(2.1rem, 5.5vw, 3.4rem); line-height: 1.0; letter-spacing: -0.02em; margin: 0.6rem 0 0; }
-.genre-note { font-family: var(--mono); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--remainder); margin: 0.9rem 0 0; }
-.downloads { font-family: var(--mono); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin: 0 0 2rem; }
+.genre-note { font-family: var(--mono); font-size: 0.7rem; font-weight: 700; text-transform: lowercase; letter-spacing: 0.08em; color: var(--remainder); margin: 0.9rem 0 0; }
+.downloads { font-family: var(--mono); font-size: 0.72rem; font-weight: 700; text-transform: lowercase; letter-spacing: 0.05em; color: var(--muted); margin: 0 0 2rem; }
 .downloads a { color: var(--measure); text-decoration: none; }
 .downloads a:hover { text-decoration: underline; }
 
@@ -144,18 +145,18 @@ main { padding-left: 36px; }
 .prose p { margin: 0 0 1.25rem; }
 .prose a { color: var(--measure); }
 .prose blockquote { margin: 1.7rem 0; padding-left: 1.3rem; border-left: 4px solid var(--measure); font-style: italic; color: var(--ink-soft); font-size: 1.12rem; }
-.prose hr { border: none; text-align: center; margin: 2.8rem 0; }
-.prose hr::before { content: "✶"; font-family: var(--display); color: var(--measure); font-size: 1.2rem; }
+.prose hr { border: none; height: 1px; background: var(--rule); width: 64px; margin: 2.6rem 0; }
+.prose hr::before { content: none; }
 .prose code { font-family: var(--mono); font-size: 0.82em; background: var(--paper-2); padding: 0.1em 0.35em; }
 .prose pre { font-family: var(--mono); font-size: 0.8rem; line-height: 1.5; background: var(--ink); color: #efe9d8; padding: 1rem 1.2rem; overflow-x: auto; }
 .prose pre code { background: none; padding: 0; }
 .prose table { width: 100%; border-collapse: collapse; font-family: var(--serif); font-size: 0.92rem; margin: 1.7rem 0; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
 .prose th, .prose td { text-align: left; padding: 0.55rem 0.7rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
-.prose th { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+.prose th { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; text-transform: lowercase; letter-spacing: 0.06em; }
 .prose img { max-width: 100%; height: auto; }
 .prose sup.fn a { font-family: var(--mono); font-size: 0.7em; color: var(--measure); text-decoration: none; }
 .footnotes { margin-top: 3.5rem; padding-top: 1.4rem; border-top: 1px solid var(--ink); font-size: 0.86rem; color: var(--ink-soft); }
-.footnotes h4 { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--measure); margin: 0 0 0.8rem; }
+.footnotes h4 { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; text-transform: lowercase; letter-spacing: 0.12em; color: var(--measure); margin: 0 0 0.8rem; }
 .footnotes ol { padding-left: 1.4rem; } .footnotes li { margin-bottom: 0.5rem; } .footnotes .mono { font-family: var(--mono); }
 .piece .foot { margin-top: 3.5rem; padding-top: 1.4rem; border-top: 1px solid var(--ink); }
 
@@ -163,7 +164,7 @@ main { padding-left: 36px; }
 .autotheory .prose > p:first-of-type::first-letter,
 .autotheory .prose h1 + p::first-letter { font-family: var(--display); font-weight: 900; float: left; font-size: 3.8rem; line-height: 0.74; padding: 0.4rem 0.55rem 0 0; color: var(--measure); }
 .autotheory .prose h1 { font-family: var(--display); font-weight: 800; font-size: clamp(1.8rem,4.5vw,2.5rem); letter-spacing: -0.02em; line-height: 1.02; margin: 5rem 0 1.5rem; padding-top: 2.6rem; border-top: 1px solid var(--ink); position: relative; }
-.autotheory .prose h1::before { content: "ch."; font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--measure); position: absolute; top: 1.4rem; left: 0; }
+.autotheory .prose h1::before { content: "ch."; font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: lowercase; color: var(--measure); position: absolute; top: 1.4rem; left: 0; }
 
 /* ---------- index / search ---------- */
 .dbwrap { max-width: 50rem; margin: 0 auto; padding: clamp(2rem,6vh,4rem) clamp(1.1rem,5vw,2rem) 5rem; }
@@ -171,12 +172,12 @@ main { padding-left: 36px; }
 .searchbox:focus { outline: none; border-color: var(--measure); }
 .searchbox::placeholder { color: var(--faint); font-style: italic; }
 .filters { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1.2rem 0; }
-.filters button { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; cursor: pointer; border: 2px solid var(--ink); background: transparent; color: var(--ink); padding: 0.3rem 0.7rem; }
+.filters button { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; text-transform: lowercase; letter-spacing: 0.06em; cursor: pointer; border: 2px solid var(--ink); background: transparent; color: var(--ink); padding: 0.3rem 0.7rem; }
 .filters button.active { background: var(--ink); color: var(--paper); }
-.dbcount { font-family: var(--mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 0.5rem 0 1.5rem; }
+.dbcount { font-family: var(--mono); font-size: 0.7rem; text-transform: lowercase; letter-spacing: 0.06em; color: var(--muted); margin: 0.5rem 0 1.5rem; }
 .dbrow { padding: 1rem 0; border-bottom: 1px solid var(--rule); }
 .dbrow.hidden { display: none; }
-.dbrow .meta { font-family: var(--mono); font-size: 0.64rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--measure); }
+.dbrow .meta { font-family: var(--mono); font-size: 0.64rem; font-weight: 700; text-transform: lowercase; letter-spacing: 0.08em; color: var(--measure); }
 .dbrow a { font-family: var(--display); font-weight: 700; font-size: 1.3rem; color: var(--ink); text-decoration: none; display: inline-block; margin: 0.15rem 0; }
 .dbrow a:hover { color: var(--measure); }
 .dbrow .dek { font-size: 0.92rem; color: var(--muted); line-height: 1.45; }
@@ -184,27 +185,27 @@ main { padding-left: 36px; }
 /* ---------- instrument ---------- */
 .toolpage .lede { font-family: var(--display); font-weight: 400; font-size: 1.3rem; line-height: 1.35; color: var(--ink); }
 .toolpage .lede strong { font-weight: 800; }
-.toolpage .privacy { font-family: var(--mono); font-size: 0.72rem; line-height: 1.7; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); border-left: 2px solid var(--measure); padding-left: 0.9rem; margin: 1.2rem 0 2rem; }
+.toolpage .privacy { font-family: var(--mono); font-size: 0.72rem; line-height: 1.7; text-transform: lowercase; letter-spacing: 0.04em; color: var(--muted); border-left: 2px solid var(--measure); padding-left: 0.9rem; margin: 1.2rem 0 2rem; }
 .toolpage .privacy a { text-transform: none; letter-spacing: 0; color: var(--measure); }
 .examples { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; margin: 0 0 0.9rem; }
-.examples span { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
-.examples button, .run { font-family: var(--mono); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; cursor: pointer; border: 2px solid var(--ink); background: transparent; color: var(--ink); padding: 0.4rem 0.85rem; }
+.examples span { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; text-transform: lowercase; letter-spacing: 0.06em; color: var(--muted); }
+.examples button, .run { font-family: var(--mono); font-size: 0.72rem; font-weight: 700; text-transform: lowercase; letter-spacing: 0.04em; cursor: pointer; border: 2px solid var(--ink); background: transparent; color: var(--ink); padding: 0.4rem 0.85rem; }
 .examples button:hover { border-color: var(--measure); color: var(--measure); }
 .field { display: block; margin: 1rem 0; }
-.field .fk { display: block; font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--measure); margin-bottom: 0.4rem; }
+.field .fk { display: block; font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.1em; text-transform: lowercase; color: var(--measure); margin-bottom: 0.4rem; }
 #copy, #arch, #input { width: 100%; font-family: var(--mono); font-size: 0.88rem; line-height: 1.5; padding: 1rem; border: 2px solid var(--ink); background: var(--paper); color: var(--ink); resize: vertical; }
 #copy:focus, #arch:focus, #input:focus { outline: none; border-color: var(--measure); }
 .run { margin-top: 0.9rem; background: var(--ink); color: var(--paper); padding: 0.6rem 1.3rem; }
 .run:hover { background: var(--measure); border-color: var(--measure); }
 .results { margin-top: 2rem; }
-.section-h { font-family: var(--mono); font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink); border-bottom: 1px solid var(--ink); padding-bottom: 0.5rem; margin: 2.5rem 0 1.2rem; }
+.section-h { font-family: var(--mono); font-size: 0.76rem; font-weight: 700; text-transform: lowercase; letter-spacing: 0.1em; color: var(--ink); border-bottom: 1px solid var(--ink); padding-bottom: 0.5rem; margin: 2.5rem 0 1.2rem; }
 .section-h em { font-style: italic; text-transform: none; letter-spacing: 0; color: var(--muted); font-family: var(--serif); font-size: 1rem; }
 .verdict { font-family: var(--display); display: flex; flex-direction: column; gap: 0.2rem; padding: 1rem 1.2rem; border: 2px solid var(--ink); margin-bottom: 1.5rem; }
 .verdict strong { font-weight: 800; font-size: 1.25rem; }
-.verdict span { font-family: var(--mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+.verdict span { font-family: var(--mono); font-size: 0.68rem; text-transform: lowercase; letter-spacing: 0.05em; color: var(--muted); }
 .v-fires { border-color: var(--measure); border-width: 3px; }
 .tier { margin: 1.5rem 0; }
-.tier h3 { font-family: var(--mono); font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; display: flex; align-items: baseline; gap: 0.6rem; margin: 0 0 0.8rem; }
+.tier h3 { font-family: var(--mono); font-size: 0.76rem; font-weight: 700; text-transform: lowercase; letter-spacing: 0.06em; display: flex; align-items: baseline; gap: 0.6rem; margin: 0 0 0.8rem; }
 .tier h3 em { font-style: normal; color: var(--muted); }
 .badge { font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.06em; padding: 0.2rem 0.5rem; color: var(--paper); }
 .tier-fires .badge { background: var(--measure); } .tier-partial .badge { background: #8a6d1f; }
@@ -213,8 +214,8 @@ main { padding-left: 36px; }
 .finding.billf { border-color: var(--measure); border-left-width: 4px; }
 .finding p { margin: 0 0 0.7rem; font-size: 0.96rem; line-height: 1.5; }
 .finding p:last-child { margin-bottom: 0; }
-.finding .k { display: block; font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.25rem; }
-.finding .probe { font-family: var(--mono); font-size: 0.74rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink); }
+.finding .k { display: block; font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.08em; text-transform: lowercase; color: var(--muted); margin-bottom: 0.25rem; }
+.finding .probe { font-family: var(--mono); font-size: 0.74rem; font-weight: 700; text-transform: lowercase; letter-spacing: 0.04em; color: var(--ink); }
 .finding mark { background: #f4cf6a; padding: 0 0.1em; }
 .finding .ev blockquote { font-family: var(--mono); font-size: 0.82rem; line-height: 1.5; margin: 0.3rem 0 0; padding: 0.5rem 0.7rem; background: var(--paper-2); border-left: 2px solid var(--remainder); }
 .empty, .discipline { font-family: var(--mono); font-size: 0.78rem; line-height: 1.7; color: var(--muted); }
@@ -223,7 +224,7 @@ main { padding-left: 36px; }
 
 /* ---------- footer / colophon ---------- */
 footer { border-top: 1px solid var(--ink); margin-top: 4rem; padding: 2.5rem clamp(1.1rem,5vw,3rem) 3.5rem calc(36px + clamp(1.1rem,5vw,3rem)); }
-footer .colophon { max-width: 64rem; margin: 0 auto; font-family: var(--mono); font-size: 0.72rem; line-height: 1.9; letter-spacing: 0.02em; color: var(--muted); text-transform: uppercase; }
+footer .colophon { max-width: 64rem; margin: 0 auto; font-family: var(--mono); font-size: 0.72rem; line-height: 1.9; letter-spacing: 0.02em; color: var(--muted); text-transform: lowercase; }
 footer .colophon a { color: var(--ink); text-transform: none; }
 footer .colophon .lead { color: var(--measure); font-weight: 700; }
 

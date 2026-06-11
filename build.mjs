@@ -96,7 +96,7 @@ function shell({ title, body, bodyClass = "", desc = "", route = "" }) {
 <div id="measure" aria-hidden="true"></div>
 <div class="ruler-gutter" aria-hidden="true"></div>
 <header class="topbar">
-  <a class="home" href="/">The Ruler &amp; the Remainder<small>Independent research · R. Murphy</small></a>
+  <a class="home" href="/">the ruler &amp; the remainder<small>vibe coding &amp; vibe research · r. murphy</small></a>
   <nav aria-label="Primary">${NAV}</nav>
 </header>
 <main id="main">
@@ -453,8 +453,9 @@ const cover = shell({
 <section class="cover">
   <div class="issueline reveal"><span>Vol. I</span><span class="dot">●</span><span>An academic journal of interactive media arts</span><span class="dot">●</span><span>Independent research</span></div>
   <h1 class="title reveal">The<br>Ruler <span class="amp">&amp;</span><br>the <span class="block" aria-hidden="true">▟</span> Remainder</h1>
-  <p class="statement reveal">How systems read the world into legible categories — and who pays for what stays invisible. The measure is the ruler. What it cannot hold is the remainder.</p>
-  <p class="enter reveal"><a href="#books">↓ Enter ↓</a></p>
+  <p class="statement reveal">how systems read the world into legible categories — and who pays for what stays invisible. the measure is the ruler. what it cannot hold is the remainder.</p>
+  <p class="by reveal">ryann murphy — unreasonably good at vibe coding &amp; vibe research. didn't invent it; runs it.</p>
+  <p class="enter reveal"><a href="#books">↓ enter ↓</a></p>
 </section>
 
 <div class="contents">
