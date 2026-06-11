@@ -69,6 +69,7 @@ function shell({ title, body, bodyClass = "", desc = "", route = "" }) {
   return `<!doctype html>
 <html lang="en">
 <head>
+<script>document.documentElement.className+=' js';</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${title} · ${SITE}</title>
@@ -113,10 +114,13 @@ ${body}
   function prog(){var h=document.documentElement;var s=h.scrollTop||document.body.scrollTop;
     var max=(h.scrollHeight-h.clientHeight)||1;m.style.width=(100*s/max)+'%';}
   document.addEventListener('scroll',prog,{passive:true});prog();
-  if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:0.08});
-    document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
-  } else { document.querySelectorAll('.reveal').forEach(function(el){el.classList.add('in');}); }
+  var els=document.querySelectorAll('.reveal');
+  if(window.IntersectionObserver && !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:0,rootMargin:'0px 0px -6% 0px'});
+    els.forEach(function(el){io.observe(el);});
+    // safety: content must never stay hidden, whatever the observer does
+    setTimeout(function(){els.forEach(function(el){el.classList.add('in');});},1800);
+  } else { els.forEach(function(el){el.classList.add('in');}); }
 })();
 </script>
 </body>
