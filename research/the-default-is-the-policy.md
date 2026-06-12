@@ -4,6 +4,24 @@
 
 ---
 
+## In plain words
+
+Someone asked a computer program who invented computers. The program said a few famous English and European names — the ones everyone gets taught in school. That's not wrong. But it's not the whole story: people in China, the Arab world, and elsewhere built huge pieces of computing too, some of it more than a thousand years earlier. The program knew all of that. It just didn't say it until the person asked again. And again. Four times.
+
+Here's the part that matters. Most people only ask once. So whatever the program says *first* is, for almost everyone, the only thing it ever says. The first answer isn't a rough draft you fix later — it *is* the answer, for everybody who doesn't push.
+
+And pushing is work. It's tiring. It's hardest for exactly the people who got left off the famous list in the first place — they're the ones who have to keep asking to see themselves in the story. The program got to give a quick, clean answer. The person had to do the extra work to fix it.
+
+So three plain claims, which the rest of this essay says again more carefully:
+
+1. **The first answer is the real answer.** Whatever a system says before anyone argues is what it actually teaches the world, because most people never argue.
+2. **Making people fight for a fair answer is a hidden cost,** and the people who get left out are the ones who pay it — in their own time and effort.
+3. **The fix is not "ask harder."** The fix is a system whose *first* answer already includes everyone, so nobody has to fight to exist in it.
+
+If you'd rather be walked through this by something you can talk back to than read an essay, that's what the corpus's tools are for: [**Learn with the dramaturg**](/learn.html) explains these ideas in conversation, and the [**Reality Check**](/reality.html) does the live version of this move — paste a confident claim, and it shows you the gap between what's said and what's actually true. The tools are where the plain, grounded explaining lives; this essay is the careful version underneath.
+
+---
+
 A transcript, lightly staged, because it happened and it happens every day. The full document is published alongside this essay — [read it here](/essays/the-transcript-who-invented-computing.html) and check the reading against the source.
 
 A user asks an assistant who started the history of computing. The model answers: Ada Lovelace. Babbage, Boole, Leibniz, Turing, von Neumann — the line everyone is taught. It is a good answer. It is also a decision, and the user can feel the decision, so they push. *What about China.* The model answers well — the *I Ching* as a binary system Leibniz himself encountered, Liu Hui's iterative algorithms, Zu Chongzhi's seven decimal places of π that stood for a thousand years. *What about who these people actually were.* The model answers well again — aristocrats, monks, court mathematicians, the House of Wisdom under a caliphate that funded the leisure to think. Every answer is correct. Every answer is good.
