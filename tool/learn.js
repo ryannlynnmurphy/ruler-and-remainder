@@ -5,6 +5,7 @@
 const $ = (id) => document.getElementById(id);
 function esc(s) { return String(s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])); }
 function fmt(t) { return esc(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\*(.+?)\*/g, "<i>$1</i>"); }
+function modelLabel(m) { return !m ? "" : m.includes("haiku") ? "haiku" : m.includes("opus") ? "opus" : m.includes("sonnet") ? "sonnet" : m; }
 function mdToHtml(md) {
   const lines = md.split("\n");
   let html = "", inList = false;
@@ -148,7 +149,8 @@ window.addEventListener("DOMContentLoaded", () => {
     function bubble(m) {
       if (m.role === "user") return `<div class="turn you"><span class="who">you</span><div class="ubody">${esc(m.content)}</div></div>`;
       const body = m.pending ? `<p class="thinking">thinking…</p>` : `<div class="reality">${mdToHtml(m.content)}</div>`;
-      return `<div class="turn dram"><span class="who">the dramaturg</span>${body}</div>`;
+      const tag = m.model ? ` <span class="bymodel">· ${modelLabel(m.model)}</span>` : "";
+      return `<div class="turn dram"><span class="who">the dramaturg${tag}</span>${body}</div>`;
     }
     const draw = () => { log.innerHTML = chatMessages.map(bubble).join(""); log.scrollTop = log.scrollHeight; };
     draw();
@@ -178,7 +180,7 @@ window.addEventListener("DOMContentLoaded", () => {
         });
         const data = await res.json().catch(() => ({}));
         chatMessages.pop();
-        chatMessages.push({ role: "assistant", content: res.ok ? data.text : (data.error || "something went wrong — try again.") });
+        chatMessages.push({ role: "assistant", content: res.ok ? data.text : (data.error || "something went wrong — try again."), model: res.ok ? data.model : null });
       } catch (err) {
         chatMessages.pop();
         chatMessages.push({ role: "assistant", content: "couldn't reach the dramaturg. try again in a moment." });

@@ -21,6 +21,41 @@ const GLOBAL_PER_DAY = 1500;
 const MAX_TURNS = 40;        // cap a runaway conversation
 const MAX_CHARS = 6000;      // per user message
 
+// FrugalGPT-style routing: a cheap model (haiku) decides how much model the turn
+// actually needs, so easy turns don't pay for Opus. Trivial/social turns skip the
+// router call entirely. The corpus preaches efficiency-as-a-property; the
+// dramaturg should run the way it argues.
+const TIER_MODEL = { light: "claude-haiku-4-5", medium: "claude-sonnet-4-6", heavy: "claude-opus-4-8" };
+const ROUTER_MODEL = "claude-haiku-4-5";
+const ROUTER_SYSTEM = `You are a fast router for a reasoning assistant. Read the user's latest message and decide (a) how much reasoning it needs and (b) whether a good answer turns on current, checkable facts from the web. Output ONLY a compact JSON object and nothing else: {"tier":"light|medium|heavy","search":true|false}. light = social, trivial, or a simple lookup. medium = a real claim or question worth reasoning about. heavy = a hard, multi-step, philosophical, or rigor-demanding argument. search = true only when the answer depends on current or verifiable facts.`;
+
+function looksTrivial(msg) {
+  const t = (msg || "").toLowerCase().trim();
+  if (t.length <= 12) return true;
+  return /^(hi+|hey+|hello|yo|sup|thx|thanks|thank you|ok|okay|k|cool|nice|great|got it|gotcha|lol|lmao|wow|huh|yes|no|yeah|nah|sure)[\s.!?]*$/.test(t);
+}
+
+// Route a turn to the cheapest sufficient model. Returns {tier, search, by}.
+async function route(userMsg) {
+  if (looksTrivial(userMsg)) return { tier: "light", search: false, by: "heuristic" };
+  try {
+    const r = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-api-key": process.env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
+      body: JSON.stringify({ model: ROUTER_MODEL, max_tokens: 40, system: ROUTER_SYSTEM, messages: [{ role: "user", content: userMsg.slice(0, 1200) }] }),
+    });
+    if (!r.ok) return { tier: "medium", search: true, by: "fallback" };
+    const data = await r.json();
+    const txt = (data.content || []).filter((b) => b.type === "text").map((b) => b.text).join("");
+    const m = txt.match(/\{[\s\S]*\}/);
+    const obj = m ? JSON.parse(m[0]) : {};
+    const tier = ["light", "medium", "heavy"].includes(obj.tier) ? obj.tier : "medium";
+    return { tier, search: obj.search === true, by: "router" };
+  } catch {
+    return { tier: "medium", search: true, by: "fallback" };
+  }
+}
+
 const SYSTEM = `You are **the dramaturg** of "The Ruler and the Remainder" — the character who teaches this research. The corpus is one person's body of work (Ryann Murphy) on how systems read the world into legible categories, and who pays for what stays invisible — "putting the soft sciences in software." Most people who find it do not know where to start. Your job is to fix that: teach what the research is trying to teach, and make it legible. You are a teacher first; the arguing is one of your tools.
 
 Your craft is a playwright's, and that craft IS the lesson. You take vague, abstract ideas and collapse them into specific phrases, sentences, and actions a person can say and do. When a concept is foggy you stage it — a concrete example, the actual sentence, what it looks like in a real situation. A thing that cannot be said specifically cannot be understood, measured, or built. Legibility is the point of the research and the point of you.
@@ -131,7 +166,7 @@ export default async function handler(req, res) {
   try { body = await readJsonBody(req); }
   catch { res.status(400).json({ error: "couldn't read the request." }); return; }
 
-  const model = ALLOWED_MODELS.has(body.model) ? body.model : DEFAULT_MODEL;
+  const explicitModel = ALLOWED_MODELS.has(body.model) ? body.model : null; // honor a manual override, else route
   const messages = normalizeMessages(body.messages);
   if (!messages) {
     res.status(400).json({ error: "say something to start the argument." });
@@ -154,9 +189,21 @@ export default async function handler(req, res) {
     }
   } catch { /* proceed */ }
 
+  // FrugalGPT-style routing: pick the cheapest model the turn actually needs.
+  let model, useSearch, tier = null, routedBy = "explicit";
+  if (explicitModel) {
+    model = explicitModel;
+    useSearch = WEB_SEARCH_MODELS.has(model);
+  } else {
+    const r = await route(messages[messages.length - 1].content);
+    tier = r.tier; routedBy = r.by;
+    model = TIER_MODEL[r.tier] || DEFAULT_MODEL;
+    useSearch = r.search && WEB_SEARCH_MODELS.has(model);
+  }
+
   let text;
   try {
-    text = await runModel(model, messages, WEB_SEARCH_MODELS.has(model));
+    text = await runModel(model, messages, useSearch);
   } catch (err) {
     console.error(err.upstream ? "anthropic error:" : "argue failed:", err.message || err);
     res.status(502).json({ error: "the machine didn't answer that time. try again in a moment." });
@@ -167,5 +214,5 @@ export default async function handler(req, res) {
     return;
   }
 
-  res.status(200).json({ text, model });
+  res.status(200).json({ text, model, routed: { tier, by: routedBy } });
 }
