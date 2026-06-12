@@ -67,15 +67,20 @@ const CHIPS = ["so ai is bad for the environment…", "ai is going to take my jo
 window.addEventListener("DOMContentLoaded", () => {
   const stage = $("stage"), cont = $("cont"), back = $("back"), pbar = $("pbar"), mascot = $("mascot");
   let idx = 0;
-  // The Duolingo part dissipates once you've finished it: on return, skip straight
-  // to the live dramaturg (the last screen). "replay the walk" brings it back.
-  // ?chat=1 (used when hosted as the Chat mode of the unified workspace) always
-  // jumps straight to the live dramaturg — no walk.
+  // Three ways in:
+  //  ?chat=1  — hosted as the Chat mode inside the workspace: show the live
+  //             dramaturg chat right here, never the walk, never redirect.
+  //  ?walk=1  — replay: always start the walk from the top.
+  //  default  — first time, walk it; once finished, the home of the work is the
+  //             workspace, so a returning visitor goes straight there.
+  let chatOnly = false, replay = false;
   try {
-    const chatOnly = /[?&]chat=1\b/.test(location.search);
-    if (chatOnly) { document.body.classList.add("chatonly"); idx = screens.length - 1; }
-    else if (localStorage.getItem("rr_walk_complete")) idx = screens.length - 1;
+    chatOnly = /[?&]chat=1\b/.test(location.search);
+    replay = /[?&]walk=1\b/.test(location.search);
   } catch {}
+  if (chatOnly) { document.body.classList.add("chatonly"); idx = screens.length - 1; }
+  else if (replay) { idx = 0; }
+  else { try { if (localStorage.getItem("rr_walk_complete")) { location.replace("/dramaturg.html"); return; } } catch {} }
   let chatMessages = null; // persists across re-renders of the final screen
 
   function tile(cls, name, desc) {
@@ -96,13 +101,17 @@ window.addEventListener("DOMContentLoaded", () => {
         tile("r", "red", "honestly? just a vibe.") +
         `</div></div>`;
     } else if (s.k === "final") {
+      // Finishing the walk lands you in the full workspace. The inline chat only
+      // renders when this page is hosted as the workspace's Chat mode (chatonly).
+      if (!document.body.classList.contains("chatonly")) {
+        try { localStorage.setItem("rr_walk_complete", "1"); } catch {}
+        location.href = "/dramaturg.html";
+        return;
+      }
       html = `<div class="screen final-screen"><h1 class="big">${fmt(s.big)}</h1>` +
         s.body.map((l) => `<p class="line">${fmt(l)}</p>`).join("") +
         `<div id="log" class="log"></div><div id="chips" class="chips"></div>` +
         `<div class="sayrow"><textarea id="say" rows="2" placeholder="bring the dramaturg a claim, a worry, a headline…"></textarea><button id="send" class="run">send</button></div>` +
-        (document.body.classList.contains("chatonly")
-          ? ""
-          : `<p class="finlinks"><a href="/dramaturg.html#lens">open the full workspace ↗</a> · <a href="/corpus">read the corpus ↗</a> · <a href="#" id="replay">↺ replay the walk</a></p>`) +
         `</div>`;
     } else {
       html = `<div class="screen"><h1 class="big${s.book ? " book" : ""}">${fmt(s.big)}</h1>` +
