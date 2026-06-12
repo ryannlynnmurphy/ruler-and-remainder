@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script>document.documentElement.className+=' js';</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Lens — point your research at the world · The Ruler and the Remainder</title>
+<meta name="description" content="Paste anything from the world — a headline, a claim, a paragraph — and read it through your own research corpus. A media-literacy instrument that cites your own work.">
+<link rel="canonical" href="https://ruler-and-remainder.vercel.app/lens.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="The Ruler and the Remainder">
+<meta property="og:title" content="The Lens — point your research at the world">
+<meta property="og:description" content="Read anything through your own research. The media-literacy machine, powered by your corpus.">
+<meta property="og:url" content="https://ruler-and-remainder.vercel.app/lens.html">
+<meta property="og:image" content="https://ruler-and-remainder.vercel.app/og.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#e2300c">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<style>
+*{ box-sizing:border-box; }
+:root{ --ink:#0e0d0a; --paper:#f4f0e6; --verm:#e2300c; --muted:#6c6557; --line:#cfc7b1; }
+body.lens{ margin:0; background:var(--paper); color:var(--ink); font-family:"Newsreader",Georgia,serif; overflow-x:hidden; }
+.lens-top{ display:flex; align-items:baseline; gap:1rem; flex-wrap:wrap; border-bottom:2px solid var(--ink); padding:1rem 1.4rem; }
+.lens-top .brand{ font-family:"Space Grotesk",sans-serif; font-weight:700; font-size:1.15rem; letter-spacing:-0.01em; text-decoration:none; color:var(--ink); }
+.lens-top .brand small{ display:block; font-family:"Space Mono",monospace; font-weight:400; font-size:0.66rem; letter-spacing:0.06em; color:var(--muted); text-transform:uppercase; }
+.lens-top .links{ margin-left:auto; font-family:"Space Mono",monospace; font-size:0.72rem; letter-spacing:0.04em; }
+.lens-top .links a{ color:var(--verm); text-decoration:none; margin-left:1.1rem; }
+@media (max-width:560px){ .lens-top .links{ width:100%; margin-left:0; margin-top:0.35rem; } .lens-top .links a:first-child{ margin-left:0; } }
+
+.wrap{ max-width:760px; margin:0 auto; padding:2.4rem 1.4rem 5rem; }
+.lede{ font-family:"Space Grotesk",sans-serif; font-size:clamp(1.8rem,5vw,2.8rem); font-weight:700; line-height:1.05; letter-spacing:-0.02em; margin:0 0 0.6rem; }
+.lede .v{ color:var(--verm); }
+.sub{ font-size:1.05rem; line-height:1.5; color:var(--muted); margin:0 0 1.8rem; max-width:54ch; }
+
+.composer{ border:2px solid var(--ink); background:#fff; }
+.composer textarea{ width:100%; border:none; resize:vertical; min-height:8rem; padding:1rem 1.1rem; font-family:"Newsreader",serif; font-size:1.08rem; line-height:1.5; background:transparent; color:var(--ink); }
+.composer textarea:focus{ outline:none; }
+.composer .bar{ display:flex; align-items:center; gap:0.8rem; border-top:1px solid var(--line); padding:0.6rem 0.8rem; }
+.composer .hint{ font-family:"Space Mono",monospace; font-size:0.62rem; letter-spacing:0.04em; color:var(--muted); text-transform:uppercase; }
+.btn{ margin-left:auto; font-family:"Space Mono",monospace; font-size:0.74rem; letter-spacing:0.05em; text-transform:uppercase; border:1.5px solid var(--verm); background:var(--verm); color:var(--paper); padding:0.5rem 1.1rem; cursor:pointer; }
+.btn:hover{ background:var(--ink); border-color:var(--ink); }
+.btn:disabled{ opacity:0.5; cursor:default; }
+.chips{ margin-top:1rem; display:flex; flex-wrap:wrap; gap:0.5rem; }
+.chip{ font-family:"Space Mono",monospace; font-size:0.66rem; border:1px solid var(--line); background:#fff; color:var(--ink); padding:0.3rem 0.6rem; cursor:pointer; }
+.chip:hover{ border-color:var(--verm); color:var(--verm); }
+
+.reading{ margin-top:2.4rem; }
+.reading.hidden{ display:none; }
+.src{ font-family:"Space Mono",monospace; font-size:0.66rem; letter-spacing:0.03em; color:var(--muted); border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:0.6rem 0; margin-bottom:1.6rem; }
+.src b{ color:var(--ink); }
+.reading h3{ font-family:"Space Grotesk",sans-serif; font-size:0.78rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--verm); margin:1.8rem 0 0.5rem; }
+.reading p{ font-size:1.08rem; line-height:1.6; margin:0 0 0.9rem; }
+.tier{ display:inline-block; font-family:"Space Mono",monospace; font-size:0.6rem; letter-spacing:0.04em; text-transform:uppercase; padding:0.05rem 0.4rem; border:1px solid; vertical-align:middle; }
+.tier.established{ color:#2c6e49; border-color:#2c6e49; }
+.tier.exploratory{ color:#b06a00; border-color:#b06a00; }
+.tier.speculative{ color:var(--muted); border-color:var(--muted); }
+.cite{ color:var(--verm); font-style:italic; }
+.thinking{ font-family:"Space Mono",monospace; font-size:0.8rem; color:var(--muted); margin-top:2rem; }
+.err{ color:var(--verm); font-family:"Space Mono",monospace; font-size:0.85rem; margin-top:1rem; }
+</style>
+</head>
+<body class="lens">
+<header class="lens-top">
+  <a class="brand" href="/">the lens<small>the ruler &amp; the remainder · point your research at the world</small></a>
+  <div class="links">
+    <a href="/studio">studio ↗</a>
+    <a href="/corpus">corpus ↗</a>
+    <a href="/learn.html">learn ↗</a>
+  </div>
+</header>
+<main class="wrap">
+  <h1 class="lede">read it through <span class="v">your own research.</span></h1>
+  <p class="sub">bring anything from the world — a headline, a hype claim, a paragraph, a press release. the lens reads it against your corpus and tells you what it says, what it hides, and what your own work says about it — cited, and tiered.</p>
+
+  <div class="composer">
+    <textarea id="text" placeholder="paste a headline, a claim, a paragraph from the world…" aria-label="Text to read"></textarea>
+    <div class="bar">
+      <span class="hint">grounded in your corpus</span>
+      <button class="btn" id="go" type="button">hold it to the light</button>
+    </div>
+  </div>
+  <div class="chips" id="chips"></div>
+
+  <div class="reading hidden" id="reading"></div>
+</main>
+<script src="/lens.js"></script>
+</body>
+</html>
