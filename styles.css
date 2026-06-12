@@ -479,6 +479,48 @@ body.chatonly #log { flex: 1 1 auto; min-height: 0; overflow-y: auto; margin: 0.
 body.chatonly #chips, body.chatonly .toolsrow, body.chatonly .sayrow { flex: 0 0 auto; }
 body.chatonly .sayrow { margin-bottom: 1rem; }
 
+/* the workspace greeting — Claude-like: a calm, time-aware hello that rotates a
+   short welcome while the conversation is empty. It stands in for the walk's locked
+   final heading INSIDE the workspace only; the walk itself is never touched. */
+body.chatonly .final-screen .big { display: none; }
+body.chatonly .greet { flex: 0 0 auto; padding: 1.3rem 0 0.5rem; }
+.greet[hidden] { display: none; }
+.greet-tod { font-family: var(--display); font-weight: 600; font-size: clamp(1.45rem, 3.4vw, 2.1rem); letter-spacing: -0.01em; color: var(--ink); margin: 0 0 0.25rem; }
+.greet-rot { font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.03em; color: var(--measure); margin: 0; min-height: 1.2em; }
+.greet-rot.in { animation: greet-fade 0.5s ease; }
+@keyframes greet-fade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+
+/* answer footer: copy + the plain-language routing note (legibility is the point) */
+.ansbar { display: flex; align-items: center; gap: 0.85rem; margin: 0.6rem 0 0.1rem; flex-wrap: wrap; }
+.ans-act { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); background: none; border: 1px solid var(--rule); padding: 0.22rem 0.55rem; cursor: pointer; }
+.ans-act:hover { color: var(--measure); border-color: var(--measure); }
+.routed { font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.01em; color: var(--faint); }
+
+/* receipts: the corpus passages + web pages an answer actually stood on */
+.sources { margin: 0.55rem 0 0.1rem; }
+.sources summary { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); cursor: pointer; list-style: none; outline: none; }
+.sources summary::-webkit-details-marker { display: none; }
+.sources summary::before { content: "▸ "; }
+.sources[open] summary::before { content: "▾ "; }
+.sources ul { list-style: none; margin: 0.5rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.35rem; }
+.sources li { display: flex; align-items: baseline; gap: 0.5rem; font-size: 0.86rem; }
+.sources a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--rule); }
+.sources a:hover { color: var(--measure); border-color: var(--measure); }
+.src-k { font-family: var(--mono); font-size: 0.54rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); }
+
+/* links, inline code, ordered lists, and quotes inside Dorothy's prose */
+.reality a { color: var(--measure); text-decoration: none; border-bottom: 1px solid currentColor; }
+.reality a:hover { color: var(--ink); }
+.reality code { font-family: var(--mono); font-size: 0.86em; background: var(--paper-2); padding: 0.05rem 0.3rem; border-radius: 2px; }
+.reality ol { margin: 0 0 0.9rem; padding-left: 1.3rem; }
+.reality ol li { margin-bottom: 0.4rem; line-height: 1.55; }
+.reality blockquote { margin: 0 0 0.9rem; padding-left: 0.9rem; border-left: 2px solid var(--measure); color: var(--muted); }
+
+/* composer: send doubles as stop while streaming; the textarea grows with content */
+body.chatonly .sayrow #say { resize: none; overflow-y: auto; max-height: 168px; }
+.run.stopping { background: var(--measure); border-color: var(--measure); }
+.run.stopping:hover { background: var(--ink); border-color: var(--ink); }
+
 /* AI news tool — a live feed that develops in the conversation, story by story */
 .newsfeed { display: flex; flex-direction: column; gap: 0.7rem; margin: 0.3rem 0; }
 .newscard { border: 1px solid var(--rule); background: var(--paper); overflow: hidden; }

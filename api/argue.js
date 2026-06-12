@@ -194,7 +194,25 @@ async function pipeAnthropicStream(r, send) {
   return { stopReason, assistantContent: blocks.filter(Boolean), hadText };
 }
 
-async function streamAnswer(res, { model, messages, useSearch, system, thinkingOn, meta }) {
+// Pull the web pages a web_search turn actually returned, so the answer can show
+// its receipts. Server-tool result blocks carry { type:"web_search_tool_result",
+// content:[{ type:"web_search_result", title, url }] }.
+function collectWebSources(blocks, out) {
+  for (const b of blocks || []) {
+    if (b && b.type === "web_search_tool_result" && Array.isArray(b.content)) {
+      for (const r of b.content) {
+        if (r && r.type === "web_search_result" && r.url) out.push({ title: r.title || r.url, url: r.url });
+      }
+    }
+  }
+}
+function dedupeByUrl(list) {
+  const seen = new Set(), out = [];
+  for (const s of list) { if (s.url && !seen.has(s.url)) { seen.add(s.url); out.push(s); } }
+  return out.slice(0, 8);
+}
+
+async function streamAnswer(res, { model, messages, useSearch, system, thinkingOn, effort, meta }) {
   res.setHeader("content-type", "text/event-stream; charset=utf-8");
   res.setHeader("cache-control", "no-cache, no-transform");
   res.setHeader("connection", "keep-alive");
@@ -202,9 +220,16 @@ async function streamAnswer(res, { model, messages, useSearch, system, thinkingO
   if (res.flushHeaders) res.flushHeaders();
   const send = (event, data) => { try { res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`); } catch {} };
   send("meta", meta);
-  const base = { model, max_tokens: 3200, system, stream: true };
-  if (thinkingOn) base.thinking = { type: "enabled", budget_tokens: 1800 };
+  // Adaptive thinking — NOT { type:"enabled", budget_tokens } which 400s on
+  // claude-opus-4-8 (the heavy tier). display:"summarized" because Opus defaults
+  // thinking display to "omitted", which would leave the "watch it think" panel
+  // empty. effort scales reasoning depth to the routed tier (haiku rejects it,
+  // so it stays null there).
+  const base = { model, max_tokens: 6000, system, stream: true };
+  if (thinkingOn) base.thinking = { type: "adaptive", display: "summarized" };
+  if (effort) base.output_config = { effort };
   if (useSearch) base.tools = [{ type: "web_search_20260209", name: "web_search" }];
+  const webSources = []; // the pages Dorothy actually read this turn — handed back as receipts
   let convo = messages;
   try {
     for (let turn = 0; turn < 4; turn++) {
@@ -220,12 +245,17 @@ async function streamAnswer(res, { model, messages, useSearch, system, thinkingO
         break;
       }
       const { stopReason, assistantContent } = await pipeAnthropicStream(r, send);
+      collectWebSources(assistantContent, webSources);
       if (stopReason === "pause_turn") { convo = [...convo, { role: "assistant", content: assistantContent }]; continue; }
       break;
     }
   } catch (e) {
     send("error", { message: "the machine dropped the line. try again in a moment." });
   }
+  // receipts: the corpus passages grounded in + any web pages read
+  const corpus = (meta.grounded && meta.grounded.sources) || [];
+  const web = dedupeByUrl(webSources);
+  if (corpus.length || web.length) send("sources", { corpus, web });
   send("done", { model });
   res.end();
 }
@@ -298,11 +328,14 @@ export default async function handler(req, res) {
   // Extended thinking on the turns that warrant it (medium/heavy), so the user can
   // watch the dramaturg reason. Light/social turns stay fast and quiet.
   const thinkingOn = explicitModel ? (model !== "claude-haiku-4-5") : (tier === "medium" || tier === "heavy");
+  // effort scales reasoning depth to the model. haiku rejects the param, so it
+  // stays null there; opus → high (the hard turns), sonnet → medium (the common case).
+  const effort = model === "claude-opus-4-8" ? "high" : model === "claude-sonnet-4-6" ? "medium" : null;
 
   // Streaming path: forward thinking + text live. The non-streaming JSON path below
   // is preserved for any caller that doesn't ask to stream.
   if (body.stream === true) {
-    await streamAnswer(res, { model, messages, useSearch, system, thinkingOn, meta: { model, routed: { tier, by: routedBy }, grounded } });
+    await streamAnswer(res, { model, messages, useSearch, system, thinkingOn, effort, meta: { model, routed: { tier, by: routedBy }, grounded } });
     return;
   }
 

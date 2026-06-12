@@ -6,20 +6,49 @@ const $ = (id) => document.getElementById(id);
 function esc(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
 function fmt(t) { return esc(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\*(.+?)\*/g, "<i>$1</i>"); }
 function modelLabel(m) { return !m ? "" : m.includes("haiku") ? "haiku" : m.includes("opus") ? "opus" : m.includes("sonnet") ? "sonnet" : m; }
+// legibility: say plainly why a turn went where it did. the router is the method
+// made visible — light turns stay quiet so the note never clutters small talk.
+function routeWhy(r) {
+  if (!r || !r.tier) return "";
+  if (r.by === "explicit") return "you chose this model";
+  if (r.tier === "heavy") return "routed up to the strongest model — this called for hard reasoning";
+  if (r.tier === "medium") return "routed to the middle model — a real question worth reasoning about";
+  return "";
+}
+// receipts: the corpus passages and web pages the answer actually stood on.
+function sourcesBlock(s) {
+  if (!s) return "";
+  const corpus = (s.corpus || []).map((t) => `<li><a href="/corpus" target="_blank" rel="noopener">${esc(t)}</a><span class="src-k">corpus</span></li>`);
+  const web = (s.web || []).map((w) => `<li><a href="${esc(w.url)}" target="_blank" rel="noopener">${esc(w.title || w.url)}</a><span class="src-k">web</span></li>`);
+  const items = corpus.concat(web).join("");
+  if (!items) return "";
+  const n = (s.corpus ? s.corpus.length : 0) + (s.web ? s.web.length : 0);
+  return `<details class="sources"><summary>sources · ${n}</summary><ul>${items}</ul></details>`;
+}
+let greetTimer = null; // the workspace greeting's rotation timer — module scope so it never doubles up
 function mdToHtml(md) {
   const lines = md.split("\n");
-  let html = "", inList = false;
+  let html = "", listType = null, inQuote = false;
   const inline = (t) => esc(t)
-    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/\*(.+?)\*/g, "<em>$1</em>")
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.+?)\*/g, "<em>$1</em>")
+    // links Dorothy writes when she web_searches — open out, never trap the reader in the iframe
+    .replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
     .replace(/\[(established|exploratory|speculative|unverifiable)\]/gi, '<span class="tierflag t-$1">$1</span>');
-  for (let raw of lines) {
+  const closeList = () => { if (listType) { html += `</${listType}>`; listType = null; } };
+  const closeQuote = () => { if (inQuote) { html += "</blockquote>"; inQuote = false; } };
+  for (const raw of lines) {
     const l = raw.trim();
-    if (!l) { if (inList) { html += "</ul>"; inList = false; } continue; }
-    if (l.startsWith("## ")) { if (inList) { html += "</ul>"; inList = false; } html += `<h3>${inline(l.slice(3))}</h3>`; }
-    else if (l.startsWith("- ") || l.startsWith("• ") || l.startsWith("— ")) { if (!inList) { html += "<ul>"; inList = true; } html += `<li>${inline(l.slice(2))}</li>`; }
-    else { if (inList) { html += "</ul>"; inList = false; } html += `<p>${inline(l)}</p>`; }
+    let m;
+    if (!l) { closeList(); closeQuote(); continue; }
+    if (l.startsWith("## ")) { closeList(); closeQuote(); html += `<h3>${inline(l.slice(3))}</h3>`; }
+    else if (l.startsWith("> ")) { closeList(); if (!inQuote) { html += "<blockquote>"; inQuote = true; } html += `<p>${inline(l.slice(2))}</p>`; }
+    else if ((m = l.match(/^(\d+)\.\s+(.*)/))) { closeQuote(); if (listType !== "ol") { closeList(); html += "<ol>"; listType = "ol"; } html += `<li>${inline(m[2])}</li>`; }
+    else if (l.startsWith("- ") || l.startsWith("• ") || l.startsWith("— ")) { closeQuote(); if (listType !== "ul") { closeList(); html += "<ul>"; listType = "ul"; } html += `<li>${inline(l.slice(2))}</li>`; }
+    else { closeList(); closeQuote(); html += `<p>${inline(l)}</p>`; }
   }
-  if (inList) html += "</ul>";
+  closeList(); closeQuote();
   return html;
 }
 
@@ -117,6 +146,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const d = e.data || {};
     if (d.type === "rr-new") newChat();
     else if (d.type === "rr-load" && d.id) loadChat(d.id);
+    else if (d.type === "rr-deleted" && d.id === sessionId) newChat(); // the open one was deleted — start fresh
   });
 
   function tile(cls, name, desc) {
@@ -146,9 +176,10 @@ window.addEventListener("DOMContentLoaded", () => {
       }
       html = `<div class="screen final-screen"><h1 class="big">${fmt(s.big)}</h1>` +
         s.body.map((l) => `<p class="line">${fmt(l)}</p>`).join("") +
-        `<div id="log" class="log"></div><div id="chips" class="chips"></div>` +
+        `<div id="greet" class="greet" hidden></div>` +
+        `<div id="log" class="log" role="log" aria-live="polite"></div><div id="chips" class="chips"></div>` +
         `<div class="toolsrow"><button id="toolsbtn" class="toolsbtn" type="button" aria-expanded="false">⊕ tools</button><div id="toolspanel" class="toolspanel" hidden></div></div>` +
-        `<div class="sayrow"><textarea id="say" rows="2" placeholder="bring the dramaturg a claim, a worry, a headline…"></textarea><button id="send" class="run">send</button></div>` +
+        `<div class="sayrow"><textarea id="say" rows="2" aria-label="message to dorothy" placeholder="bring the dramaturg a claim, a worry, a headline…"></textarea><button id="send" class="run" aria-label="send">send</button></div>` +
         `</div>`;
     } else {
       html = `<div class="screen"><h1 class="big${s.book ? " book" : ""}">${fmt(s.big)}</h1>` +
@@ -217,7 +248,7 @@ window.addEventListener("DOMContentLoaded", () => {
         `<div class="nc-actions">${btn}${link}</div>${read}</div></div>`;
     }
 
-    function bubble(m) {
+    function bubble(m, i) {
       if (m.role === "user") return `<div class="turn you"><span class="who">you</span><div class="ubody">${esc(m.content)}</div></div>`;
       if (m.kind === "news") {
         let inner;
@@ -232,12 +263,46 @@ window.addEventListener("DOMContentLoaded", () => {
       if (m.thinking) inner += `<details class="thinkblock"${m.streaming ? " open" : ""}><summary>thinking</summary><div class="thinktext">${esc(m.thinking)}</div></details>`;
       if (m.content) inner += `<div class="reality">${mdToHtml(m.content)}</div>`;
       else if (!m.thinking && (m.pending || m.streaming)) inner += `<p class="thinking">thinking…</p>`;
+      // once a real answer has settled (m.model is set on API turns, not on the canned
+      // welcome or slash notices): copy it, see why it routed where it did, check its sources
+      if (m.content && m.model && !m.streaming && !m.pending) {
+        const why = routeWhy(m.routed);
+        inner += `<div class="ansbar"><button class="ans-act" type="button" data-copy="${i}">copy</button>` +
+          (why ? `<span class="routed">${esc(why)}</span>` : "") + `</div>` + sourcesBlock(m.sources);
+      }
       return `<div class="turn dram"><span class="who">dorothy${tag}</span>${inner}</div>`;
     }
     // The conversation develops inside a fixed brick; we never auto-scroll the
     // user (no jump-to-bottom). On send we bring the new turn to the top once,
     // then leave the scroll to them — like Claude.
-    const draw = () => { log.innerHTML = chatMessages.map(bubble).join(""); };
+    let aborter = null;        // set while a turn streams; lets the send button double as "stop"
+    let greetFreshState = null;
+    // Claude-like empty state: a calm, time-aware hello with a short rotating
+    // welcome, shown only while no one has spoken yet. Collapses once the chat starts.
+    function renderGreeting() {
+      const g = $("greet"); if (!g) return;
+      const fresh = !chatMessages.some((m) => m.role === "user");
+      if (fresh === greetFreshState) return;       // only rebuild on a real transition
+      greetFreshState = fresh;
+      if (greetTimer) { clearInterval(greetTimer); greetTimer = null; }
+      if (!fresh) { g.hidden = true; document.body.classList.remove("fresh"); return; }
+      g.hidden = false; document.body.classList.add("fresh");
+      const h = new Date().getHours();
+      const tod = h < 5 ? "still up" : h < 12 ? "good morning" : h < 17 ? "good afternoon" : "good evening";
+      const returning = readSessions().some((s) => s.id !== sessionId);
+      const lines = returning
+        ? ["welcome back.", "good to see you again.", "pick up where you left off.", "ready when you are."]
+        : ["where do you want to start?", "ask me anything — i'll tier it.", "bring me a claim you don't trust.", "there's no wrong place to begin."];
+      g.innerHTML = `<p class="greet-tod">${tod}.</p><p class="greet-rot" id="greetrot"></p>`;
+      const rot = $("greetrot"); let i = 0;
+      const tick = () => {
+        if (!rot.isConnected) { clearInterval(greetTimer); greetTimer = null; return; }
+        rot.textContent = lines[i % lines.length];
+        rot.classList.remove("in"); void rot.offsetWidth; rot.classList.add("in"); i++;
+      };
+      tick(); greetTimer = setInterval(tick, 3800);
+    }
+    const draw = () => { log.innerHTML = chatMessages.map((m, i) => bubble(m, i)).join(""); renderGreeting(); };
     redrawChat = draw;
     const scrollIntoTop = (sel) => {
       requestAnimationFrame(() => {
@@ -286,8 +351,18 @@ window.addEventListener("DOMContentLoaded", () => {
       it.reading_pending = false; draw(); persistChat();
     }
 
-    // one delegated handler on the log (survives redraws) for the news cards
+    // one delegated handler on the log (survives redraws): copy an answer, or the news cards
     log.addEventListener("click", (e) => {
+      const cp = e.target.closest(".ans-act[data-copy]");
+      if (cp) {
+        const m = chatMessages[+cp.getAttribute("data-copy")];
+        if (m && m.content && navigator.clipboard) {
+          navigator.clipboard.writeText(m.content)
+            .then(() => { cp.textContent = "copied"; setTimeout(() => { cp.textContent = "copy"; }, 1400); })
+            .catch(() => {});
+        }
+        return;
+      }
       const btn = e.target.closest(".nc-btn[data-news]");
       if (!btn) return;
       const msg = chatMessages.find((x) => x.kind === "news" && String(x.nid) === btn.getAttribute("data-msg"));
@@ -295,7 +370,11 @@ window.addEventListener("DOMContentLoaded", () => {
       if (it) runReality(it);
     });
 
-    sendBtn.onclick = send;
+    // the send button doubles as "stop" mid-stream; Enter sends, Shift+Enter newlines
+    const autoGrow = () => { sayEl.style.height = "auto"; sayEl.style.height = Math.min(sayEl.scrollHeight, 168) + "px"; };
+    function onComposerBtn() { if (aborter) aborter.abort(); else send(); }
+    sendBtn.onclick = onComposerBtn;
+    sayEl.addEventListener("input", autoGrow);
     sayEl.onkeydown = (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } };
 
     // tools: one reveal of everything the dramaturg can do. Most run in this same
@@ -324,7 +403,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     async function send() {
       const text = sayEl.value.trim();
-      if (!text || sendBtn.disabled) return;
+      if (!text || aborter) return;
       // routing: the chat is the one interface, but /lens or /studio opens the
       // deeper standalone tool when someone explicitly wants it.
       const slash = text.match(/^\/(lens|studio|chat)\b\s*([\s\S]*)$/i);
@@ -337,8 +416,9 @@ window.addEventListener("DOMContentLoaded", () => {
         try { (window.top || window).location.href = url; } catch (e) { location.href = url; }
         return;
       }
-      sendBtn.disabled = true; sendBtn.textContent = "…"; // guard FIRST, before any push (re-entry race)
-      sayEl.value = ""; chips.style.display = "none";
+      aborter = new AbortController();                   // lock FIRST (re-entry race) — also enables "stop"
+      sendBtn.textContent = "stop"; sendBtn.classList.add("stopping");
+      sayEl.value = ""; autoGrow(); chips.style.display = "none";
       chatMessages.push({ role: "user", content: text });
       const pend = { role: "assistant", content: "", thinking: "", pending: true, streaming: true };
       chatMessages.push(pend);
@@ -354,7 +434,7 @@ window.addEventListener("DOMContentLoaded", () => {
       try {
         const res = await fetch("/api/argue", {
           method: "POST", headers: { "content-type": "application/json" },
-          body: JSON.stringify({ messages: history, stream: true }),
+          body: JSON.stringify({ messages: history, stream: true }), signal: aborter.signal,
         });
         if (!res.ok || !res.body) {
           let err = "something went wrong — try again.";
@@ -380,7 +460,9 @@ window.addEventListener("DOMContentLoaded", () => {
               let d; try { d = JSON.parse(dataStr); } catch { continue; }
               if (ev === "thinking") { pend.thinking += d.delta || ""; flush(); }
               else if (ev === "text") { pend.content += d.delta || ""; pend.pending = false; flush(); }
-              else if (ev === "meta" || ev === "done") { if (d.model) pend.model = d.model; }
+              else if (ev === "meta") { if (d.model) pend.model = d.model; if (d.routed) pend.routed = d.routed; }
+              else if (ev === "sources") { pend.sources = d; }
+              else if (ev === "done") { if (d.model) pend.model = d.model; }
               else if (ev === "error") { streamErr = d.message || "the machine hit an error."; }
             }
           }
@@ -388,10 +470,11 @@ window.addEventListener("DOMContentLoaded", () => {
           if (!pend.content && !pend.thinking) pend.content = "the machine returned nothing readable. try again.";
         }
       } catch (err) {
-        if (!pend.content) pend.content = "couldn't reach the dramaturg. try again in a moment.";
+        if (err && err.name === "AbortError") { if (!pend.content && !pend.thinking) pend.content = "_(stopped)_"; }
+        else if (!pend.content) pend.content = "couldn't reach the dramaturg. try again in a moment.";
       } finally {
         pend.pending = false; pend.streaming = false;
-        sendBtn.disabled = false; sendBtn.textContent = "send"; draw(); persistChat(); sayEl.focus();
+        aborter = null; sendBtn.textContent = "send"; sendBtn.classList.remove("stopping"); draw(); persistChat(); sayEl.focus();
       }
     }
   }

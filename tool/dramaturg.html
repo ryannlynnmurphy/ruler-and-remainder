@@ -48,6 +48,13 @@ body{ margin:0; background:var(--ink); color:var(--paper); font-family:"Space Gr
 .hist{ flex:1 1 auto; overflow-y:auto; min-height:0; padding:0 0.5rem 1rem; }
 .hist .it{ display:block; width:100%; text-align:left; border:0; background:none; cursor:pointer; padding:0.55rem 0.6rem; color:#cfc8b8; border-radius:3px; border-left:2px solid transparent; }
 .hist .it:hover{ background:#201e16; color:var(--paper); }
+.hist .it-row{ display:flex; align-items:stretch; border-radius:3px; }
+.hist .it-row:hover{ background:#201e16; }
+.hist .it-row .it{ flex:1 1 auto; min-width:0; }
+.hist .it-row:hover .it{ background:none; }
+.it-del{ flex:0 0 auto; appearance:none; background:none; border:0; color:var(--muted); cursor:pointer; padding:0 0.6rem; font-size:1.05rem; line-height:1; opacity:0; transition:opacity 0.12s, color 0.12s; }
+.it-row:hover .it-del{ opacity:1; }
+.it-del:hover{ color:var(--verm); }
 .hist .it b{ display:block; font-weight:500; font-size:0.84rem; line-height:1.25; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .hist .it time{ font-family:"Space Mono",monospace; font-size:0.56rem; letter-spacing:0.04em; color:var(--muted); }
 .hist .empty{ font-family:"Space Mono",monospace; font-size:0.64rem; color:var(--muted); padding:0.6rem; line-height:1.5; }
@@ -115,6 +122,8 @@ body{ margin:0; background:var(--ink); color:var(--paper); font-family:"Space Gr
   var hist = document.getElementById("hist");
   var SKEY = "rr_sessions";
   function read(){ try { return JSON.parse(localStorage.getItem(SKEY) || "[]"); } catch(e){ return []; } }
+  function write(a){ try { localStorage.setItem(SKEY, JSON.stringify(a)); } catch(e){} }
+  function remove(id){ write(read().filter(function(s){ return s.id !== id; })); tell({ type: "rr-deleted", id: id }); render(); }
   function ago(t){
     var s = Math.max(0, (Date.now() - t) / 1000);
     if (s < 60) return "just now";
@@ -129,13 +138,19 @@ body{ margin:0; background:var(--ink); color:var(--paper); font-family:"Space Gr
     if (!ss.length){ hist.innerHTML = '<p class="empty">your conversations show up here once you start talking.</p>'; return; }
     hist.innerHTML = "";
     ss.forEach(function(s){
+      var row = document.createElement("div"); row.className = "it-row";
       var b = document.createElement("button");
       b.className = "it"; b.type = "button";
       var t = document.createElement("b"); t.textContent = s.title || "conversation";
       var w = document.createElement("time"); w.textContent = ago(s.updatedAt || Date.now());
       b.appendChild(t); b.appendChild(w);
       b.addEventListener("click", function(){ tell({ type: "rr-load", id: s.id }); closeNav(); });
-      hist.appendChild(b);
+      var del = document.createElement("button");
+      del.className = "it-del"; del.type = "button"; del.textContent = "×";
+      del.setAttribute("aria-label", "delete conversation"); del.title = "delete";
+      del.addEventListener("click", function(ev){ ev.stopPropagation(); remove(s.id); });
+      row.appendChild(b); row.appendChild(del);
+      hist.appendChild(row);
     });
   }
   document.getElementById("newbtn").addEventListener("click", function(){ tell({ type: "rr-new" }); closeNav(); });
