@@ -24,6 +24,9 @@
   var AUTHORS = ["human", "co", "ai"];
 
   var state = { convId: null, messages: [{ role: "assistant", content: OPENING }] };
+  var studioMode = "argue";
+  var selection = new Set();
+  var MODE_LABEL = { walkthrough: "scene walkthrough", synthesis: "synthesis", plan: "plan scaffold", critique: "critique" };
 
   var $ = function (id) { return document.getElementById(id); };
   var thread = $("thread"), sayEl = $("say"), statusEl = $("status");
@@ -39,6 +42,29 @@
     statusEl.textContent = msg ? "· " + msg : "";
     if (msg) setTimeout(function () { if (statusEl.textContent === "· " + msg) statusEl.textContent = ""; }, 4500);
   }
+  // light markdown for workshop/dramaturg artifacts: ## → h4, [tier] → badge, (cite) emphasized
+  function renderInlineTiers(container, line) {
+    var re = /\[(established|exploratory|speculative)\]|\(([^)]{2,70})\)/gi, last = 0, m;
+    while ((m = re.exec(line))) {
+      if (m.index > last) container.appendChild(document.createTextNode(line.slice(last, m.index)));
+      if (m[1]) container.appendChild(el("span", "tier " + m[1].toLowerCase(), m[1].toLowerCase()));
+      else { var c = el("span", null, "(" + m[2] + ")"); c.style.cssText = "color:var(--verm);font-style:italic;"; container.appendChild(c); }
+      last = re.lastIndex;
+    }
+    if (last < line.length) container.appendChild(document.createTextNode(line.slice(last)));
+  }
+  function renderProse(container, text) {
+    String(text).split("\n").forEach(function (raw) {
+      var line = raw.replace(/\s+$/, "");
+      if (!line) return;
+      var h = line.match(/^#{1,4}\s+(.+)$/);
+      if (h) { container.appendChild(el("h4", null, h[1].replace(/[*`]/g, ""))); return; }
+      var p = el("p"); p.style.cssText = "margin:0 0 0.6rem;line-height:1.5;";
+      renderInlineTiers(p, line.replace(/^[-*]\s+/, "• ").replace(/\*\*/g, "").replace(/[*`]/g, ""));
+      container.appendChild(p);
+    });
+  }
+
   function label(t) { return el("label", null, t); }
   function select(opts, def) {
     var s = document.createElement("select");
@@ -76,7 +102,12 @@
       var isUser = m.role === "user";
       var wrap = el("div", "msg " + (isUser ? "user" : "dram") + (m.pending ? " pending" : ""));
       wrap.appendChild(el("div", "who", isUser ? "you" : "the dramaturg"));
-      wrap.appendChild(el("div", "body", m.display != null ? m.display : (m.content || (m.pending ? "thinking…" : ""))));
+      if (m.isWorkshop && m.content) {
+        if (m.wsmeta) wrap.appendChild(el("div", "wsmeta", m.wsmeta));
+        var pb = el("div", "body"); renderProse(pb, m.content); wrap.appendChild(pb);
+      } else {
+        wrap.appendChild(el("div", "body", m.display != null ? m.display : (m.content || (m.pending ? "thinking…" : ""))));
+      }
       if (m.grounded && m.grounded.length) wrap.appendChild(el("div", "meta", "grounded in: " + m.grounded.join(" · ") + (m.groundMode ? " · " + m.groundMode + " search" : "")));
       if (m.model) wrap.appendChild(el("div", "meta", "the dramaturg · " + m.model));
       if (!isUser && !m.pending && m.content && i > 0) {
@@ -296,7 +327,13 @@
         c.appendChild(el("div", "t", it.title));
         c.appendChild(head);
         c.title = it.summary || "";
-        c.addEventListener("click", function () { viewItem(it.id); });
+        if (selection.has(it.id)) c.classList.add("sel");
+        c.addEventListener("click", function () {
+          if (studioMode === "argue") { viewItem(it.id); return; }
+          if (selection.has(it.id)) { selection.delete(it.id); c.classList.remove("sel"); }
+          else { selection.add(it.id); c.classList.add("sel"); }
+          updateRunmsg();
+        });
         box.appendChild(c);
       });
     }).catch(function () {});
@@ -346,6 +383,44 @@
       .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); });
   }
 
+  // ---- workflow modes -------------------------------------------------------
+  function updateRunmsg() {
+    var n = selection.size;
+    var need = studioMode === "synthesis" ? "documents (2+)" : "a document";
+    $("runmsg").textContent = n ? (n + " selected — run " + (MODE_LABEL[studioMode] || studioMode)) : ("select " + need + " from the corpus →");
+  }
+  function setMode(mode, chip) {
+    studioMode = mode;
+    var chips = document.querySelectorAll(".modechip");
+    for (var i = 0; i < chips.length; i++) chips[i].classList.toggle("active", chips[i] === chip);
+    selection.clear();
+    var sels = document.querySelectorAll("#corpus .card.sel");
+    for (var j = 0; j < sels.length; j++) sels[j].classList.remove("sel");
+    $("runbar").classList.toggle("on", mode !== "argue");
+    $("run-target").style.display = mode === "plan" ? "" : "none";
+    updateRunmsg();
+  }
+  function runMode() {
+    if (studioMode === "argue") return;
+    var ids = [];
+    selection.forEach(function (id) { ids.push(id); });
+    if (!ids.length) { status("select at least one document from the corpus."); return; }
+    var btn = $("run-mode"); btn.disabled = true; var l = btn.textContent; btn.textContent = "running…";
+    state.messages.push({ role: "assistant", content: "", pending: true }); render();
+    post("/api/workshop", { mode: studioMode, itemIds: ids, target: ($("run-target").value || "research memo") })
+      .then(function (res) {
+        state.messages = state.messages.filter(function (m) { return !m.pending; });
+        btn.disabled = false; btn.textContent = l;
+        if (!res.ok) { status(res.d.error || "the pass failed."); render(); return; }
+        state.messages.push({
+          role: "assistant", content: res.d.output, isWorkshop: true, model: res.d.model,
+          wsmeta: (MODE_LABEL[studioMode] || studioMode) + " · " + (res.d.items || []).join(", "),
+        });
+        render();
+      })
+      .catch(function () { state.messages = state.messages.filter(function (m) { return !m.pending; }); btn.disabled = false; btn.textContent = l; status("couldn't reach the workshop."); render(); });
+  }
+
   // ---- wire up --------------------------------------------------------------
   $("send").addEventListener("click", send);
   sayEl.addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } });
@@ -354,6 +429,13 @@
   $("new-conv").addEventListener("click", newConv);
   $("add-doc").addEventListener("click", openAddDoc);
   $("reflect-btn").addEventListener("click", reflect);
+  (function () {
+    var chips = document.querySelectorAll(".modechip");
+    for (var i = 0; i < chips.length; i++) {
+      (function (chip) { chip.addEventListener("click", function () { setMode(chip.getAttribute("data-mode"), chip); }); })(chips[i]);
+    }
+    $("run-mode").addEventListener("click", runMode);
+  })();
 
   render();
   loadCorpus();

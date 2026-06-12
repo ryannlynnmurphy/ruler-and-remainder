@@ -164,6 +164,20 @@ body.studio{ margin:0; background:var(--paper); color:var(--ink);
   border:1px solid var(--line); padding:0.1rem 0.4rem; margin:0.15rem 0.2rem 0 0; }
 .modal .claims li{ margin-bottom:0.3rem; }
 .modal .actions{ display:flex; gap:0.6rem; margin-top:1rem; }
+
+/* workflow modes — the dramaturg as a lab instrument */
+.modebar{ display:flex; align-items:center; gap:0.4rem; flex-wrap:wrap; padding:0.5rem 1.4rem; border-bottom:1px solid var(--line); }
+.modebar .lbl{ font-family:"Space Mono",monospace; font-size:0.6rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); margin-right:0.3rem; }
+.modechip{ font-family:"Space Mono",monospace; font-size:0.64rem; letter-spacing:0.02em; border:1px solid var(--line); background:var(--paper); color:var(--ink); padding:0.22rem 0.55rem; cursor:pointer; }
+.modechip:hover{ border-color:var(--ink); }
+.modechip.active{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
+.runbar{ display:none; align-items:center; gap:0.6rem; flex-wrap:wrap; padding:0.5rem 1.4rem; border-bottom:1px solid var(--line); background:#efe9da; }
+.runbar.on{ display:flex; }
+.runbar .msg{ font-family:"Space Mono",monospace; font-size:0.62rem; color:var(--muted); }
+.runbar input{ font-family:"Newsreader",serif; font-size:0.85rem; border:1px solid var(--line); padding:0.25rem 0.45rem; background:#fff; color:var(--ink); }
+.card.sel{ border-color:var(--verm); box-shadow:inset 3px 0 0 var(--verm); }
+.msg .wsmeta{ font-family:"Space Mono",monospace; font-size:0.6rem; letter-spacing:0.04em; text-transform:uppercase; color:var(--verm); margin-bottom:0.4rem; }
+.msg .body h4{ font-family:"Space Grotesk",sans-serif; font-size:0.76rem; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--verm); margin:1rem 0 0.3rem; }
 </style>
 </head>
 <body class="studio">
@@ -182,6 +196,19 @@ body.studio{ margin:0; background:var(--paper); color:var(--ink);
       <input id="conv-title" type="text" value="untitled session" aria-label="Conversation title">
       <button class="btn" id="new-conv" type="button">new</button>
       <button class="btn verm" id="save-conv" type="button">save session</button>
+    </div>
+    <div class="modebar" id="modebar">
+      <span class="lbl">mode</span>
+      <button class="modechip active" data-mode="argue" type="button">argue</button>
+      <button class="modechip" data-mode="walkthrough" type="button">walkthrough</button>
+      <button class="modechip" data-mode="synthesis" type="button">synthesis</button>
+      <button class="modechip" data-mode="plan" type="button">plan</button>
+      <button class="modechip" data-mode="critique" type="button">critique</button>
+    </div>
+    <div class="runbar" id="runbar">
+      <span class="msg" id="runmsg">select documents from the corpus →</span>
+      <input id="run-target" type="text" placeholder="e.g. research memo" style="display:none" aria-label="Deliverable type">
+      <button class="btn verm" id="run-mode" type="button" style="margin-left:auto;">run</button>
     </div>
     <div class="thread" id="thread"></div>
     <div class="composer">
