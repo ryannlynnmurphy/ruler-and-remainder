@@ -1080,6 +1080,7 @@ render();
 
 // ---------- INSTRUMENTS (landing page for the runnable tools) ----------------
 const INSTRUMENTS = [
+  { url: "/learn.html", kicker: "Teaching app · in conversation", title: "Learn with the dramaturg", dek: "The way in. A character whose craft is making abstract ideas legible teaches what the corpus is trying to teach — ask anything, or bring a claim and argue it into shape. No wrong place to start." },
   { url: "/audit.html", kicker: "Tool · runs in browser", title: "The CRD Audit", dek: "Paste a system's copy and its real architecture; the audit surfaces every place stated confidence outruns what the system actually is. Deterministic — nothing leaves the page." },
   { url: "/reality.html", kicker: "Tool · no key needed", title: "The Reality Check", dek: "Paste an AI news story; it returns the likely reality, read against the corpus and the Cybersecurity Bill of Rights. No key needed — and what you check joins a public ledger." },
   { url: "/database.html", kicker: "Tool · searchable", title: "The Index", dek: "Search and filter the whole corpus — books, pamphlets, essays, dialogues, instruments, and apparatus." },
@@ -1131,6 +1132,23 @@ const cover = shell({
 </section>
 
 <div class="contents">
+  <section class="dept primer reveal" id="start">
+    <div class="dept-head"><span class="no" aria-hidden="true">00</span><h2>Start here</h2><span class="gloss">if you don't know where to begin</span></div>
+    <div class="primer-body">
+      <p class="primer-lead">This is one person's research corpus — books, essays, and a few small tools — built by <strong>vibe coding</strong> and <strong>vibe research</strong>. New to those? Here is the whole thing in plain language before you go deeper.</p>
+      <p><strong>Vibe coding</strong> is building software by telling an AI what you want, in ordinary words, and steering it until it works — instead of writing every line by hand. You don't memorize the syntax; you have a conversation with the machine and keep correcting it until the thing is real.</p>
+      <p><strong>Vibe research</strong> is the same move pointed at ideas instead of code: using the model as a thinking partner to cross between fields — philosophy, security, how minds and machines read the world — and arguing with it until something true falls out. Ryann calls that last part <em>machine arguing</em>.</p>
+      <p>The one idea under all of it: systems — AI products, institutions, the marketing around them — usually claim more certainty than they actually have. This work measures that gap (it has a name for it: <em>confidence–reality divergence</em>) and asks what the tidy version leaves out, and who pays for what stays invisible. The <strong>ruler</strong> is the measure; the <strong>remainder</strong> is what it cannot divide cleanly. That is the title, and the whole method.</p>
+      <p>One promise, because the work insists on it: nothing here is dressed up as more certain than it is. Every claim is marked — <em>established</em> (you can check it now), <em>exploratory</em> (plausible, untested), or <em>speculative</em> (a shape, not a proof) — and the three are never allowed to pass for one another.</p>
+    </div>
+    <p class="primer-doors">three ways in →</p>
+    <div class="items">
+      <a class="item" href="/learn.html"><span class="kicker">learn it</span><h3>Learn with the dramaturg</h3><p>A teaching app. A character who makes the abstract legible walks you in — ask anything, or bring a claim to test. No wrong place to start.</p></a>
+      <a class="item" href="/reality.html"><span class="kicker">try it</span><h3>The anti-hype machine</h3><p>Paste any AI news story; it reads the gap between what's claimed and what's likely true, grounded in live sources.</p></a>
+      <a class="item" href="#books"><span class="kicker">browse it</span><h3>Just pick a book</h3><p>Or keep scrolling — the full corpus is right below.</p></a>
+    </div>
+  </section>
+
   <section class="dept" id="books">
     <div class="dept-head reveal"><span class="no" aria-hidden="true">01</span><h2>Books</h2><span class="gloss">long-form</span></div>
     <div class="features">${bookFeatures}</div>
@@ -1144,6 +1162,7 @@ const cover = shell({
   <section class="dept" id="instruments">
     <div class="dept-head reveal"><span class="no" aria-hidden="true">03</span><h2>Instruments</h2><span class="gloss">runnable research tools</span></div>
     <div class="items">
+      <a class="item" href="/learn.html"><span class="kicker">Teaching app · in conversation</span><h3>Learn with the dramaturg</h3><p>A character who makes abstract ideas legible teaches what the corpus is trying to teach. Ask anything, or bring a claim to argue into shape.</p></a>
       <a class="item" href="/audit.html"><span class="kicker">Tool · runs in browser</span><h3>The CRD Audit</h3><p>Paste copy and the architecture; surface where stated confidence contradicts what the system is. Nothing leaves the page.</p></a>
       <a class="item" href="/reality.html"><span class="kicker">Tool · no key needed</span><h3>The Reality Check</h3><p>Paste an AI news story; get the likely reality, read against the corpus and the Cybersecurity Bill of Rights. What you check joins a public ledger.</p></a>
       <a class="item" href="/database.html"><span class="kicker">Tool · searchable</span><h3>The Index</h3><p>Search and filter the whole corpus — books, pamphlets, essays, dialogues, apparatus.</p></a>
@@ -1169,7 +1188,7 @@ fs.writeFileSync(path.join(DIST, "index.html"), cover);
 
 // ---------- static assets ----------------------------------------------------
 fs.copyFileSync(path.join(ROOT, "styles.css"), path.join(DIST, "styles.css"));
-for (const f of ["audit.html", "audit.js", "reality.html", "reality.js"]) {
+for (const f of ["audit.html", "audit.js", "reality.html", "reality.js", "learn.html", "learn.js"]) {
   if (exists(path.join(ROOT, "tool", f))) fs.copyFileSync(path.join(ROOT, "tool", f), path.join(DIST, f));
 }
 
@@ -1189,7 +1208,7 @@ fs.writeFileSync(path.join(DIST, "og.svg"),
 </svg>`);
 
 // sitemap + robots
-const routes = ["/", "/database.html", "/instruments.html", "/audit.html", "/reality.html",
+const routes = ["/", "/database.html", "/instruments.html", "/learn.html", "/audit.html", "/reality.html",
   ...BOOKS.filter((b) => b.href).map((b) => b.href),
   ...entries.map((e) => e.url), ...pages.map((p) => p.url)];
 fs.writeFileSync(path.join(DIST, "sitemap.xml"),

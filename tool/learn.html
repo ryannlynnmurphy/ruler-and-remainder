@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script>document.documentElement.className+=' js';</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Learn the research — with the dramaturg · The Ruler and the Remainder</title>
+<meta name="description" content="A teaching app for the corpus. The dramaturg — a character whose whole craft is making abstract ideas legible — teaches what the research is trying to teach. There is no wrong place to start.">
+<link rel="canonical" href="https://ruler-and-remainder.vercel.app/learn.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="The Ruler and the Remainder">
+<meta property="og:title" content="Learn the research — with the dramaturg">
+<meta property="og:description" content="A teaching app. The dramaturg makes the corpus legible — bring a question, a half-formed idea, or nothing at all.">
+<meta property="og:url" content="https://ruler-and-remainder.vercel.app/learn.html">
+<meta property="og:image" content="https://ruler-and-remainder.vercel.app/og.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#e2300c">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body class="tool">
+<a class="skip" href="#main">Skip to content</a>
+<div id="measure" aria-hidden="true"></div>
+<div class="ruler-gutter" aria-hidden="true"></div>
+<header class="topbar">
+  <a class="home" href="/">the ruler &amp; the remainder<small>vibe coding &amp; vibe research · r. murphy</small></a>
+  <nav aria-label="Primary"><a href="/#books">Books</a><a href="/#corpus">Corpus</a><a href="/database.html">Index</a><a href="/instruments.html">Instruments</a><a href="/method.html">Method</a></nav>
+</header>
+<main id="main">
+<article class="piece toolpage learnpage">
+  <a class="back" href="/">← The Ruler &amp; the Remainder</a>
+  <header class="head"><div class="kicker">a teaching app · in conversation</div><h1>Learn the research</h1><p class="antihype">with the dramaturg</p></header>
+  <p class="lede">The dramaturg is a character whose whole craft is making abstract ideas legible — collapsing fog into the specific phrase, the actual sentence, the thing you can do. It teaches what this corpus is trying to teach. Bring a question, a half-formed idea, or nothing at all. There is no wrong place to start.</p>
+
+  <div id="log" class="log" aria-live="polite"></div>
+  <div id="chips" class="chips"></div>
+  <div class="sayrow">
+    <textarea id="say" rows="2" placeholder="ask the dramaturg anything — or bring a claim to test…"></textarea>
+    <button id="send" class="run">send</button>
+  </div>
+  <p class="discipline">the dramaturg runs on a model, grounded in the corpus. it marks what's <span class="tierflag t-established">established</span>, <span class="tierflag t-exploratory">exploratory</span>, or <span class="tierflag t-speculative">speculative</span> — and it's still a model's read. you keep the pen.</p>
+</article>
+</main>
+<footer><div class="colophon">
+  <span class="lead">The Ruler and the Remainder</span> — a personal research corpus.
+  Independent research by Ryann Murphy. Text released under
+  <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+</div></footer>
+<script>
+(function(){var m=document.getElementById('measure');function p(){var h=document.documentElement;var s=h.scrollTop||document.body.scrollTop;var mx=(h.scrollHeight-h.clientHeight)||1;m.style.width=(100*s/mx)+'%';}document.addEventListener('scroll',p,{passive:true});p();})();
+</script>
+<script src="/learn.js"></script>
+</body>
+</html>
