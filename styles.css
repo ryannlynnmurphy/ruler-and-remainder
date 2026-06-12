@@ -368,8 +368,33 @@ main { padding-left: 36px; }
 #copy:focus, #arch:focus, #input:focus, #story:focus, #say:focus { outline: none; border-color: var(--measure); }
 #copy::placeholder, #arch::placeholder, #input::placeholder, #story::placeholder, #say::placeholder { color: var(--faint); font-style: normal; }
 
-/* the teaching app — conversation with the dramaturg */
-.learnpage .lede { margin-bottom: 1.6rem; }
+/* the teaching app — a screen-by-screen walk that collapses into the next */
+.walkpage { max-width: 44rem; }
+.walkpage .back { margin-bottom: 1rem; }
+.walkrail { display: flex; align-items: flex-end; gap: 0; height: 26px; border-bottom: 1px solid var(--ink); margin: 0 0 2.4rem; }
+.walkrail .rtick { flex: 1; height: 7px; padding: 0; border: 0; border-right: 1px solid var(--rule); background: transparent; cursor: pointer; transition: height 0.25s, background 0.25s; }
+.walkrail .rtick:last-child { border-right: 0; }
+.walkrail .rtick:hover { background: var(--paper-2); }
+.walkrail .rtick.passed { background: var(--measure); height: 13px; }
+.walkrail .rtick.now { background: var(--measure); height: 24px; }
+.walk { position: relative; min-height: 64vh; }
+.beat { display: none; }
+.beat.active { display: flex; flex-direction: column; justify-content: center; min-height: 60vh; }
+.beat.active .beat-body { animation: beatIn 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) both; }
+.beat.collapsing .beat-body { animation: beatOut 0.3s ease-in forwards; }
+@keyframes beatIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes beatOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-12px) scaleY(0.96); } }
+.beat-tick { display: none; }
+.beat-body p { font-family: var(--serif); font-size: 1.4rem; line-height: 1.5; margin: 0 0 1.1rem; color: var(--ink); }
+.beat-body p:has(.tierflag) { font-size: 1.15rem; }
+.beat-body strong { font-weight: 600; }
+.beat-body em { font-style: italic; }
+.beat-body a { color: var(--measure); }
+.goon { margin-top: 1.4rem; align-self: flex-start; font-family: var(--mono); font-size: 0.82rem; font-weight: 700; text-transform: lowercase; letter-spacing: 0.03em; cursor: pointer; border: 2px solid var(--ink); background: var(--ink); color: var(--paper); padding: 0.6rem 1.2rem; transition: background 0.15s, border-color 0.15s; }
+.goon:hover { background: var(--measure); border-color: var(--measure); }
+@media (max-width: 640px) { .beat-body p { font-size: 1.18rem; } }
+
+/* the conversation surface (the final screen) */
 .log { display: flex; flex-direction: column; gap: 1.4rem; margin: 1.6rem 0; }
 .turn { display: flex; flex-direction: column; gap: 0.4rem; }
 .turn .who { font-family: var(--mono); font-size: 0.58rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
