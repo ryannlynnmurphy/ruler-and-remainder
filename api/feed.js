@@ -71,7 +71,7 @@ async function tavilyNews() {
 
   const seen = new Set();
   const uniq = all.filter((it) => it.url && !seen.has(it.url) && seen.add(it.url));
-  uniq.sort((a, b) => (Date.parse(b.published_date || 0) || 0) - (Date.parse(a.published_date || 0) || 0));
+  uniq.sort((a, b) => (Date.parse(b.published_date) || 0) - (Date.parse(a.published_date) || 0));
   const top = uniq.slice(0, 16);
 
   const images = await Promise.allSettled(top.map((it) => ogImage(it.url)));

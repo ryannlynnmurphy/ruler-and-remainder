@@ -3,7 +3,7 @@
 // hands you to the live dramaturg (brain: /api/argue — not modified here).
 
 const $ = (id) => document.getElementById(id);
-function esc(s) { return String(s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])); }
+function esc(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
 function fmt(t) { return esc(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\*(.+?)\*/g, "<i>$1</i>"); }
 function modelLabel(m) { return !m ? "" : m.includes("haiku") ? "haiku" : m.includes("opus") ? "opus" : m.includes("sonnet") ? "sonnet" : m; }
 function mdToHtml(md) {
@@ -168,11 +168,11 @@ window.addEventListener("DOMContentLoaded", () => {
     async function send() {
       const text = sayEl.value.trim();
       if (!text || sendBtn.disabled) return;
+      sendBtn.disabled = true; sendBtn.textContent = "…"; // guard FIRST, before any push (re-entry race)
       sayEl.value = ""; chips.style.display = "none";
       chatMessages.push({ role: "user", content: text });
       chatMessages.push({ role: "assistant", content: "", pending: true });
       draw();
-      sendBtn.disabled = true; sendBtn.textContent = "…";
       try {
         const res = await fetch("/api/argue", {
           method: "POST", headers: { "content-type": "application/json" },

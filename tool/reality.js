@@ -11,7 +11,7 @@
 const $ = (id) => document.getElementById(id);
 
 // ---- tiny markdown renderer (headings, bold, bullets, paragraphs) -----------
-function esc(s) { return s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])); }
+function esc(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
 function mdToHtml(md) {
   const lines = md.split("\n");
   let html = "", inList = false;
