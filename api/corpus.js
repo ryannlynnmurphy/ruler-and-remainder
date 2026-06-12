@@ -13,10 +13,21 @@
 
 import {
   saveCorpusItem, listCorpusItems, getCorpusItem, searchCorpusChunks,
-  vectorSearchChunks, bumpRateLimit,
+  vectorSearchChunks, backfillEmbeddings, seededResearchSources, bumpRateLimit,
 } from "../lib/db.js";
 import { analyzeDocument } from "../lib/analyze.js";
 import { embed } from "../lib/embed.js";
+import INDEX from "../lib/corpus-index.json" with { type: "json" };
+
+// research docs reconstructed from the bundled index (for the seed action)
+function researchDocs() {
+  const map = new Map();
+  for (const c of INDEX) {
+    if (!map.has(c.file)) map.set(c.file, { file: c.file, title: c.title, kind: c.kind === "book" ? "book" : "essay", parts: [] });
+    map.get(c.file).parts.push(c.text);
+  }
+  return [...map.values()].map((d) => ({ file: d.file, title: d.title, kind: d.kind, body: d.parts.join("\n\n") }));
+}
 
 // Semantic-first retrieval: embed the query and do cosine search over pgvector;
 // fall back to keyword when embeddings are unavailable (no key) or nothing
@@ -56,9 +67,23 @@ export default async function handler(req, res) {
   res.setHeader("content-type", "application/json");
 
   if (req.method === "GET") {
-    const { id, search } = req.query || {};
+    const { id, search, backfill, seed } = req.query || {};
     try {
-      if (id) {
+      if (backfill) {
+        res.status(200).json(await backfillEmbeddings({ limit: req.query?.limit }));
+      } else if (seed) {
+        // resumable research → corpus seed (text-only; backfill embeds afterward)
+        const all = researchDocs();
+        const seeded = new Set(await seededResearchSources());
+        const todo = all.filter((d) => !seeded.has("research:" + d.file));
+        const lim = Math.min(Math.max(parseInt(req.query?.limit, 10) || 2, 1), 4);
+        const done = [];
+        for (const d of todo.slice(0, lim)) {
+          const r = await saveCorpusItem({ title: d.title, kind: d.kind, authorship: "human", status: "source", source: "research:" + d.file, body: d.body, skipEmbed: true });
+          if (r) done.push(d.title);
+        }
+        res.status(200).json({ seeded: done, total: all.length, remaining: todo.length - done.length });
+      } else if (id) {
         res.status(200).json({ item: (await getCorpusItem(id)) || null });
       } else if (search) {
         res.status(200).json(await retrieve(search));
