@@ -183,7 +183,7 @@ export default async function handler(req, res) {
   let id = null;
   try {
     const rec = await recordCheck({ model, story, verdict: text, source, published: publish });
-    id = rec?.id ?? null;
+    id = rec?.id != null ? Number(rec.id) : null; // bigint arrives as string — match /api/checks
   } catch (err) {
     console.error("recordCheck failed:", err);
   }
