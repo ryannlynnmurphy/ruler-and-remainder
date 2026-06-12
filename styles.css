@@ -440,7 +440,9 @@ body.walkgame { overflow-x: hidden; }
 .turn.dram .who { color: var(--measure); }
 .turn.dram .who .bymodel { color: var(--faint); font-weight: 400; letter-spacing: 0.04em; }
 .turn.dram .reality { font-size: 1rem; }
-.turn.dram .thinking { font-family: var(--mono); font-size: 0.78rem; color: var(--faint); margin: 0.2rem 0; }
+.turn.dram .thinking { font-family: var(--mono); font-size: 0.82rem; color: var(--muted); margin: 0.2rem 0; }
+.thinking { animation: think-pulse 1.4s ease-in-out infinite; }
+@keyframes think-pulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
 .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0 0 1.1rem; }
 .chip { font-family: var(--mono); font-size: 0.68rem; cursor: pointer; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); padding: 0.45rem 0.7rem; text-align: left; line-height: 1.2; }
 .chip:hover { border-color: var(--measure); color: var(--measure); }
@@ -453,6 +455,22 @@ body.walkgame { overflow-x: hidden; }
 .toolspanel[hidden] { display: none; }
 .toolspanel .chip.tool { color: var(--ink); }
 .toolspanel .chip.tool:hover { color: var(--measure); border-color: var(--measure); }
+
+/* THE WORKSPACE CHAT (chatonly) — a solid brick: the conversation scrolls INSIDE
+   it, the composer is pinned, and it never auto-scrolls. Scoped to chatonly so the
+   walkthrough itself is never touched. */
+html:has(body.chatonly), body.chatonly { height: 100%; }
+body.chatonly { overflow: hidden; }
+body.chatonly #main { height: 100%; min-height: 0; }
+body.chatonly .game { height: 100%; min-height: 0; max-width: 52rem; }
+body.chatonly .gamebar, body.chatonly .gamefoot { display: none; } /* dramaturg bar above already brands + exits */
+body.chatonly .stage { flex: 1 1 auto; min-height: 0; padding: 0; justify-content: flex-start; }
+body.chatonly .final-screen { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+body.chatonly .final-screen .big { flex: 0 0 auto; font-size: clamp(1.3rem, 3vw, 1.8rem); margin: 1.1rem 0 0.2rem; }
+body.chatonly .final-screen .line { display: none; } /* the opening chat message carries the welcome — no fixed intro wall */
+body.chatonly #log { flex: 1 1 auto; min-height: 0; overflow-y: auto; margin: 0.7rem 0 0.6rem; padding-right: 0.35rem; }
+body.chatonly #chips, body.chatonly .toolsrow, body.chatonly .sayrow { flex: 0 0 auto; }
+body.chatonly .sayrow { margin-bottom: 1rem; }
 
 /* AI news tool — a live feed that develops in the conversation, story by story */
 .newsfeed { display: flex; flex-direction: column; gap: 0.7rem; margin: 0.3rem 0; }

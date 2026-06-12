@@ -87,7 +87,7 @@ window.addEventListener("DOMContentLoaded", () => {
     chatOnly = /[?&]chat=1\b/.test(location.search);
     replay = /[?&]walk=1\b/.test(location.search);
   } catch {}
-  if (chatOnly) { document.body.classList.add("chatonly"); idx = screens.length - 1; }
+  if (chatOnly) { document.body.classList.add("chatonly"); document.documentElement.style.height = "100%"; document.body.style.height = "100%"; idx = screens.length - 1; }
   else if (replay) { idx = 0; }
   else { try { if (localStorage.getItem("rr_walk_complete")) { location.replace("/dramaturg.html"); return; } } catch {} }
   let chatMessages = null; // persists across re-renders of the final screen
@@ -204,7 +204,17 @@ window.addEventListener("DOMContentLoaded", () => {
       const tag = m.model ? ` <span class="bymodel">· ${modelLabel(m.model)}</span>` : "";
       return `<div class="turn dram"><span class="who">the dramaturg${tag}</span>${body}</div>`;
     }
-    const draw = () => { log.innerHTML = chatMessages.map(bubble).join(""); log.scrollTop = log.scrollHeight; };
+    // The conversation develops inside a fixed brick; we never auto-scroll the
+    // user (no jump-to-bottom). On send we bring the new turn to the top once,
+    // then leave the scroll to them — like Claude.
+    const draw = () => { log.innerHTML = chatMessages.map(bubble).join(""); };
+    const scrollIntoTop = (sel) => {
+      requestAnimationFrame(() => {
+        const els = log.querySelectorAll(sel);
+        const last = els[els.length - 1];
+        if (last) last.scrollIntoView({ block: "start", behavior: "smooth" });
+      });
+    };
     draw();
     if (chatMessages.length <= 1) {
       CHIPS.forEach((c) => {
@@ -218,7 +228,7 @@ window.addEventListener("DOMContentLoaded", () => {
     // panel; each story opens its tiered "real story" read inline (via /api/reality).
     async function loadNews() {
       const msg = { role: "assistant", kind: "news", nid: ++nidSeq, items: null, pending: true };
-      chatMessages.push(msg); chips.style.display = "none"; draw();
+      chatMessages.push(msg); chips.style.display = "none"; draw(); scrollIntoTop(".turn");
       try {
         const res = await fetch("/api/feed");
         const data = await res.json().catch(() => ({}));
@@ -301,6 +311,7 @@ window.addEventListener("DOMContentLoaded", () => {
       chatMessages.push({ role: "user", content: text });
       chatMessages.push({ role: "assistant", content: "", pending: true });
       draw();
+      scrollIntoTop(".turn.you"); // bring their message to the top once; then leave the scroll to them
       try {
         const res = await fetch("/api/argue", {
           method: "POST", headers: { "content-type": "application/json" },
