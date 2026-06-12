@@ -151,7 +151,7 @@ window.addEventListener("DOMContentLoaded", () => {
       });
     }
     sendBtn.onclick = send;
-    sayEl.onkeydown = (e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); send(); } };
+    sayEl.onkeydown = (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } };
 
     async function send() {
       const text = sayEl.value.trim();
