@@ -25,7 +25,8 @@
    Reuses the corpus palette + fonts; the workstation chrome lives only here. */
 :root{ --ink:#0e0d0a; --paper:#f4f0e6; --verm:#e2300c; --muted:#6c6557; --line:#cfc7b1; }
 body.studio{ margin:0; background:var(--paper); color:var(--ink);
-  font-family:"Newsreader",Georgia,serif; }
+  font-family:"Newsreader",Georgia,serif; overflow-x:hidden; }
+*{ box-sizing:border-box; }
 .studio-top{ display:flex; align-items:baseline; gap:1rem; flex-wrap:wrap;
   border-bottom:2px solid var(--ink); padding:1rem 1.4rem; }
 .studio-top .brand{ font-family:"Space Grotesk",sans-serif; font-weight:700;
@@ -39,7 +40,26 @@ body.studio{ margin:0; background:var(--paper); color:var(--ink);
 
 .studio-grid{ display:grid; grid-template-columns: 1fr 320px; gap:0;
   height:calc(100vh - 64px); }
-@media (max-width:860px){ .studio-grid{ grid-template-columns:1fr; height:auto; } }
+@media (max-width:860px){
+  .studio-grid{ grid-template-columns:1fr; height:auto; }
+  .center{ border-right:none; border-bottom:2px solid var(--ink); }
+  .thread{ flex:none; min-height:46vh; }
+  .composer{ position:sticky; bottom:0; background:var(--paper); }
+  .rail{ max-height:none; }
+}
+@media (max-width:560px){
+  .studio-top{ padding:0.75rem 1rem; }
+  .studio-top .brand{ font-size:1.05rem; }
+  .studio-top .links{ width:100%; margin-left:0; margin-top:0.35rem; }
+  .studio-top .links a:first-child{ margin-left:0; }
+  .center-head{ flex-wrap:wrap; padding:0.7rem 1rem; }
+  .center-head input{ flex-basis:100%; order:-1; margin-bottom:0.45rem; }
+  .thread{ padding:1rem; } .composer{ padding:0.7rem 1rem; } .note{ padding:0.55rem 1rem; }
+  .rail{ padding:1rem; }
+  .modal{ padding:0; align-items:flex-start; }
+  .modal .sheet{ padding:1.1rem 1.05rem; box-shadow:none; max-width:100%; min-height:100vh; }
+  .modal .row{ flex-direction:column; gap:0; }
+}
 
 /* conversation center */
 .center{ display:flex; flex-direction:column; min-width:0; border-right:1px solid var(--line); }
@@ -62,7 +82,7 @@ body.studio{ margin:0; background:var(--paper); color:var(--ink);
   text-transform:uppercase; color:var(--muted); margin-bottom:0.3rem; }
 .msg.user .who{ color:var(--ink); }
 .msg.dram .who{ color:var(--verm); }
-.msg .body{ white-space:pre-wrap; line-height:1.55; font-size:1.02rem; }
+.msg .body{ white-space:pre-wrap; line-height:1.55; font-size:1.02rem; overflow-wrap:anywhere; }
 .msg .meta{ font-family:"Space Mono",monospace; font-size:0.62rem; color:var(--muted);
   margin-top:0.4rem; }
 .msg .keep{ margin-top:0.5rem; }
@@ -84,7 +104,7 @@ body.studio{ margin:0; background:var(--paper); color:var(--ink);
   margin-bottom:0.5rem; cursor:pointer; }
 .card:hover{ border-color:var(--verm); }
 .card .t{ font-family:"Space Grotesk",sans-serif; font-weight:600; font-size:0.86rem;
-  line-height:1.2; }
+  line-height:1.2; overflow-wrap:anywhere; }
 .card .s{ font-family:"Space Mono",monospace; font-size:0.6rem; letter-spacing:0.04em;
   text-transform:uppercase; color:var(--muted); margin-top:0.25rem; }
 .tier{ display:inline-block; font-family:"Space Mono",monospace; font-size:0.56rem;
@@ -126,7 +146,7 @@ body.studio{ margin:0; background:var(--paper); color:var(--ink);
   align-items:flex-start; justify-content:center; padding:4vh 4vw; z-index:50; overflow:auto; }
 .modal.open{ display:flex; }
 .modal .sheet{ background:var(--paper); border:2px solid var(--ink); max-width:760px; width:100%;
-  padding:1.6rem 1.8rem; box-shadow:8px 8px 0 rgba(14,13,10,0.18); }
+  padding:1.6rem 1.8rem; box-shadow:8px 8px 0 rgba(14,13,10,0.18); overflow-wrap:anywhere; }
 .modal .sheet h3{ font-family:"Space Grotesk",sans-serif; font-size:1.3rem; margin:0 0 0.2rem; }
 .modal .x{ float:right; font-family:"Space Mono",monospace; font-size:0.8rem; border:none;
   background:none; cursor:pointer; color:var(--muted); }
