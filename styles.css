@@ -443,6 +443,13 @@ body.walkgame { overflow-x: hidden; }
 .turn.dram .thinking { font-family: var(--mono); font-size: 0.82rem; color: var(--muted); margin: 0.2rem 0; }
 .thinking { animation: think-pulse 1.4s ease-in-out infinite; }
 @keyframes think-pulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
+/* watch it think — the reasoning streams in, collapsible like Claude */
+.thinkblock { margin: 0 0 0.7rem; border-left: 2px solid var(--rule); padding-left: 0.85rem; }
+.thinkblock summary { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); cursor: pointer; list-style: none; outline: none; }
+.thinkblock summary::-webkit-details-marker { display: none; }
+.thinkblock summary::before { content: "▸ "; }
+.thinkblock[open] summary::before { content: "▾ "; }
+.thinktext { font-family: var(--mono); font-size: 0.76rem; line-height: 1.55; color: var(--faint); white-space: pre-wrap; margin-top: 0.45rem; }
 .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0 0 1.1rem; }
 .chip { font-family: var(--mono); font-size: 0.68rem; cursor: pointer; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); padding: 0.45rem 0.7rem; text-align: left; line-height: 1.2; }
 .chip:hover { border-color: var(--measure); color: var(--measure); }

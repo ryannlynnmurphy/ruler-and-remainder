@@ -200,9 +200,12 @@ window.addEventListener("DOMContentLoaded", () => {
         else inner = `<div class="newsfeed">${m.items.map((it, i) => newsCard(it, m.nid, i)).join("")}</div>`;
         return `<div class="turn dram"><span class="who">the dramaturg · today's ai news</span>${inner}</div>`;
       }
-      const body = m.pending ? `<p class="thinking">thinking…</p>` : `<div class="reality">${mdToHtml(m.content)}</div>`;
       const tag = m.model ? ` <span class="bymodel">· ${modelLabel(m.model)}</span>` : "";
-      return `<div class="turn dram"><span class="who">the dramaturg${tag}</span>${body}</div>`;
+      let inner = "";
+      if (m.thinking) inner += `<details class="thinkblock"${m.streaming ? " open" : ""}><summary>thinking</summary><div class="thinktext">${esc(m.thinking)}</div></details>`;
+      if (m.content) inner += `<div class="reality">${mdToHtml(m.content)}</div>`;
+      else if (!m.thinking && (m.pending || m.streaming)) inner += `<p class="thinking">thinking…</p>`;
+      return `<div class="turn dram"><span class="who">the dramaturg${tag}</span>${inner}</div>`;
     }
     // The conversation develops inside a fixed brick; we never auto-scroll the
     // user (no jump-to-bottom). On send we bring the new turn to the top once,
@@ -309,21 +312,57 @@ window.addEventListener("DOMContentLoaded", () => {
       sendBtn.disabled = true; sendBtn.textContent = "…"; // guard FIRST, before any push (re-entry race)
       sayEl.value = ""; chips.style.display = "none";
       chatMessages.push({ role: "user", content: text });
-      chatMessages.push({ role: "assistant", content: "", pending: true });
+      const pend = { role: "assistant", content: "", thinking: "", pending: true, streaming: true };
+      chatMessages.push(pend);
       draw();
       scrollIntoTop(".turn.you"); // bring their message to the top once; then leave the scroll to them
+
+      // coalesce redraws to one per frame so a fast stream stays smooth
+      let queued = false;
+      const flush = () => { if (queued) return; queued = true; requestAnimationFrame(() => { queued = false; draw(); }); };
+      const history = chatMessages.filter((m) => m !== pend && !m.pending && m.kind !== "news" && typeof m.content === "string")
+        .map((m) => ({ role: m.role, content: m.content }));
+
       try {
         const res = await fetch("/api/argue", {
           method: "POST", headers: { "content-type": "application/json" },
-          body: JSON.stringify({ messages: chatMessages.filter((m) => !m.pending) }),
+          body: JSON.stringify({ messages: history, stream: true }),
         });
-        const data = await res.json().catch(() => ({}));
-        chatMessages.pop();
-        chatMessages.push({ role: "assistant", content: res.ok ? data.text : (data.error || "something went wrong — try again."), model: res.ok ? data.model : null });
+        if (!res.ok || !res.body) {
+          let err = "something went wrong — try again.";
+          try { const d = await res.json(); if (d && d.error) err = d.error; } catch {}
+          pend.content = err;
+        } else {
+          const reader = res.body.getReader(), dec = new TextDecoder();
+          let buf = "", streamErr = null;
+          for (;;) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buf += dec.decode(value, { stream: true });
+            let sep;
+            while ((sep = buf.indexOf("\n\n")) >= 0) {
+              const chunk = buf.slice(0, sep); buf = buf.slice(sep + 2);
+              let ev = "message", dataStr = "";
+              for (const line of chunk.split("\n")) {
+                const l = line.trimStart();
+                if (l.startsWith("event:")) ev = l.slice(6).trim();
+                else if (l.startsWith("data:")) dataStr += l.slice(5).trim();
+              }
+              if (!dataStr) continue;
+              let d; try { d = JSON.parse(dataStr); } catch { continue; }
+              if (ev === "thinking") { pend.thinking += d.delta || ""; flush(); }
+              else if (ev === "text") { pend.content += d.delta || ""; pend.pending = false; flush(); }
+              else if (ev === "meta" || ev === "done") { if (d.model) pend.model = d.model; }
+              else if (ev === "error") { streamErr = d.message || "the machine hit an error."; }
+            }
+          }
+          if (streamErr && !pend.content) pend.content = streamErr;
+          if (!pend.content && !pend.thinking) pend.content = "the machine returned nothing readable. try again.";
+        }
       } catch (err) {
-        chatMessages.pop();
-        chatMessages.push({ role: "assistant", content: "couldn't reach the dramaturg. try again in a moment." });
+        if (!pend.content) pend.content = "couldn't reach the dramaturg. try again in a moment.";
       } finally {
+        pend.pending = false; pend.streaming = false;
         sendBtn.disabled = false; sendBtn.textContent = "send"; draw(); sayEl.focus();
       }
     }

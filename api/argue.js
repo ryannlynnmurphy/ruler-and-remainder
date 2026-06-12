@@ -153,6 +153,83 @@ async function runModel(model, messages, useWebSearch, system = SYSTEM) {
   return "";
 }
 
+// --- streaming: forward Anthropic's SSE (thinking + text) straight to the client,
+// following the web_search pause_turn loop, so the dramaturg is watched as it thinks. ---
+async function pipeAnthropicStream(r, send) {
+  const reader = r.body.getReader();
+  const decoder = new TextDecoder();
+  let buf = "", stopReason = null, hadText = false;
+  const blocks = [];
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += decoder.decode(value, { stream: true });
+    let sep;
+    while ((sep = buf.indexOf("\n\n")) >= 0) {
+      const chunk = buf.slice(0, sep); buf = buf.slice(sep + 2);
+      let dataStr = "";
+      for (const line of chunk.split("\n")) {
+        const l = line.trimStart();
+        if (l.startsWith("data:")) dataStr += l.slice(5).trim();
+      }
+      if (!dataStr || dataStr === "[DONE]") continue;
+      let d; try { d = JSON.parse(dataStr); } catch { continue; }
+      if (d.type === "content_block_start") {
+        blocks[d.index] = d.content_block ? { ...d.content_block } : {};
+      } else if (d.type === "content_block_delta") {
+        const b = blocks[d.index] || (blocks[d.index] = {});
+        const delta = d.delta || {};
+        if (delta.type === "thinking_delta") { b.thinking = (b.thinking || "") + delta.thinking; send("thinking", { delta: delta.thinking }); }
+        else if (delta.type === "text_delta") { b.text = (b.text || "") + delta.text; hadText = true; send("text", { delta: delta.text }); }
+        else if (delta.type === "signature_delta") { b.signature = (b.signature || "") + (delta.signature || ""); }
+        else if (delta.type === "input_json_delta") { b._json = (b._json || "") + (delta.partial_json || ""); }
+      } else if (d.type === "message_delta") {
+        if (d.delta && d.delta.stop_reason) stopReason = d.delta.stop_reason;
+      } else if (d.type === "error") {
+        send("error", { message: (d.error && d.error.message) || "stream error" });
+      }
+    }
+  }
+  for (const b of blocks) { if (b && b._json !== undefined) { try { b.input = JSON.parse(b._json); } catch {} delete b._json; } }
+  return { stopReason, assistantContent: blocks.filter(Boolean), hadText };
+}
+
+async function streamAnswer(res, { model, messages, useSearch, system, thinkingOn, meta }) {
+  res.setHeader("content-type", "text/event-stream; charset=utf-8");
+  res.setHeader("cache-control", "no-cache, no-transform");
+  res.setHeader("connection", "keep-alive");
+  res.setHeader("x-accel-buffering", "no"); // ask proxies not to buffer the stream
+  if (res.flushHeaders) res.flushHeaders();
+  const send = (event, data) => { try { res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`); } catch {} };
+  send("meta", meta);
+  const base = { model, max_tokens: 3200, system, stream: true };
+  if (thinkingOn) base.thinking = { type: "enabled", budget_tokens: 1800 };
+  if (useSearch) base.tools = [{ type: "web_search_20260209", name: "web_search" }];
+  let convo = messages;
+  try {
+    for (let turn = 0; turn < 4; turn++) {
+      const r = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-api-key": process.env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
+        body: JSON.stringify({ ...base, messages: convo }),
+      });
+      if (!r.ok || !r.body) {
+        let msg = `${r.status} ${r.statusText}`;
+        try { const e = await r.json(); if (e?.error?.message) msg = e.error.message; } catch {}
+        send("error", { message: msg });
+        break;
+      }
+      const { stopReason, assistantContent } = await pipeAnthropicStream(r, send);
+      if (stopReason === "pause_turn") { convo = [...convo, { role: "assistant", content: assistantContent }]; continue; }
+      break;
+    }
+  } catch (e) {
+    send("error", { message: "the machine dropped the line. try again in a moment." });
+  }
+  send("done", { model });
+  res.end();
+}
+
 export default async function handler(req, res) {
   res.setHeader("content-type", "application/json");
   if (req.method !== "POST") {
@@ -217,6 +294,17 @@ export default async function handler(req, res) {
       if (g.block) { system = SYSTEM + g.block; grounded = { sources: g.sources, mode: g.mode }; }
     }
   } catch (e) { console.error("grounding failed (continuing ungrounded):", e.message || e); }
+
+  // Extended thinking on the turns that warrant it (medium/heavy), so the user can
+  // watch the dramaturg reason. Light/social turns stay fast and quiet.
+  const thinkingOn = explicitModel ? (model !== "claude-haiku-4-5") : (tier === "medium" || tier === "heavy");
+
+  // Streaming path: forward thinking + text live. The non-streaming JSON path below
+  // is preserved for any caller that doesn't ask to stream.
+  if (body.stream === true) {
+    await streamAnswer(res, { model, messages, useSearch, system, thinkingOn, meta: { model, routed: { tier, by: routedBy }, grounded } });
+    return;
+  }
 
   let text;
   try {
