@@ -41,12 +41,23 @@ body{ margin:0; background:var(--ink); color:var(--paper); font-family:"Space Gr
 .brand b{ font-weight:700; font-size:0.98rem; letter-spacing:-0.01em; }
 .brand small{ font-family:"Space Mono",monospace; font-size:0.56rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); margin-left:0.1rem; }
 
-.modes{ display:flex; gap:0.3rem; }
-.modes button{ appearance:none; background:none; border:1px solid transparent; color:#b7b0a0; font-family:"Space Grotesk",sans-serif; font-size:0.86rem; font-weight:600; letter-spacing:0.01em; padding:0.42rem 0.95rem; cursor:pointer; border-radius:2px; }
-.modes button .k{ display:block; font-family:"Space Mono",monospace; font-size:0.5rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); font-weight:400; margin-top:0.06rem; }
-.modes button:hover{ color:var(--paper); }
-.modes button.on{ color:var(--ink); background:var(--verm); border-color:var(--verm); }
-.modes button.on .k{ color:rgba(14,13,10,0.7); }
+/* one main interface (Chat) + the tools it can open (Lens, Studio) */
+.modes{ display:flex; align-items:center; gap:0.35rem; }
+.modes button{ appearance:none; background:none; border:1px solid transparent; cursor:pointer; border-radius:2px; font-family:"Space Grotesk",sans-serif; letter-spacing:0.01em; }
+.modes button .k{ display:block; font-family:"Space Mono",monospace; font-size:0.5rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); font-weight:400; margin-top:0.05rem; }
+/* Chat — the main interface, prominent */
+.modes .primary{ color:var(--paper); font-size:0.94rem; font-weight:700; padding:0.42rem 0.9rem; }
+.modes .primary .k{ color:#8f897b; }
+.modes .primary.on{ color:var(--verm); }
+.modes .primary.on .k{ color:var(--verm); }
+/* the divider that names them as secondary */
+.toolsep{ font-family:"Space Mono",monospace; font-size:0.5rem; letter-spacing:0.14em; text-transform:uppercase; color:#6c6557; padding:0 0.15rem 0 0.5rem; white-space:nowrap; }
+/* Lens / Studio — smaller tools the dramaturg reaches for */
+.modes .tool{ color:#8f897b; font-size:0.78rem; font-weight:600; padding:0.34rem 0.7rem; border-color:#2a2823; }
+.modes .tool .k{ font-size:0.46rem; }
+.modes .tool:hover{ color:var(--paper); border-color:#4a473f; }
+.modes .tool.on{ color:var(--ink); background:var(--verm); border-color:var(--verm); }
+.modes .tool.on .k{ color:rgba(14,13,10,0.7); }
 
 .exits{ margin-left:auto; display:flex; gap:1rem; font-family:"Space Mono",monospace; font-size:0.66rem; letter-spacing:0.04em; }
 .exits a{ color:#b7b0a0; text-decoration:none; }
@@ -63,8 +74,11 @@ body{ margin:0; background:var(--ink); color:var(--paper); font-family:"Space Gr
 @media (max-width:560px){
   .bar{ gap:0.7rem; padding:0 0.6rem; }
   .brand small{ display:none; }
-  .modes button{ padding:0.38rem 0.6rem; font-size:0.8rem; }
+  .modes{ gap:0.25rem; }
+  .modes button{ padding:0.38rem 0.55rem; font-size:0.8rem; }
+  .modes .primary{ font-size:0.85rem; }
   .modes button .k{ display:none; }
+  .toolsep{ display:none; }
   .exits a:not(.corpus){ display:none; }
 }
 </style>
@@ -82,10 +96,11 @@ body{ margin:0; background:var(--ink); color:var(--paper); font-family:"Space Gr
       </svg>
       <span><b>The Dramaturg</b><small>one workspace</small></span>
     </a>
-    <nav class="modes" role="tablist" aria-label="workspace modes">
-      <button data-mode="chat" role="tab" aria-selected="true">Chat<span class="k">talk it through</span></button>
-      <button data-mode="lens" role="tab" aria-selected="false">Lens<span class="k">read the world</span></button>
-      <button data-mode="studio" role="tab" aria-selected="false">Studio<span class="k">work the corpus</span></button>
+    <nav class="modes" aria-label="workspace">
+      <button class="primary" data-mode="chat" aria-pressed="true">Chat<span class="k">talk to the dramaturg</span></button>
+      <span class="toolsep">tools it opens →</span>
+      <button class="tool" data-mode="lens" aria-pressed="false">Lens<span class="k">read the world</span></button>
+      <button class="tool" data-mode="studio" aria-pressed="false">Studio<span class="k">work the corpus</span></button>
     </nav>
     <div class="exits">
       <a class="corpus" href="/corpus">corpus ↗</a>
@@ -122,7 +137,7 @@ body{ margin:0; background:var(--ink); color:var(--paper); font-family:"Space Gr
       var on = m === mode;
       frames[m].classList.toggle("on", on);
       btns[m].classList.toggle("on", on);
-      btns[m].setAttribute("aria-selected", on ? "true" : "false");
+      btns[m].setAttribute("aria-pressed", on ? "true" : "false");
     });
     if (boot) { boot.style.display = "none"; }
     try { localStorage.setItem("rr_dramaturg_mode", mode); } catch(e){}
@@ -131,6 +146,26 @@ body{ margin:0; background:var(--ink); color:var(--paper); font-family:"Space Gr
 
   MODES.forEach(function(m){ btns[m].addEventListener("click", function(){ show(m); }); });
   window.addEventListener("hashchange", function(){ show(location.hash.slice(1)); });
+
+  // ---- routing: the chatbot reaches for its tools ------------------------
+  // The Chat frame (or a /lens, /studio slash) asks the shell to open a tool and
+  // hand it some text. Each tool frame announces "rr-ready" on load; we hold the
+  // text until then, then deliver it so the tool prefills and runs.
+  var frameWin = {}, pending = {};
+  window.addEventListener("message", function(e){
+    var d = e.data || {};
+    if (d.type === "rr-ready" && MODES.indexOf(d.mode) >= 0) {
+      frameWin[d.mode] = e.source;
+      if (pending[d.mode]) { try { e.source.postMessage({ type: "rr-prefill", text: pending[d.mode] }, "*"); } catch(x){} pending[d.mode] = null; }
+    }
+    if (d.type === "rr-route" && MODES.indexOf(d.mode) >= 0) {
+      show(d.mode);
+      if (d.text) {
+        if (frameWin[d.mode]) { try { frameWin[d.mode].postMessage({ type: "rr-prefill", text: d.text }, "*"); } catch(x){} }
+        else { pending[d.mode] = d.text; }
+      }
+    }
+  });
 
   // open to: explicit hash → last used → chat
   var start = location.hash.slice(1);

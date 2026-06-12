@@ -185,6 +185,17 @@ window.addEventListener("DOMContentLoaded", () => {
     async function send() {
       const text = sayEl.value.trim();
       if (!text || sendBtn.disabled) return;
+      // routing: /lens or /studio hands off to that tool in the workspace shell.
+      const slash = text.match(/^\/(lens|studio|chat)\b\s*([\s\S]*)$/i);
+      if (slash && window.parent !== window) {
+        const mode = slash[1].toLowerCase(), rest = (slash[2] || "").trim();
+        sayEl.value = ""; chips.style.display = "none";
+        chatMessages.push({ role: "assistant", content: mode === "chat"
+          ? "we're already talking, baby — go on." : `→ opening the **${mode}**${rest ? " with that" : ""}.` });
+        draw();
+        if (mode !== "chat") { try { window.parent.postMessage({ type: "rr-route", mode, text: rest }, "*"); } catch (e) {} }
+        return;
+      }
       sendBtn.disabled = true; sendBtn.textContent = "…"; // guard FIRST, before any push (re-entry race)
       sayEl.value = ""; chips.style.display = "none";
       chatMessages.push({ role: "user", content: text });

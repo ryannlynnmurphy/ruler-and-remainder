@@ -183,6 +183,19 @@
   document.getElementById("new").addEventListener("click", newReading);
   document.getElementById("menutoggle").addEventListener("click", function () { side.classList.toggle("open"); });
 
+  // workspace routing: when the dramaturg hands the lens a claim, read it.
+  if (window.parent !== window) {
+    window.addEventListener("message", function (e) {
+      var d = e.data || {};
+      if (d.type === "rr-prefill" && d.text) {
+        textEl.value = d.text;
+        textEl.style.height = "auto"; textEl.style.height = Math.min(textEl.scrollHeight, 144) + "px";
+        send();
+      }
+    });
+    try { window.parent.postMessage({ type: "rr-ready", mode: "lens" }, "*"); } catch (e) {}
+  }
+
   render();
   loadLog();
 })();
