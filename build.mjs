@@ -1132,7 +1132,11 @@ const bookFeatures = BOOKS.filter((b) => b.href).map((b) => `
 const pamphlets = entries.filter((e) => e.pamphlet).map((e) => `
   <a class="item" href="${e.url}"><span class="kicker">Pamphlet</span><h3>${e.title}</h3><p>${e.dek}…</p></a>`).join("");
 
-const corpusPicks = entries.filter((e) => !e.pamphlet && ["Method", "Essay", "Dialogue", "Note"].includes(e.kind)).slice(0, 6)
+// Flagship essays pinned to the front of The Corpus so the reading has a clear way in.
+const PINNED_ESSAYS = ["the-default-is-the-policy"];
+const corpusEssays = entries.filter((e) => !e.pamphlet && ["Method", "Essay", "Dialogue", "Note"].includes(e.kind));
+const pinnedEssays = PINNED_ESSAYS.map((s) => corpusEssays.find((e) => e.slug === s)).filter(Boolean);
+const corpusPicks = [...pinnedEssays, ...corpusEssays.filter((e) => !PINNED_ESSAYS.includes(e.slug))].slice(0, 6)
   .map((e) => `<a class="item" href="${e.url}"><span class="kicker">${e.kind}</span><h3>${e.title}</h3></a>`).join("");
 
 const cover = shell({
