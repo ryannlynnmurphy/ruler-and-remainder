@@ -54,14 +54,20 @@
     if (last < line.length) container.appendChild(document.createTextNode(line.slice(last)));
   }
   function renderProse(container, text) {
-    String(text).split("\n").forEach(function (raw) {
-      var line = raw.replace(/\s+$/, "");
-      if (!line) return;
-      var h = line.match(/^#{1,4}\s+(.+)$/);
-      if (h) { container.appendChild(el("h4", null, h[1].replace(/[*`]/g, ""))); return; }
-      var p = el("p"); p.style.cssText = "margin:0 0 0.6rem;line-height:1.5;";
-      renderInlineTiers(p, line.replace(/^[-*]\s+/, "• ").replace(/\*\*/g, "").replace(/[*`]/g, ""));
-      container.appendChild(p);
+    // paragraphs from blank-line blocks; wrapped lines joined (no staggered indents)
+    String(text).replace(/\r/g, "").split(/\n{2,}/).forEach(function (block) {
+      var lines = block.split("\n").map(function (l) { return l.replace(/\s+$/, ""); }).filter(Boolean);
+      if (!lines.length) return;
+      var h0 = lines[0].match(/^#{1,4}\s+(.+)$/);
+      if (h0 && lines.length === 1) { container.appendChild(el("h4", null, h0[1].replace(/[*`]/g, ""))); return; }
+      if (lines.every(function (l) { return /^[-*•]\s+/.test(l); })) {
+        lines.forEach(function (l) { var p = el("p"); p.style.cssText = "margin:0 0 0.35rem;line-height:1.5;"; renderInlineTiers(p, "• " + l.replace(/^[-*•]\s+/, "").replace(/\*\*/g, "").replace(/[*`]/g, "")); container.appendChild(p); });
+        return;
+      }
+      var start = 0;
+      if (h0) { container.appendChild(el("h4", null, h0[1].replace(/[*`]/g, ""))); start = 1; }
+      var rest = lines.slice(start);
+      if (rest.length) { var p = el("p"); p.style.cssText = "margin:0 0 0.6rem;line-height:1.5;"; renderInlineTiers(p, rest.join(" ").replace(/\*\*/g, "").replace(/[*`]/g, "")); container.appendChild(p); }
     });
   }
 
@@ -356,7 +362,7 @@
   function loadConversations() {
     fetch("/api/conversations").then(function (r) { return r.json(); }).then(function (d) {
       var box = $("conversations"); box.textContent = "";
-      var items = (d && d.conversations) || [];
+      var items = ((d && d.conversations) || []).filter(function (c) { return c.mode !== "lens"; });
       if (!items.length) { box.appendChild(el("p", "empty", "no saved sessions yet.")); return; }
       items.forEach(function (cv) {
         var c = el("div", "card");

@@ -38,7 +38,30 @@ One sharp, usable line in the researcher's own register — what to do or say wi
 ## check
 One line: what a careful reader should independently verify, and what the corpus does NOT cover here.
 
+CONVERSATION: When the user brings a NEW text, claim, or headline to read, give the full structured reading above. When they ask a FOLLOW-UP about a prior reading or the corpus ("say more about the third point", "what does X argue here", "draft that as a paragraph"), answer directly and conversationally — still grounded in the passages, still cited, still tiered — without forcing the section headers. Read the room: structure for a new read, prose for a follow-up.
+
 Rules: tier every nontrivial claim [established] / [exploratory] / [speculative], and never let the tiers certify each other. Separate what the corpus SAYS from what you INFER. No hype, no preamble, no AI clichés (no "delve", "tapestry", "landscape", "in an increasingly ___ world"). Editorial severity. If the corpus is silent, be honest that this is a general reading, not a grounded one.`;
+
+const MAX_TURNS = 30;
+function normalizeMessages(raw) {
+  if (!Array.isArray(raw)) return null;
+  const msgs = [];
+  for (const m of raw.slice(-MAX_TURNS)) {
+    if (!m || (m.role !== "user" && m.role !== "assistant")) continue;
+    const content = typeof m.content === "string" ? m.content.trim() : "";
+    if (!content) continue;
+    msgs.push({ role: m.role, content: content.slice(0, MAX_CHARS) });
+  }
+  const merged = [];
+  for (const m of msgs) {
+    const last = merged[merged.length - 1];
+    if (last && last.role === m.role) last.content += "\n\n" + m.content;
+    else merged.push({ ...m });
+  }
+  while (merged.length && merged[0].role !== "user") merged.shift();
+  if (!merged.length || merged[merged.length - 1].role !== "user") return null;
+  return merged;
+}
 
 function clientIp(req) {
   const xff = req.headers["x-forwarded-for"];
@@ -69,24 +92,29 @@ export default async function handler(req, res) {
   try { body = await readJsonBody(req); }
   catch { res.status(400).json({ error: "couldn't read the request." }); return; }
 
-  const text = typeof body.text === "string" ? body.text.slice(0, MAX_CHARS).trim() : "";
-  if (!text) { res.status(400).json({ error: "bring me something to read — paste a headline, a claim, a paragraph." }); return; }
+  // accept a conversation (messages) or a single text (first turn)
+  let messages = normalizeMessages(body.messages);
+  if (!messages) {
+    const text = typeof body.text === "string" ? body.text.slice(0, MAX_CHARS).trim() : "";
+    if (!text) { res.status(400).json({ error: "bring me something to read — paste a headline, a claim, a paragraph." }); return; }
+    messages = [{ role: "user", content: text }];
+  }
+  const lastUser = messages[messages.length - 1].content;
 
-  // retrieve from the researcher's corpus (semantic, keyword fallback)
+  // retrieve from the researcher's corpus (semantic, keyword fallback) on the latest turn
   let results = [], mode = "keyword";
-  try { ({ results, mode } = await corpusRetrieve(text, { k: 6 })); } catch { /* read ungrounded */ }
+  try { ({ results, mode } = await corpusRetrieve(lastUser, { k: 6 })); } catch { /* read ungrounded */ }
   const sources = [...new Set(results.map((r) => r.title))];
   const passages = results.length
     ? results.map((r, i) => `[${i + 1}] From "${r.title}"${r.heading ? ` — ${r.heading}` : ""}:\n${r.text}`).join("\n\n")
-    : "(no passages retrieved — the corpus is silent on this; give a general reading and say so)";
-
-  const user = `TEXT TO READ:\n${text}\n\n---\n\nPASSAGES FROM YOUR CORPUS:\n${passages}`;
+    : "(no passages retrieved — the corpus is silent on this turn; give a general reading and say so)";
+  const system = `${SYSTEM}\n\n---\n\nPASSAGES FROM THE CORPUS, retrieved for the latest turn (ground in these, cite by title):\n\n${passages}`;
 
   try {
     const r = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "content-type": "application/json", "x-api-key": process.env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model: MODEL, max_tokens: 2000, system: SYSTEM, messages: [{ role: "user", content: user }] }),
+      body: JSON.stringify({ model: MODEL, max_tokens: 2000, system, messages }),
     });
     if (!r.ok) { res.status(502).json({ error: "the lens didn't focus. try again." }); return; }
     const data = await r.json();
