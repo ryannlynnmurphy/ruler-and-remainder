@@ -195,10 +195,15 @@ window.addEventListener("DOMContentLoaded", () => {
       const note = data.published
         ? "this reading is on the public ledger below."
         : "you kept this reading off the ledger; it was not stored.";
+      const g = data.grounding || {};
+      const gbits = [];
+      if (g.sources) gbits.push(`grounded in ${g.sources} live source${g.sources > 1 ? "s" : ""}`);
+      if (g.searched) gbits.push("cross-checked with a web search");
+      const gnote = gbits.length ? gbits.join(" · ") + ". " : "";
       out.innerHTML =
         `<div class="cardmark verdictmark">${markSVG(story.slice(0, 80))}</div>` +
         `<div class="reality">${mdToHtml(data.text)}</div>` +
-        `<p class="discipline">this is a model's read, not a verdict. it surfaces where confidence outruns reality and which rights are in play — you still check the math. ${note}</p>`;
+        `<p class="discipline">this is a model's read, not a verdict. it surfaces where confidence outruns reality and which rights are in play — you still check the math. ${gnote}${note}</p>`;
       if (data.published) loadLedger();
     } catch (err) {
       out.innerHTML = `<div class="verdict v-fires"><strong>could not reach the instrument</strong><span>${esc(String(err))}</span></div><p class="empty">network error — try again in a moment.</p>`;

@@ -95,11 +95,11 @@ function deriveQuery(story) {
   return firstLine.replace(/\(source:[^)]*\)/i, "").trim().slice(0, 200);
 }
 
-// Tavily retrieval — best-effort. Returns an evidence block for the prompt, or
-// "" when there's no key or the call fails.
+// Tavily retrieval — best-effort. Returns { block, count }: the evidence block
+// for the prompt and how many sources it carries (0 when no key / failure).
 async function tavilyEvidence(query) {
   const key = process.env.TAVILY_API_KEY;
-  if (!key || !query) return "";
+  if (!key || !query) return { block: "", count: 0 };
   try {
     const r = await fetch("https://api.tavily.com/search", {
       method: "POST",
@@ -112,16 +112,16 @@ async function tavilyEvidence(query) {
         include_answer: false,
       }),
     });
-    if (!r.ok) return "";
+    if (!r.ok) return { block: "", count: 0 };
     const data = await r.json();
-    const results = Array.isArray(data.results) ? data.results : [];
-    if (!results.length) return "";
-    return results
-      .slice(0, 5)
+    const results = (Array.isArray(data.results) ? data.results : []).slice(0, 5);
+    if (!results.length) return { block: "", count: 0 };
+    const block = results
       .map((x, i) => `[${i + 1}] ${(x.title || "untitled").trim()} — ${x.url}\n${(x.content || "").replace(/\s+/g, " ").trim().slice(0, 480)}`)
       .join("\n\n");
+    return { block, count: results.length };
   } catch {
-    return "";
+    return { block: "", count: 0 };
   }
 }
 
@@ -132,6 +132,7 @@ async function runModel(model, messages, useWebSearch) {
   const base = { model, max_tokens: 2000, system: SYSTEM };
   if (useWebSearch) base.tools = [{ type: "web_search_20260209", name: "web_search" }];
   let convo = messages;
+  let searched = false;
   for (let i = 0; i < 4; i++) {
     const r = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -150,13 +151,15 @@ async function runModel(model, messages, useWebSearch) {
       throw err;
     }
     const data = await r.json();
+    const content = data.content || [];
+    if (content.some((b) => b.type === "server_tool_use" || b.type === "web_search_tool_result")) searched = true;
     if (data.stop_reason === "pause_turn") {
-      convo = [...convo, { role: "assistant", content: data.content }];
+      convo = [...convo, { role: "assistant", content }];
       continue; // server tool is mid-loop — re-send to let it finish
     }
-    return (data.content || []).filter((b) => b.type === "text").map((b) => b.text).join("\n").trim();
+    return { text: content.filter((b) => b.type === "text").map((b) => b.text).join("\n").trim(), searched };
   }
-  return ""; // exhausted continuation budget
+  return { text: "", searched }; // exhausted continuation budget
 }
 
 export default async function handler(req, res) {
@@ -214,14 +217,18 @@ export default async function handler(req, res) {
   // Tavily retrieves live sources up front (best-effort); web_search lets Claude
   // follow up its own searches. It reads the story against both.
   let text;
+  const grounding = { sources: 0, searched: false };
   try {
-    const evidence = await tavilyEvidence(deriveQuery(story));
+    const ev = await tavilyEvidence(deriveQuery(story));
+    grounding.sources = ev.count;
     const userContent =
       "Here is the AI news story. Read it and return the reality check.\n\n---\n" + story +
-      (evidence
-        ? "\n\n---\nLIVE SEARCH RESULTS (retrieved seconds ago — evidence to check the story against, not ground truth):\n" + evidence
+      (ev.block
+        ? "\n\n---\nLIVE SEARCH RESULTS (retrieved seconds ago — evidence to check the story against, not ground truth):\n" + ev.block
         : "");
-    text = await runModel(model, [{ role: "user", content: userContent }], WEB_SEARCH_MODELS.has(model));
+    const out = await runModel(model, [{ role: "user", content: userContent }], WEB_SEARCH_MODELS.has(model));
+    text = out.text;
+    grounding.searched = out.searched;
   } catch (err) {
     // Don't leak provider internals to the reader.
     console.error(err.upstream ? "anthropic error:" : "grounding/model failed:", err.message || err);
@@ -247,5 +254,5 @@ export default async function handler(req, res) {
     console.error("recordCheck failed:", err);
   }
 
-  res.status(200).json({ text, model, id, published: publish && id !== null });
+  res.status(200).json({ text, model, id, published: publish && id !== null, grounding });
 }
