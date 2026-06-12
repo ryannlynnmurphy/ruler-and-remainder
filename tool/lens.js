@@ -36,6 +36,22 @@
     if (last < line.length) container.appendChild(document.createTextNode(line.slice(last)));
   }
 
+  var audio = null;
+  function speak(btn, text) {
+    if (audio && !audio.paused) { audio.pause(); audio.currentTime = 0; btn.textContent = "▶ hear it · michael"; return; }
+    btn.disabled = true; btn.textContent = "michael is reading…";
+    fetch("/api/voice", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text: text }) })
+      .then(function (r) { if (!r.ok) return r.json().then(function (e) { throw new Error(e.error || "voice failed"); }); return r.blob(); })
+      .then(function (blob) {
+        btn.disabled = false; btn.textContent = "⏸ stop";
+        audio = new Audio(URL.createObjectURL(blob));
+        audio.onended = function () { btn.textContent = "▶ hear it · michael"; };
+        audio.onpause = function () { if (audio && audio.currentTime === 0) btn.textContent = "▶ hear it · michael"; };
+        audio.play();
+      })
+      .catch(function (e) { btn.disabled = false; btn.textContent = "▶ hear it · michael"; });
+  }
+
   function render(reading, sources, mode) {
     out.textContent = "";
     out.classList.remove("hidden");
@@ -47,7 +63,14 @@
     } else {
       src.appendChild(el("span", null, "your corpus is silent on this — a general reading"));
     }
-    out.appendChild(src);
+    var hear = el("button", "chip hear", "▶ hear it · michael"); hear.type = "button";
+    hear.style.cssText = "margin-left:auto;";
+    hear.addEventListener("click", function () { speak(hear, reading); });
+    var srcRow = el("div");
+    srcRow.style.cssText = "display:flex;align-items:center;gap:0.8rem;flex-wrap:wrap;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:0.6rem 0;margin-bottom:1.6rem;";
+    src.style.cssText = "border:none;padding:0;margin:0;flex:1;min-width:200px;";
+    srcRow.appendChild(src); srcRow.appendChild(hear);
+    out.appendChild(srcRow);
 
     reading.split("\n").forEach(function (raw) {
       var line = raw.replace(/\s+$/, "");
