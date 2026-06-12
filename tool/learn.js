@@ -24,22 +24,22 @@ function mdToHtml(md) {
 
 const UNITS = [
   { n: "01", title: "the big idea", screens: [
-    { big: "everything gets measured.", body: ["a person. a price. a risk. a kid in a classroom.", "something always does the measuring."] },
-    { big: "a ruler only sees what it was built to see.", body: ["and *someone* built it. for a reason.", "to notice some things and skip the rest."] },
+    { big: "everything gets measured.", body: ["a person. a price. a risk. a kid in a classroom.", "and whoever holds the ruler decides what counts."] },
+    { big: "a ruler only sees what it was built to see.", body: ["and *someone* built it — for a reason, with a budget, on a deadline.", "what didn't make the cut isn't an accident. it's a decision."] },
     { big: "what it skips doesn't vanish.", body: ["it's called the **remainder**.", "and it always lands on somebody."] },
-    { big: "here's what that looks like.", body: ["a credit score is built for a steady paycheck and a bank account.", "live on cash and gig work, and the ruler doesn't read you as *complicated* — it reads you as *risky*.", "you pay for being invisible: a higher rate, or no loan at all."] },
+    { big: "here's what that looks like.", body: ["a test measures one kind of smart: how fast you fill in the right bubble.", "the kid who builds things, or draws, or thinks slow and deep — the test can't see any of it, so it files them under *behind*.", "they spend years paying for a picture a machine drew of them in an afternoon."] },
     { big: "so the whole thing asks three questions.", body: ["who built the ruler?", "what can't it see?", "and who pays for the remainder?"] },
   ] },
   { n: "02", title: "the words", screens: [
     { big: "every system hides something.", body: ["a cheap price hides who got paid less to make it cheap.", "**legibilism** has one demand: make the hiding visible."] },
-    { big: "make power readable.", body: ["to the people stuck living inside it.", "that's the whole first pamphlet."] },
+    { big: "make power readable.", body: ["not to a regulator, not to an expert — to the people stuck living inside it.", "the subscription that hides what you own. the feed that hides why you're seeing this. name the hiding, and you can fight it."] },
     { big: "but — readable to who?", body: ["a secret everyone *could* see and nobody looks at is still a secret.", "**attentionism**: attention — noticing before the moment passes — is the rarest thing there is."] },
     { big: "switched off, or only sleeping?", body: ["some things look dead but are just *dormant* — waiting.", "**latentology** is learning to tell the difference. it matters most when the thing is a mind."] },
   ] },
   { n: "03", title: "the method", screens: [
-    { big: "people always sound more sure than they are.", body: ["in ads. in headlines. in AI.", "the gap between how sure they *sound* and how sure they should be — that gap is the whole game."] },
+    { big: "people always sound more sure than they are.", body: ["in ads. in headlines. in your group chat.", "the space between how sure they *sound* and how sure they've earned the right to be — that's where the lie lives."] },
     { k: "tiers", big: "so you label every claim.", body: [] },
-    { big: "and you never let red dress up as green.", body: ["that's the rule the entire body of work runs on.", "that's it. that's the spine."] },
+    { big: "and you never let red dress up as green.", body: ["a vibe sold as a fact is how every overclaim works — 'unbreakable,' '100% secure,' 'it just gets you.'", "catch the swap, and the spell breaks."] },
     { big: "how do you find what's true?", body: ["you argue with a machine until the truth falls out.", "ryann calls it **machine arguing**. you've been doing a tiny version this whole walk."] },
   ] },
   { n: "04", title: "the books", screens: [

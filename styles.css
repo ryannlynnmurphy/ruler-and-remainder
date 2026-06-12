@@ -391,10 +391,10 @@ body.walkgame { overflow-x: hidden; }
 /* the stage — one screen at a time, centered, big */
 .stage { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 2rem 0; }
 .screen { width: 100%; }
-.big { font-family: var(--display); font-weight: 700; font-size: clamp(2.1rem, 6.5vw, 4rem); line-height: 1.02; letter-spacing: -0.03em; color: var(--ink); margin: 0 0 1.6rem; text-wrap: balance; }
+.big { font-family: var(--display); font-weight: 500; font-size: clamp(1.9rem, 5.2vw, 3.3rem); line-height: 1.08; letter-spacing: -0.035em; color: var(--ink); margin: 0 0 1.6rem; text-wrap: balance; }
 .big.book { color: var(--measure); font-style: normal; }
 .big i { font-style: italic; }
-.big b { color: var(--measure); }
+.big b { color: var(--measure); font-weight: 600; }
 .line { font-family: var(--serif); font-size: clamp(1.15rem, 2.6vw, 1.6rem); line-height: 1.45; color: var(--ink-soft); margin: 0 0 0.9rem; max-width: 36rem; }
 .line.sub { font-family: var(--mono); font-size: 0.9rem; color: var(--muted); }
 .line b { color: var(--ink); font-weight: 600; }
@@ -404,7 +404,7 @@ body.walkgame { overflow-x: hidden; }
 /* unit-intro screens */
 .unit-screen { text-align: left; }
 .unit-no { font-family: var(--mono); font-size: 1rem; font-weight: 700; letter-spacing: 0.3em; color: var(--measure); }
-.unit-title { font-family: var(--display); font-weight: 700; font-size: clamp(2.6rem, 9vw, 5.5rem); line-height: 0.95; letter-spacing: -0.04em; text-transform: lowercase; color: var(--ink); margin: 0.4rem 0 0; }
+.unit-title { font-family: var(--display); font-weight: 600; font-size: clamp(2.3rem, 7vw, 4.2rem); line-height: 0.98; letter-spacing: -0.045em; text-transform: lowercase; color: var(--ink); margin: 0.4rem 0 0; }
 
 /* the three tiers, as a traffic light */
 .tiers { display: flex; flex-direction: column; gap: 0.7rem; margin-top: 1.4rem; max-width: 34rem; }
