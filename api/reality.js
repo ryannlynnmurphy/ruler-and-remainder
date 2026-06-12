@@ -44,7 +44,7 @@ II. data minimization by default. III. local processing. IV. encryption that sta
 V. legible failure (breach disclosure a person can act on). VI. refuse without penalty. VII. leave with everything (portability).
 VIII. inspection (no security-through-obscurity). IX. repair. X. a human in consequential decisions. XI. don't subsidize fragility (efficiency is a security property). XII. deletion that is actually deletion.
 
-OUTPUT — plain, lowercase headers, markdown. Be specific and brief. Use these sections exactly:
+OUTPUT — plain, lowercase headers, markdown. Be specific and brief. Begin your response directly with the "## the claim" header — no preamble, no "Here is…", no meta-commentary about searching or what you found, no sign-off. Use these sections exactly:
 
 ## the claim
 One or two sentences: what the story/headline is asserting.
