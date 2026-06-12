@@ -4,7 +4,7 @@
 
 ---
 
-A transcript, lightly staged, because it happened and it happens every day.
+A transcript, lightly staged, because it happened and it happens every day. The full document is published alongside this essay — [read it here](/essays/the-transcript-who-invented-computing.html) and check the reading against the source.
 
 A user asks an assistant who started the history of computing. The model answers: Ada Lovelace. Babbage, Boole, Leibniz, Turing, von Neumann — the line everyone is taught. It is a good answer. It is also a decision, and the user can feel the decision, so they push. *What about China.* The model answers well — the *I Ching* as a binary system Leibniz himself encountered, Liu Hui's iterative algorithms, Zu Chongzhi's seven decimal places of π that stood for a thousand years. *What about who these people actually were.* The model answers well again — aristocrats, monks, court mathematicians, the House of Wisdom under a caliphate that funded the leisure to think. Every answer is correct. Every answer is good.
 

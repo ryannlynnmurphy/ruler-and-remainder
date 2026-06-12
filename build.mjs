@@ -1000,6 +1000,7 @@ const KIND = {
   "The CRD Audit Confidence-Reality Divergence as Narrative Intelligence.md": "Method",
   "a-note-on-method-and-distribution.md": "Note",
   "blog-theatre-major.md": "Essay", "cybersecurity-bill-of-rights.md": "Document",
+  "the-transcript-who-invented-computing.md": "Dialogue",
 };
 const FEATURED = ["legibilism.md", "attentionism.md", "latentology.md"];
 
@@ -1133,7 +1134,7 @@ const pamphlets = entries.filter((e) => e.pamphlet).map((e) => `
   <a class="item" href="${e.url}"><span class="kicker">Pamphlet</span><h3>${e.title}</h3><p>${e.dek}…</p></a>`).join("");
 
 // Flagship essays pinned to the front of The Corpus so the reading has a clear way in.
-const PINNED_ESSAYS = ["the-default-is-the-policy"];
+const PINNED_ESSAYS = ["the-default-is-the-policy", "the-transcript-who-invented-computing"];
 const corpusEssays = entries.filter((e) => !e.pamphlet && ["Method", "Essay", "Dialogue", "Note"].includes(e.kind));
 const pinnedEssays = PINNED_ESSAYS.map((s) => corpusEssays.find((e) => e.slug === s)).filter(Boolean);
 const corpusPicks = [...pinnedEssays, ...corpusEssays.filter((e) => !PINNED_ESSAYS.includes(e.slug))].slice(0, 6)
