@@ -106,6 +106,44 @@ body.studio{ margin:0; background:var(--paper); color:var(--ink);
 .keepform .actions{ display:flex; gap:0.6rem; margin-top:0.7rem; }
 .note{ font-family:"Space Mono",monospace; font-size:0.62rem; color:var(--muted);
   padding:0.6rem 1.4rem; border-top:1px solid var(--line); }
+
+/* the corpus — the Reading Machine's living archive */
+.railhead{ display:flex; align-items:center; gap:0.5rem; margin:1.2rem 0 0.5rem; }
+.railhead:first-child{ margin-top:0; }
+.railhead h2{ margin:0; }
+.railhead .mini{ margin-left:auto; font-family:"Space Mono",monospace; font-size:0.6rem;
+  letter-spacing:0.04em; text-transform:uppercase; border:1px solid var(--ink);
+  background:var(--paper); color:var(--ink); padding:0.15rem 0.45rem; cursor:pointer; }
+.railhead .mini:hover{ background:var(--ink); color:var(--paper); }
+.card .auth{ display:inline-block; font-family:"Space Mono",monospace; font-size:0.54rem;
+  letter-spacing:0.04em; text-transform:uppercase; padding:0.04rem 0.3rem; border:1px solid var(--muted);
+  color:var(--muted); margin-right:0.3rem; }
+.card .auth.ai{ color:var(--verm); border-color:var(--verm); }
+.card .auth.co{ color:#b06a00; border-color:#b06a00; }
+
+/* modal overlay (add document · item view · reflection report) */
+.modal{ position:fixed; inset:0; background:rgba(14,13,10,0.55); display:none;
+  align-items:flex-start; justify-content:center; padding:4vh 4vw; z-index:50; overflow:auto; }
+.modal.open{ display:flex; }
+.modal .sheet{ background:var(--paper); border:2px solid var(--ink); max-width:760px; width:100%;
+  padding:1.6rem 1.8rem; box-shadow:8px 8px 0 rgba(14,13,10,0.18); }
+.modal .sheet h3{ font-family:"Space Grotesk",sans-serif; font-size:1.3rem; margin:0 0 0.2rem; }
+.modal .x{ float:right; font-family:"Space Mono",monospace; font-size:0.8rem; border:none;
+  background:none; cursor:pointer; color:var(--muted); }
+.modal label{ display:block; font-family:"Space Mono",monospace; font-size:0.6rem;
+  letter-spacing:0.06em; text-transform:uppercase; color:var(--muted); margin:0.7rem 0 0.2rem; }
+.modal input, .modal select, .modal textarea{ width:100%; box-sizing:border-box;
+  font-family:"Newsreader",serif; font-size:0.95rem; border:1px solid var(--line);
+  padding:0.45rem 0.55rem; background:#fff; color:var(--ink); }
+.modal .row{ display:flex; gap:0.6rem; } .modal .row > *{ flex:1; }
+.modal textarea{ min-height:9rem; resize:vertical; }
+.modal .docbody{ white-space:pre-wrap; line-height:1.5; font-size:0.95rem; max-height:46vh; overflow:auto;
+  border:1px solid var(--line); padding:0.8rem; background:#fff; margin-top:0.5rem; }
+.modal .report{ white-space:pre-wrap; line-height:1.6; font-size:0.98rem; }
+.modal .chips span{ display:inline-block; font-family:"Space Mono",monospace; font-size:0.62rem;
+  border:1px solid var(--line); padding:0.1rem 0.4rem; margin:0.15rem 0.2rem 0 0; }
+.modal .claims li{ margin-bottom:0.3rem; }
+.modal .actions{ display:flex; gap:0.6rem; margin-top:1rem; }
 </style>
 </head>
 <body class="studio">
@@ -132,12 +170,24 @@ body.studio{ margin:0; background:var(--paper); color:var(--ink);
     <p class="note">propose-only · the dramaturg proposes; you keep. nothing is saved without your click. <span id="status"></span></p>
   </section>
   <aside class="rail" aria-label="Archive">
-    <h2>kept artifacts</h2>
+    <div class="railhead">
+      <h2>the corpus</h2>
+      <button class="mini" id="reflect-btn" type="button" title="read the corpus as a whole">reflect</button>
+      <button class="mini" id="add-doc" type="button">+ add</button>
+    </div>
+    <div id="corpus"><p class="empty">empty corpus. add a document — a source, a note, a draft — and the reading begins.</p></div>
+    <div class="railhead"><h2>kept artifacts</h2></div>
     <div id="artifacts"><p class="empty">nothing kept yet. argue something true, then keep it.</p></div>
-    <h2>saved sessions</h2>
+    <div class="railhead"><h2>saved sessions</h2></div>
     <div id="conversations"><p class="empty">no saved sessions yet.</p></div>
   </aside>
 </main>
+
+<!-- modal: add document / view item / reflection report -->
+<div class="modal" id="modal" aria-hidden="true">
+  <div class="sheet" id="sheet"></div>
+</div>
+
 <script src="/studio.js"></script>
 </body>
 </html>
