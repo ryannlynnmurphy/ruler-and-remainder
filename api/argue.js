@@ -212,8 +212,8 @@ export default async function handler(req, res) {
   let system = SYSTEM;
   try {
     if (!looksTrivial(lastUser)) {
-      const g = groundingBlock(lastUser, { k: 5 });
-      if (g.block) { system = SYSTEM + g.block; grounded = { sources: g.sources }; }
+      const g = await groundingBlock(lastUser, { k: 5 });
+      if (g.block) { system = SYSTEM + g.block; grounded = { sources: g.sources, mode: g.mode }; }
     }
   } catch (e) { console.error("grounding failed (continuing ungrounded):", e.message || e); }
 

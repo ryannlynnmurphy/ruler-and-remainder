@@ -112,6 +112,27 @@ for (const t of targets) {
   }
 }
 
+// Embed every chunk at build time so the dramaturg can do real semantic search
+// over the whole research corpus (not just keyword). Needs VOYAGE_API_KEY in the
+// build env (Vercel exposes production env vars at build). Without it, chunks
+// ship embedding-less and retrieval falls back to keyword — the build still
+// succeeds. Floats are rounded to keep the bundled index reasonable.
+const { embed } = await import(path.join(ROOT, "lib", "embed.js"));
+if (process.env.VOYAGE_API_KEY) {
+  const BATCH = 64;
+  let embedded = 0;
+  for (let i = 0; i < chunks.length; i += BATCH) {
+    const group = chunks.slice(i, i + BATCH);
+    let vecs = null;
+    try { vecs = await embed(group.map((c) => c.text), "document"); } catch { /* keep going */ }
+    if (vecs) group.forEach((c, j) => { if (vecs[j]) { c.e = vecs[j].map((x) => Math.round(x * 1e6) / 1e6); embedded++; } });
+    else console.warn(`  embed batch @${i} failed — those chunks stay keyword-only`);
+  }
+  console.log(`Embedded ${embedded}/${chunks.length} chunks via Voyage (semantic search enabled)`);
+} else {
+  console.log("No VOYAGE_API_KEY at build — corpus index is keyword-only (set it on Vercel for semantic search)");
+}
+
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
 fs.writeFileSync(OUT, JSON.stringify(chunks));
 const bytes = fs.statSync(OUT).size;
