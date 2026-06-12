@@ -79,7 +79,7 @@ function footnotes(md) {
   return { withRefs, block };
 }
 
-const NAV = `<a href="/#books">Books</a><a href="/#corpus">Corpus</a><a href="/database.html">Index</a><a href="/instruments.html">Instruments</a><a href="/method.html">Method</a>`;
+const NAV = `<a href="/corpus#books">Books</a><a href="/corpus#corpus">Corpus</a><a href="/database.html">Index</a><a href="/instruments.html">Instruments</a><a href="/method.html">Method</a>`;
 
 function shell({ title, body, bodyClass = "", desc = "", route = "" }) {
   const d = (desc || DEFAULT_DESC).replace(/\s+/g, " ").trim();
@@ -1118,9 +1118,9 @@ const corpusPicks = entries.filter((e) => !e.pamphlet && ["Method", "Essay", "Di
   .map((e) => `<a class="item" href="${e.url}"><span class="kicker">${e.kind}</span><h3>${e.title}</h3></a>`).join("");
 
 const cover = shell({
-  title: "a personal research corpus",
+  title: "The Corpus — a personal research corpus",
   bodyClass: "home",
-  route: "/",
+  route: "/corpus.html",
   desc: "How systems read the world into legible categories — and who pays for what stays invisible. Independent research, books, and a runnable audit by Ryann Murphy.",
   body: `
 <section class="cover">
@@ -1184,7 +1184,16 @@ const cover = shell({
   </section>
 </div>`,
 });
-fs.writeFileSync(path.join(DIST, "index.html"), cover);
+// The corpus index (the former homepage) — preserved INTACT at /corpus. Nothing
+// removed; the departments, books, instruments, and apparatus all live here.
+fs.writeFileSync(path.join(DIST, "corpus.html"), cover);
+
+// The homepage now takes the shape of the dramaturg walk. Derived from the same
+// source as /learn (one source of truth), with a homepage title + canonical.
+const walkHome = fs.readFileSync(path.join(ROOT, "tool", "learn.html"), "utf8")
+  .replace(/<title>[\s\S]*?<\/title>/, "<title>The Ruler &amp; the Remainder — vibe coding &amp; vibe research</title>")
+  .replace("https://ruler-and-remainder.vercel.app/learn.html", "https://ruler-and-remainder.vercel.app/");
+fs.writeFileSync(path.join(DIST, "index.html"), walkHome);
 
 // ---------- static assets ----------------------------------------------------
 fs.copyFileSync(path.join(ROOT, "styles.css"), path.join(DIST, "styles.css"));
@@ -1208,7 +1217,7 @@ fs.writeFileSync(path.join(DIST, "og.svg"),
 </svg>`);
 
 // sitemap + robots
-const routes = ["/", "/database.html", "/instruments.html", "/learn.html", "/audit.html", "/reality.html",
+const routes = ["/", "/corpus.html", "/database.html", "/instruments.html", "/learn.html", "/audit.html", "/reality.html",
   ...BOOKS.filter((b) => b.href).map((b) => b.href),
   ...entries.map((e) => e.url), ...pages.map((p) => p.url)];
 fs.writeFileSync(path.join(DIST, "sitemap.xml"),
