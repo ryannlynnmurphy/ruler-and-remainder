@@ -298,6 +298,7 @@
               groundMode: mode,
             });
             render();
+            if (res.ok) saveConv();
           });
       })
       .catch(function () {
@@ -380,6 +381,7 @@
       var msgs = Array.isArray(cv.messages) ? cv.messages : [];
       state.messages = msgs.length ? msgs : [{ role: "assistant", content: OPENING }];
       render();
+      var s = $("side"); if (s) s.classList.remove("open");
     }).catch(function () { status("couldn't load that session."); });
   }
 
@@ -422,7 +424,7 @@
           role: "assistant", content: res.d.output, isWorkshop: true, model: res.d.model,
           wsmeta: (MODE_LABEL[studioMode] || studioMode) + " · " + (res.d.items || []).join(", "),
         });
-        render();
+        render(); saveConv();
       })
       .catch(function () { state.messages = state.messages.filter(function (m) { return !m.pending; }); btn.disabled = false; btn.textContent = l; status("couldn't reach the workshop."); render(); });
   }
@@ -442,6 +444,11 @@
     }
     $("run-mode").addEventListener("click", runMode);
   })();
+  // mobile drawers
+  var sideEl = $("side"), railEl = $("rail");
+  var ts = $("toggle-side"), tr = $("toggle-rail");
+  if (ts) ts.addEventListener("click", function () { sideEl.classList.toggle("open"); railEl.classList.remove("open"); });
+  if (tr) tr.addEventListener("click", function () { railEl.classList.toggle("open"); sideEl.classList.remove("open"); });
 
   render();
   loadCorpus();
