@@ -92,6 +92,32 @@ window.addEventListener("DOMContentLoaded", () => {
   else { try { if (localStorage.getItem("rr_walk_complete")) { location.replace("/dramaturg.html"); return; } } catch {} }
   let chatMessages = null; // persists across re-renders of the final screen
   let nidSeq = 0;          // stable ids for tool panels (e.g. the news feed) across redraws
+  let sessionId = null;    // the current conversation's id (saved history)
+  let redrawChat = () => {}; // set to the live chat's draw() once it mounts
+
+  // --- conversation history, in localStorage (shared with the workspace shell) ---
+  const SKEY = "rr_sessions";
+  const readSessions = () => { try { return JSON.parse(localStorage.getItem(SKEY) || "[]"); } catch { return []; } };
+  const writeSessions = (a) => { try { localStorage.setItem(SKEY, JSON.stringify(a.slice(0, 24))); } catch {} };
+  const newId = () => "s" + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36);
+  const notifyShell = () => { try { if (window.parent !== window) window.parent.postMessage({ type: "rr-sessions" }, "*"); } catch {} };
+  function persistChat() {
+    if (!sessionId || !chatMessages) return;
+    const msgs = chatMessages.filter((m) => !m.pending);
+    const firstUser = msgs.find((m) => m.role === "user");
+    if (!firstUser) return; // nothing worth saving until they've spoken
+    const rest = readSessions().filter((s) => s.id !== sessionId);
+    rest.unshift({ id: sessionId, title: (firstUser.content || "conversation").slice(0, 64), updatedAt: Date.now(), messages: msgs });
+    writeSessions(rest); notifyShell();
+  }
+  function newChat() { sessionId = newId(); chatMessages = [{ role: "assistant", content: OPENING }]; redrawChat(); notifyShell(); }
+  function loadChat(id) { const s = readSessions().find((x) => x.id === id); if (!s) return; sessionId = id; chatMessages = (s.messages || []).slice(); redrawChat(); }
+  // the workspace shell drives history: new chat / open a past one
+  window.addEventListener("message", (e) => {
+    const d = e.data || {};
+    if (d.type === "rr-new") newChat();
+    else if (d.type === "rr-load" && d.id) loadChat(d.id);
+  });
 
   function tile(cls, name, desc) {
     return `<div class="tile ${cls}"><span class="dot"></span><b>${name}</b><p>${desc}</p></div>`;
@@ -174,6 +200,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const log = $("log"), sayEl = $("say"), sendBtn = $("send"), chips = $("chips");
     if (!log) return;
     if (!chatMessages) chatMessages = [{ role: "assistant", content: OPENING }];
+    if (!sessionId) sessionId = newId();
 
     function newsCard(it, nid, i) {
       const img = it.image ? `<div class="nc-img" style="background-image:url('${esc(it.image)}')"></div>` : "";
@@ -211,6 +238,7 @@ window.addEventListener("DOMContentLoaded", () => {
     // user (no jump-to-bottom). On send we bring the new turn to the top once,
     // then leave the scroll to them — like Claude.
     const draw = () => { log.innerHTML = chatMessages.map(bubble).join(""); };
+    redrawChat = draw;
     const scrollIntoTop = (sel) => {
       requestAnimationFrame(() => {
         const els = log.querySelectorAll(sel);
@@ -241,7 +269,7 @@ window.addEventListener("DOMContentLoaded", () => {
         }));
         if (!msg.items.length) msg.error = "no ai news came back just now — try again in a minute.";
       } catch (e) { msg.error = "couldn't reach the news feed — try again in a moment."; }
-      msg.pending = false; draw();
+      msg.pending = false; draw(); persistChat();
     }
 
     async function runReality(it) {
@@ -255,7 +283,7 @@ window.addEventListener("DOMContentLoaded", () => {
         const data = await res.json().catch(() => ({}));
         it.reading = res.ok ? (data.text || "the reader came back empty.") : (data.error || "couldn't read this one.");
       } catch (e) { it.reading = "couldn't reach the reader — try again."; }
-      it.reading_pending = false; draw();
+      it.reading_pending = false; draw(); persistChat();
     }
 
     // one delegated handler on the log (survives redraws) for the news cards
@@ -363,7 +391,7 @@ window.addEventListener("DOMContentLoaded", () => {
         if (!pend.content) pend.content = "couldn't reach the dramaturg. try again in a moment.";
       } finally {
         pend.pending = false; pend.streaming = false;
-        sendBtn.disabled = false; sendBtn.textContent = "send"; draw(); sayEl.focus();
+        sendBtn.disabled = false; sendBtn.textContent = "send"; draw(); persistChat(); sayEl.focus();
       }
     }
   }
