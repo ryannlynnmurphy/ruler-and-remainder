@@ -10,6 +10,7 @@
 // House style: raw fetch to the Messages API (no SDK).
 
 import { bumpRateLimit } from "../lib/db.js";
+import { groundingBlock } from "../lib/retrieve.js";
 
 export const maxDuration = 60;
 
@@ -119,8 +120,8 @@ function normalizeMessages(raw) {
 }
 
 // Run the model, following the web_search pause_turn loop to completion.
-async function runModel(model, messages, useWebSearch) {
-  const base = { model, max_tokens: 1800, system: SYSTEM };
+async function runModel(model, messages, useWebSearch, system = SYSTEM) {
+  const base = { model, max_tokens: 1800, system };
   if (useWebSearch) base.tools = [{ type: "web_search_20260209", name: "web_search" }];
   let convo = messages;
   for (let i = 0; i < 4; i++) {
@@ -201,9 +202,24 @@ export default async function handler(req, res) {
     useSearch = r.search && WEB_SEARCH_MODELS.has(model);
   }
 
+  // Corpus grounding: retrieve the actual passages relevant to this turn and put
+  // them in front of the model, so the dramaturg answers from the real research
+  // (e.g. "the theory of levity") instead of the hand-written summary. Skipped on
+  // trivial/social turns, where there's nothing to ground. Best-effort: any error
+  // falls back to the ungrounded SYSTEM, identical to the prior behavior.
+  const lastUser = messages[messages.length - 1].content;
+  let grounded = { sources: [] };
+  let system = SYSTEM;
+  try {
+    if (!looksTrivial(lastUser)) {
+      const g = groundingBlock(lastUser, { k: 5 });
+      if (g.block) { system = SYSTEM + g.block; grounded = { sources: g.sources }; }
+    }
+  } catch (e) { console.error("grounding failed (continuing ungrounded):", e.message || e); }
+
   let text;
   try {
-    text = await runModel(model, messages, useSearch);
+    text = await runModel(model, messages, useSearch, system);
   } catch (err) {
     console.error(err.upstream ? "anthropic error:" : "argue failed:", err.message || err);
     res.status(502).json({ error: "the machine didn't answer that time. try again in a moment." });
@@ -214,5 +230,5 @@ export default async function handler(req, res) {
     return;
   }
 
-  res.status(200).json({ text, model, routed: { tier, by: routedBy } });
+  res.status(200).json({ text, model, routed: { tier, by: routedBy }, grounded });
 }
