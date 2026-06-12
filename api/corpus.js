@@ -12,9 +12,25 @@
 // limited, same posture as the rest of the backend.
 
 import {
-  saveCorpusItem, listCorpusItems, getCorpusItem, searchCorpusChunks, bumpRateLimit,
+  saveCorpusItem, listCorpusItems, getCorpusItem, searchCorpusChunks,
+  vectorSearchChunks, bumpRateLimit,
 } from "../lib/db.js";
 import { analyzeDocument } from "../lib/analyze.js";
+import { embed } from "../lib/embed.js";
+
+// Semantic-first retrieval: embed the query and do cosine search over pgvector;
+// fall back to keyword when embeddings are unavailable (no key) or nothing
+// matched. Returns { results, mode } so the UI can show which ran.
+async function retrieve(query) {
+  try {
+    const qv = await embed(query, "query");
+    if (qv && qv[0]) {
+      const v = await vectorSearchChunks(qv[0], { k: 6 });
+      if (v && v.length) return { results: v, mode: "semantic" };
+    }
+  } catch { /* fall through to keyword */ }
+  return { results: await searchCorpusChunks(query, { k: 6 }), mode: "keyword" };
+}
 
 export const maxDuration = 60;
 
@@ -45,7 +61,7 @@ export default async function handler(req, res) {
       if (id) {
         res.status(200).json({ item: (await getCorpusItem(id)) || null });
       } else if (search) {
-        res.status(200).json({ results: await searchCorpusChunks(search, { k: 6 }) });
+        res.status(200).json(await retrieve(search));
       } else {
         res.status(200).json({ items: await listCorpusItems({ limit: req.query?.limit, project: req.query?.project || null }) });
       }

@@ -77,7 +77,7 @@
       var wrap = el("div", "msg " + (isUser ? "user" : "dram") + (m.pending ? " pending" : ""));
       wrap.appendChild(el("div", "who", isUser ? "you" : "the dramaturg"));
       wrap.appendChild(el("div", "body", m.display != null ? m.display : (m.content || (m.pending ? "thinking…" : ""))));
-      if (m.grounded && m.grounded.length) wrap.appendChild(el("div", "meta", "grounded in: " + m.grounded.join(" · ")));
+      if (m.grounded && m.grounded.length) wrap.appendChild(el("div", "meta", "grounded in: " + m.grounded.join(" · ") + (m.groundMode ? " · " + m.groundMode + " search" : "")));
       if (m.model) wrap.appendChild(el("div", "meta", "the dramaturg · " + m.model));
       if (!isUser && !m.pending && m.content && i > 0) {
         var keep = el("button", "btn keep", "keep this"); keep.type = "button";
@@ -236,6 +236,7 @@
       .then(function (r) { return r.json(); }).catch(function () { return { results: [] }; })
       .then(function (sr) {
         var results = (sr && sr.results) || [];
+        var mode = (sr && sr.mode) || "";
         var sources = [];
         var sent = text;
         if (results.length) {
@@ -257,6 +258,7 @@
               content: res.ok ? res.d.text : (res.d.error || "something went wrong — try again."),
               model: res.ok ? res.d.model : null,
               grounded: sources,
+              groundMode: mode,
             });
             render();
           });
