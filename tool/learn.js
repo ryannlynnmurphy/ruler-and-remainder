@@ -61,7 +61,7 @@ UNITS.forEach((u) => {
 });
 
 const OPENING = `you finished the walk — so let's do the real thing. bring me a claim, a worry, a headline you don't trust, and i'll run it: find what's true, make it specific, measure where it overreaches, hand it back. start anywhere.`;
-const CHIPS = ["is AI actually going to take my job?", "test a headline i don't trust", "help me make a vague idea specific"];
+const CHIPS = ["so ai is bad for the environment…", "ai is going to take my job…", "they say this new ai basically thinks like us…"];
 
 window.addEventListener("DOMContentLoaded", () => {
   const stage = $("stage"), cont = $("cont"), back = $("back"), pbar = $("pbar"), mascot = $("mascot");
