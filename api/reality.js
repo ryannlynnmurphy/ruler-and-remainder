@@ -11,12 +11,19 @@
 
 import { recordCheck, bumpRateLimit } from "../lib/db.js";
 
+// Grounding (Tavily retrieval + Claude's own web_search rounds) can run long, so
+// give the function room beyond the platform's short default.
+export const maxDuration = 60;
+
 const ALLOWED_MODELS = new Set([
   "claude-sonnet-4-6",
   "claude-opus-4-8",
   "claude-haiku-4-5",
 ]);
 const DEFAULT_MODEL = "claude-sonnet-4-6";
+// The web_search server tool (20260209) is supported on these; haiku grounds via
+// Tavily only.
+const WEB_SEARCH_MODELS = new Set(["claude-sonnet-4-6", "claude-opus-4-8"]);
 
 // Abuse ceilings. Per-visitor-per-hour keeps one reader from hammering the
 // instrument; the daily floor protects the shared key. Tunable.
@@ -54,6 +61,8 @@ The Bill-of-Rights articles this touches, by number and name, one line each on h
 ## what to check
 2–4 concrete, checkable questions a reader should ask before believing the story.
 
+GROUNDING: You may be handed LIVE SEARCH RESULTS (retrieved seconds ago), and you can run web_search yourself when a claim turns on current fact. Use them to check the story against reality — cite what the search actually shows in "the likely reality," and turn "what to check" into checks you partly ran. But a search result is evidence, not proof: weigh source quality, and keep the tier discipline — mark [established] only what the sources genuinely establish; when sources are thin, conflicting, or absent, say so and drop to [exploratory] or UNVERIFIABLE. The presence of search results must not inflate your confidence.
+
 Rules: do not invent facts, numbers, sources, or events the story does not contain. If the text is not an AI news story, say so and stop. If you lack the basis to judge a claim, mark it UNVERIFIABLE rather than guessing.`;
 
 function clientIp(req) {
@@ -75,6 +84,79 @@ async function readJsonBody(req) {
   for await (const c of req) chunks.push(c);
   const raw = Buffer.concat(chunks).toString("utf8");
   return raw ? JSON.parse(raw) : {};
+}
+
+// ---- grounding -------------------------------------------------------------
+
+// A search query from the story — its first non-empty line, minus the
+// "(source: …)" tail the feed appends.
+function deriveQuery(story) {
+  const firstLine = story.split("\n").map((s) => s.trim()).filter(Boolean)[0] || story;
+  return firstLine.replace(/\(source:[^)]*\)/i, "").trim().slice(0, 200);
+}
+
+// Tavily retrieval — best-effort. Returns an evidence block for the prompt, or
+// "" when there's no key or the call fails.
+async function tavilyEvidence(query) {
+  const key = process.env.TAVILY_API_KEY;
+  if (!key || !query) return "";
+  try {
+    const r = await fetch("https://api.tavily.com/search", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        api_key: key,
+        query,
+        search_depth: "basic",
+        max_results: 5,
+        include_answer: false,
+      }),
+    });
+    if (!r.ok) return "";
+    const data = await r.json();
+    const results = Array.isArray(data.results) ? data.results : [];
+    if (!results.length) return "";
+    return results
+      .slice(0, 5)
+      .map((x, i) => `[${i + 1}] ${(x.title || "untitled").trim()} — ${x.url}\n${(x.content || "").replace(/\s+/g, " ").trim().slice(0, 480)}`)
+      .join("\n\n");
+  } catch {
+    return "";
+  }
+}
+
+// Run the Claude call, following the server-side web_search loop (pause_turn) to
+// completion. Returns the concatenated text blocks. Throws with .upstream = true
+// on an API error so the caller can distinguish it.
+async function runModel(model, messages, useWebSearch) {
+  const base = { model, max_tokens: 2000, system: SYSTEM };
+  if (useWebSearch) base.tools = [{ type: "web_search_20260209", name: "web_search" }];
+  let convo = messages;
+  for (let i = 0; i < 4; i++) {
+    const r = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": process.env.ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({ ...base, messages: convo }),
+    });
+    if (!r.ok) {
+      let msg = `${r.status} ${r.statusText}`;
+      try { const e = await r.json(); if (e?.error?.message) msg = e.error.message; } catch {}
+      const err = new Error(msg);
+      err.upstream = true;
+      throw err;
+    }
+    const data = await r.json();
+    if (data.stop_reason === "pause_turn") {
+      convo = [...convo, { role: "assistant", content: data.content }];
+      continue; // server tool is mid-loop — re-send to let it finish
+    }
+    return (data.content || []).filter((b) => b.type === "text").map((b) => b.text).join("\n").trim();
+  }
+  return ""; // exhausted continuation budget
 }
 
 export default async function handler(req, res) {
@@ -128,49 +210,26 @@ export default async function handler(req, res) {
     /* rate-limit store unavailable — proceed */
   }
 
-  // The model call — server-side, with the site's key.
+  // Grounding + the model call — server-side, with the site's key.
+  // Tavily retrieves live sources up front (best-effort); web_search lets Claude
+  // follow up its own searches. It reads the story against both.
   let text;
   try {
-    const r = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model,
-        max_tokens: 1600,
-        system: SYSTEM,
-        messages: [
-          {
-            role: "user",
-            content:
-              "Here is the AI news story. Read it and return the reality check.\n\n---\n" + story,
-          },
-        ],
-      }),
-    });
-    if (!r.ok) {
-      let msg = `${r.status} ${r.statusText}`;
-      try {
-        const e = await r.json();
-        if (e?.error?.message) msg = e.error.message;
-      } catch {}
-      // Don't leak provider internals to the reader.
-      console.error("anthropic error:", msg);
-      res.status(502).json({ error: "the read didn't come back this time. try again in a moment." });
-      return;
-    }
-    const data = await r.json();
-    text = (data.content || [])
-      .filter((b) => b.type === "text")
-      .map((b) => b.text)
-      .join("\n")
-      .trim();
+    const evidence = await tavilyEvidence(deriveQuery(story));
+    const userContent =
+      "Here is the AI news story. Read it and return the reality check.\n\n---\n" + story +
+      (evidence
+        ? "\n\n---\nLIVE SEARCH RESULTS (retrieved seconds ago — evidence to check the story against, not ground truth):\n" + evidence
+        : "");
+    text = await runModel(model, [{ role: "user", content: userContent }], WEB_SEARCH_MODELS.has(model));
   } catch (err) {
-    console.error("anthropic fetch failed:", err);
-    res.status(502).json({ error: "couldn't reach the model. try again in a moment." });
+    // Don't leak provider internals to the reader.
+    console.error(err.upstream ? "anthropic error:" : "grounding/model failed:", err.message || err);
+    res.status(502).json({
+      error: err.upstream
+        ? "the read didn't come back this time. try again in a moment."
+        : "couldn't reach the model. try again in a moment.",
+    });
     return;
   }
 
