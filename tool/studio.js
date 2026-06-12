@@ -450,14 +450,11 @@
   if (ts) ts.addEventListener("click", function () { sideEl.classList.toggle("open"); railEl.classList.remove("open"); });
   if (tr) tr.addEventListener("click", function () { railEl.classList.toggle("open"); sideEl.classList.remove("open"); });
 
-  // workspace routing: the dramaturg can open the studio, optionally with a claim.
-  if (window.parent !== window) {
-    window.addEventListener("message", function (e) {
-      var d = e.data || {};
-      if (d.type === "rr-prefill" && d.text) { sayEl.value = d.text; sayEl.style.height = "auto"; try { sayEl.focus(); } catch (x) {} }
-    });
-    try { window.parent.postMessage({ type: "rr-ready", mode: "studio" }, "*"); } catch (e) {}
-  }
+  // handed a claim from the dramaturg (?q=) — prefill the composer.
+  try {
+    var q = new URLSearchParams(location.search).get("q");
+    if (q) { sayEl.value = q; sayEl.style.height = "auto"; try { sayEl.focus(); } catch (x) {} }
+  } catch (e) {}
 
   render();
   loadCorpus();

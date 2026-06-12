@@ -63,6 +63,16 @@ UNITS.forEach((u) => {
 const OPENING = `you made it through — so let's do the real thing. bring me a claim, a worry, a headline you don't trust, and i'll run it: find what's true, make it specific, show you where it overreaches, hand it back sharper. start wherever you want, baby.`;
 const CHIPS = ["so ai is bad for the environment…", "ai is going to take my job…", "they say this new ai basically thinks like us…"];
 
+// the dramaturg's tools. most render right here in the conversation (send/fill);
+// the last two open a deeper page for when you explicitly want that surface.
+const TOOLS = [
+  { label: "today's AI news — the real story", send: "what's actually going on with the biggest AI news right now? search it, cut the hype, and tier what's real against what's just a vibe." },
+  { label: "read a headline through the corpus", fill: "read this through the corpus and tier it: " },
+  { label: "argue something i believe", fill: "here's something i'm pretty sure i believe — argue it with me: " },
+  { label: "the lens — a focused reading ↗", nav: "/lens.html" },
+  { label: "the studio — work with documents ↗", nav: "/studio.html" },
+];
+
 window.addEventListener("DOMContentLoaded", () => {
   const stage = $("stage"), cont = $("cont"), back = $("back"), pbar = $("pbar"), mascot = $("mascot");
   let idx = 0;
@@ -110,6 +120,7 @@ window.addEventListener("DOMContentLoaded", () => {
       html = `<div class="screen final-screen"><h1 class="big">${fmt(s.big)}</h1>` +
         s.body.map((l) => `<p class="line">${fmt(l)}</p>`).join("") +
         `<div id="log" class="log"></div><div id="chips" class="chips"></div>` +
+        `<div class="toolsrow"><button id="toolsbtn" class="toolsbtn" type="button" aria-expanded="false">⊕ tools</button><div id="toolspanel" class="toolspanel" hidden></div></div>` +
         `<div class="sayrow"><textarea id="say" rows="2" placeholder="bring the dramaturg a claim, a worry, a headline…"></textarea><button id="send" class="run">send</button></div>` +
         `</div>`;
     } else {
@@ -182,18 +193,42 @@ window.addEventListener("DOMContentLoaded", () => {
     sendBtn.onclick = send;
     sayEl.onkeydown = (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } };
 
+    // tools: one reveal of everything the dramaturg can do. Most run in this same
+    // space (the conversation develops below); a couple open a deeper page.
+    const toolsBtn = $("toolsbtn"), toolsPanel = $("toolspanel");
+    if (toolsBtn && toolsPanel) {
+      toolsPanel.innerHTML = "";
+      TOOLS.forEach((t) => {
+        const b = document.createElement("button");
+        b.className = "chip tool"; b.type = "button"; b.textContent = t.label;
+        b.addEventListener("click", () => {
+          toolsPanel.hidden = true; toolsBtn.setAttribute("aria-expanded", "false");
+          if (t.nav) { try { (window.top || window).location.href = t.nav; } catch (e) { location.href = t.nav; } return; }
+          if (t.send) { sayEl.value = t.send; send(); }
+          else if (t.fill) { sayEl.value = t.fill; sayEl.focus(); }
+        });
+        toolsPanel.appendChild(b);
+      });
+      toolsBtn.addEventListener("click", () => {
+        const open = toolsPanel.hidden;
+        toolsPanel.hidden = !open;
+        toolsBtn.setAttribute("aria-expanded", open ? "true" : "false");
+      });
+    }
+
     async function send() {
       const text = sayEl.value.trim();
       if (!text || sendBtn.disabled) return;
-      // routing: /lens or /studio hands off to that tool in the workspace shell.
+      // routing: the chat is the one interface, but /lens or /studio opens the
+      // deeper standalone tool when someone explicitly wants it.
       const slash = text.match(/^\/(lens|studio|chat)\b\s*([\s\S]*)$/i);
-      if (slash && window.parent !== window) {
+      if (slash) {
         const mode = slash[1].toLowerCase(), rest = (slash[2] || "").trim();
         sayEl.value = ""; chips.style.display = "none";
-        chatMessages.push({ role: "assistant", content: mode === "chat"
-          ? "we're already talking, baby — go on." : `→ opening the **${mode}**${rest ? " with that" : ""}.` });
-        draw();
-        if (mode !== "chat") { try { window.parent.postMessage({ type: "rr-route", mode, text: rest }, "*"); } catch (e) {} }
+        if (mode === "chat") { chatMessages.push({ role: "assistant", content: "we're already talking, baby — go on." }); draw(); return; }
+        chatMessages.push({ role: "assistant", content: `→ opening the **${mode}**…` }); draw();
+        const url = mode === "lens" ? ("/lens.html" + (rest ? "?q=" + encodeURIComponent(rest) : "")) : "/studio.html";
+        try { (window.top || window).location.href = url; } catch (e) { location.href = url; }
         return;
       }
       sendBtn.disabled = true; sendBtn.textContent = "…"; // guard FIRST, before any push (re-entry race)
