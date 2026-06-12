@@ -395,6 +395,12 @@ body.walkgame { overflow-x: hidden; }
 .big.book { color: var(--measure); font-style: italic; }
 .big i { font-style: italic; }
 .big b { color: var(--measure); font-weight: 600; }
+/* the walk speaks fierce — Bodoni, oversized, high-contrast: drag-editorial, cutting */
+.walkgame .big { font-family: "Bodoni Moda", "Newsreader", Georgia, serif; font-weight: 800; font-size: clamp(2.5rem, 8vw, 5.4rem); line-height: 1.0; letter-spacing: -0.005em; }
+.walkgame .big i { font-style: italic; font-weight: 700; }
+.walkgame .big b { color: var(--measure); font-weight: 800; }
+.walkgame .big.book { color: var(--measure); font-style: italic; font-weight: 700; }
+.walkgame .unit-title { font-family: "Bodoni Moda", Georgia, serif; font-weight: 900; letter-spacing: -0.01em; }
 .line { font-family: var(--serif); font-size: clamp(1.15rem, 2.6vw, 1.6rem); line-height: 1.45; color: var(--ink-soft); margin: 0 0 0.9rem; max-width: 36rem; }
 .line.sub { font-family: var(--mono); font-size: 0.9rem; color: var(--muted); }
 .line b { color: var(--ink); font-weight: 600; }

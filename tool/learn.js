@@ -24,33 +24,32 @@ function mdToHtml(md) {
 }
 
 const UNITS = [
-  { n: "01", title: "the big idea", screens: [
-    { big: "everything gets measured.", body: ["a person. a price. a risk. a kid in a classroom.", "and whoever holds the ruler decides what counts."] },
-    { big: "a ruler only sees what it was built to see.", body: ["and *someone* built it — for a reason, with a budget, on a deadline.", "what didn't make the cut isn't an accident. it's a decision."] },
-    { big: "what it skips doesn't vanish.", body: ["it's called the **remainder**.", "and it always lands on somebody."] },
-    { big: "here's what that looks like.", body: ["a test measures one kind of smart: how fast you fill in the right bubble.", "the kid who builds things, or draws, or thinks slow and deep — the test can't see any of it, so it files them under *behind*.", "they spend years paying for a picture a machine drew of them in an afternoon."] },
-    { big: "so the whole thing asks three questions.", body: ["who built the ruler?", "what can't it see?", "and who pays for the remainder?"] },
+  { n: "01", title: "what this actually is", screens: [
+    { big: "let's be real for a second.", body: ["everybody out here is selling you AI like it's either pure magic or the end of the world.", "it's neither, baby. it's a machine that read damn near the whole internet and learned to guess what comes next.", "that's the trick. the rest of this is about what to *do* with it."] },
+    { big: "what's it good for? real things.", body: ["the work you used to need a team, a budget, or a degree to touch — writing, building, researching, arguing it all the way out.", "used right, it puts that in *anybody's* hands.", "that part is real and it is enormous, and i will not let anybody shame you out of using it."] },
+    { big: "now the part the salesmen skip.", body: ["it is confidently, gorgeously **wrong** — all the time, with a straight face.", "and it was built by a few rich companies, trained on everybody's work, to serve whoever signs the check.", "some folks it serves beautifully. some folks it does not see at all."] },
+    { big: "and that gap is the whole point.", body: ["whoever's holding the tool decides what counts. that's the **ruler**.", "what the ruler can't measure doesn't disappear — it's the **remainder**, and honey, it always lands on *somebody*.", "so this has exactly one job: teach you to use the tool without ending up as the remainder."] },
   ] },
-  { n: "02", title: "the words", screens: [
-    { big: "every system hides something.", body: ["a cheap price hides who got paid less to make it cheap.", "**legibilism** has one demand: make the hiding visible."] },
-    { big: "make power readable.", body: ["not to a regulator, not to an expert — to the people stuck living inside it.", "the subscription that hides what you own. the feed that hides why you're seeing this. name the hiding, and you can fight it."] },
-    { big: "but — readable to who?", body: ["a secret everyone *could* see and nobody looks at is still a secret.", "**attentionism**: attention — noticing before the moment passes — is the rarest thing there is."] },
-    { big: "switched off, or only sleeping?", body: ["some things look dead but are only *dormant* — waiting to be read.", "**latentology** is telling the difference between what's gone and what's just unread — hardest when you can't tell if a thing has a mind, or only looks like it does."] },
+  { n: "02", title: "rung one — vibe coding", screens: [
+    { big: "you can build things now. for real.", body: ["not the old way — years of memorizing code in a dark little room.", "you tell the machine what you want, in plain words, and you steer it till it works.", "that's **vibe coding**. i built this whole thing that way, and i'll teach you how."] },
+    { big: "the catch — and there's always a catch.", body: ["it will hand you something broke as hell and swear on its life it's perfect.", "vibe coding is *not* 'the machine does it for me.' it's you, hands on the wheel — testing, correcting, refusing the first wrong thing it gives you.", "the skill was never the typing. the skill is not getting played."] },
   ] },
-  { n: "03", title: "the method", screens: [
-    { big: "people always sound more sure than they are.", body: ["in ads. in headlines. in your group chat.", "the space between how sure they *sound* and how sure they've earned the right to be — that's where the lie lives."] },
-    { k: "tiers", big: "so you label every claim.", body: [] },
-    { big: "and you never let red dress up as green.", body: ["a vibe sold as a fact is how every overclaim works — 'unbreakable,' '100% secure,' 'it just gets you.'", "catch the swap, and the spell breaks."] },
-    { big: "how do you find what's true?", body: ["you argue with the machine until something true falls out — you push, it pushes back, you both get more specific.", "it's called **machine arguing**, and you've been doing a tiny version this whole walk."] },
+  { n: "03", title: "rung two — vibe research", screens: [
+    { big: "now point that same move at ideas.", body: ["not building — *thinking*. crossing between fields — money, power, history, how the thing really works — faster than any one degree was ever going to let you.", "that's **vibe research**. it's how a regular person gets dangerous."] },
+    { big: "but it'll tell you exactly what you want to hear.", body: ["a machine trained to please you will flatter you straight into believing nonsense.", "so vibe research is *not* 'ask it and trust it.' it's: take what it told you back out into the real world, and **check**.", "curiosity — with receipts."] },
   ] },
-  { n: "04", title: "the books", screens: [
-    { big: "Narrative Intelligence", book: true, body: ["the stories we tell about what AI *is* quietly become the rules we all live under.", "this book reads the stories before they harden."] },
-    { big: "Our Relationship", book: true, body: ["can you study something as slippery as *thinking with a machine* — rigorously?", "this one treats three months of conversation as data, not a diary, and argues the feeling underneath has a structure you can actually check."] },
-    { big: "Radical Optimism", book: true, body: ["a better future isn't something you wish for.", "it's something you build on purpose, with the right architecture. this is the blueprint."] },
+  { n: "04", title: "masters level — machine arguing", screens: [
+    { big: "here's the one most people never reach.", body: ["you quit asking the machine for answers like it's some oracle.", "you **argue** with it. you push, it pushes back, you both get sharper — until something *true* falls out the bottom.", "that's **machine arguing**. that's the masters degree, and it's the whole game."] },
+    { big: "and arguing runs on one rule.", body: ["people sound surer than they've earned the right to be. machines do it worse.", "the distance between how sure a thing *sounds* and how sure it has any *right* to be — that, right there, is where every lie you've ever been sold was hiding."] },
+    { k: "tiers", big: "so you put a label on every claim.", body: [] },
+    { big: "and never let a vibe wear a fact's good coat.", body: ["'unbreakable.' '100% secure.' 'it just *gets* you.'", "that's a red painted up to pass for a green. catch that one swap, and the whole spell breaks.", "do this enough times and nobody can sell you a damn thing again."] },
   ] },
-  { n: "05", title: "now you", screens: [
-    { big: "you've got the whole frame now.", body: ["a five-year-old could follow it. you did.", "that was the point — not to make it *simple*, to make it *legible*."] },
-    { k: "final", big: "start asking. start arguing.", body: ["bring me a question, a headline you don't trust, or something you actually believe.", "i'll find what's true in it, make it specific, measure where it overreaches, and hand it back sharper.", "that's machine arguing — and you keep the pen."] },
+  { n: "05", title: "now it's you", screens: [
+    { big: "so that's the ladder.", body: ["build with it. think with it. argue with it.", "and don't you *ever* mistake a confident machine for an honest one."] },
+    { big: "Narrative Intelligence", book: true, body: ["the stories we tell about what AI *is* quietly become the rules the rest of us have to live under.", "this book reads those stories before they harden into law."] },
+    { big: "Our Relationship", book: true, body: ["can you study something as slippery as *thinking with a machine* — and do it rigorously?", "this one treats three months of conversation as data, not a diary, and finds the structure underneath the feeling."] },
+    { big: "Radical Optimism", book: true, body: ["a better future is not a thing you sit around wishing for.", "it's a thing you *build*, on purpose, with the right blueprint. here's the blueprint."] },
+    { k: "final", big: "now. start arguing.", body: ["bring me a question, a headline you don't trust, or something you're pretty sure you believe.", "i'll find what's true in it, make it specific, show you exactly where it overreaches, and hand it back sharper than you brought it.", "that's machine arguing. and the pen stays right there in your hand."] },
   ] },
 ];
 
@@ -61,7 +60,7 @@ UNITS.forEach((u) => {
   u.screens.forEach((s) => screens.push(Object.assign({ unit: u.n }, s)));
 });
 
-const OPENING = `you finished the walk — so let's do the real thing. bring me a claim, a worry, a headline you don't trust, and i'll run it: find what's true, make it specific, measure where it overreaches, hand it back. start anywhere.`;
+const OPENING = `you made it through — so let's do the real thing. bring me a claim, a worry, a headline you don't trust, and i'll run it: find what's true, make it specific, show you where it overreaches, hand it back sharper. start wherever you want, baby.`;
 const CHIPS = ["so ai is bad for the environment…", "ai is going to take my job…", "they say this new ai basically thinks like us…"];
 
 window.addEventListener("DOMContentLoaded", () => {
