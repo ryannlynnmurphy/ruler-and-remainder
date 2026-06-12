@@ -1081,6 +1081,7 @@ render();
 // ---------- INSTRUMENTS (landing page for the runnable tools) ----------------
 const INSTRUMENTS = [
   { url: "/learn.html", kicker: "Teaching app · in conversation", title: "Learn with the dramaturg", dek: "The way in. A character whose craft is making abstract ideas legible teaches what the corpus is trying to teach — ask anything, or bring a claim and argue it into shape. No wrong place to start." },
+  { url: "/studio.html", kicker: "Workstation · the workroom", title: "The Studio", dek: "The workroom, not the walk. Argue a claim into shape with the dramaturg, then keep what's worth keeping as an artifact — a living archive of research you grow by arguing. Propose-only: it proposes, you keep." },
   { url: "/audit.html", kicker: "Tool · runs in browser", title: "The CRD Audit", dek: "Paste a system's copy and its real architecture; the audit surfaces every place stated confidence outruns what the system actually is. Deterministic — nothing leaves the page." },
   { url: "/reality.html", kicker: "Tool · no key needed", title: "The Reality Check", dek: "Paste an AI news story; it returns the likely reality, read against the corpus and the Cybersecurity Bill of Rights. No key needed — and what you check joins a public ledger." },
   { url: "/database.html", kicker: "Tool · searchable", title: "The Index", dek: "Search and filter the whole corpus — books, pamphlets, essays, dialogues, instruments, and apparatus." },
@@ -1197,7 +1198,7 @@ fs.writeFileSync(path.join(DIST, "index.html"), walkHome);
 
 // ---------- static assets ----------------------------------------------------
 fs.copyFileSync(path.join(ROOT, "styles.css"), path.join(DIST, "styles.css"));
-for (const f of ["audit.html", "audit.js", "reality.html", "reality.js", "learn.html", "learn.js"]) {
+for (const f of ["audit.html", "audit.js", "reality.html", "reality.js", "learn.html", "learn.js", "studio.html", "studio.js"]) {
   if (exists(path.join(ROOT, "tool", f))) fs.copyFileSync(path.join(ROOT, "tool", f), path.join(DIST, f));
 }
 
@@ -1217,7 +1218,7 @@ fs.writeFileSync(path.join(DIST, "og.svg"),
 </svg>`);
 
 // sitemap + robots
-const routes = ["/", "/corpus.html", "/database.html", "/instruments.html", "/learn.html", "/audit.html", "/reality.html",
+const routes = ["/", "/corpus.html", "/database.html", "/instruments.html", "/learn.html", "/audit.html", "/reality.html", "/studio.html",
   ...BOOKS.filter((b) => b.href).map((b) => b.href),
   ...entries.map((e) => e.url), ...pages.map((p) => p.url)];
 fs.writeFileSync(path.join(DIST, "sitemap.xml"),
