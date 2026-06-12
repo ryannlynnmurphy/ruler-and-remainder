@@ -1191,7 +1191,7 @@ fs.writeFileSync(path.join(DIST, "corpus.html"), cover);
 // The homepage now takes the shape of the dramaturg walk. Derived from the same
 // source as /learn (one source of truth), with a homepage title + canonical.
 const walkHome = fs.readFileSync(path.join(ROOT, "tool", "learn.html"), "utf8")
-  .replace(/<title>[\s\S]*?<\/title>/, "<title>The Ruler &amp; the Remainder — vibe coding &amp; vibe research</title>")
+  .replace(/<title>[\s\S]*?<\/title>/, "<title>The Ruler &amp; the Remainder — the media literacy machine</title>")
   .replace("https://ruler-and-remainder.vercel.app/learn.html", "https://ruler-and-remainder.vercel.app/");
 fs.writeFileSync(path.join(DIST, "index.html"), walkHome);
 

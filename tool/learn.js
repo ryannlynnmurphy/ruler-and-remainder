@@ -66,6 +66,9 @@ const CHIPS = ["so ai is bad for the environment…", "ai is going to take my jo
 window.addEventListener("DOMContentLoaded", () => {
   const stage = $("stage"), cont = $("cont"), back = $("back"), pbar = $("pbar"), mascot = $("mascot");
   let idx = 0;
+  // The Duolingo part dissipates once you've finished it: on return, skip straight
+  // to the live dramaturg (the last screen). "replay the walk" brings it back.
+  try { if (localStorage.getItem("rr_walk_complete")) idx = screens.length - 1; } catch {}
   let chatMessages = null; // persists across re-renders of the final screen
 
   function tile(cls, name, desc) {
@@ -90,7 +93,7 @@ window.addEventListener("DOMContentLoaded", () => {
         s.body.map((l) => `<p class="line">${fmt(l)}</p>`).join("") +
         `<div id="log" class="log"></div><div id="chips" class="chips"></div>` +
         `<div class="sayrow"><textarea id="say" rows="2" placeholder="bring the dramaturg a claim, a worry, a headline…"></textarea><button id="send" class="run">send</button></div>` +
-        `<p class="finlinks"><a href="/reality">try the anti-hype machine ↗</a> · <a href="/corpus">read the corpus ↗</a></p></div>`;
+        `<p class="finlinks"><a href="/reality">try the anti-hype machine ↗</a> · <a href="/corpus">read the corpus ↗</a> · <a href="#" id="replay">↺ replay the walk</a></p></div>`;
     } else {
       html = `<div class="screen"><h1 class="big${s.book ? " book" : ""}">${fmt(s.big)}</h1>` +
         s.body.map((l) => `<p class="line">${fmt(l)}</p>`).join("") + `</div>`;
@@ -105,9 +108,16 @@ window.addEventListener("DOMContentLoaded", () => {
     // the mascot reacts
     mascot.classList.remove("talk"); void mascot.offsetWidth; mascot.classList.add("talk");
 
+    const rp = $("replay");
+    if (rp) rp.addEventListener("click", (e) => { e.preventDefault(); idx = 0; render(); window.scrollTo({ top: 0, behavior: "smooth" }); });
+
     pbar.style.width = (100 * idx / (screens.length - 1)) + "%";
     back.style.visibility = idx === 0 ? "hidden" : "visible";
-    if (s.k === "final") { cont.style.display = "none"; mountChat(); }
+    if (s.k === "final") {
+      cont.style.display = "none";
+      try { localStorage.setItem("rr_walk_complete", "1"); } catch {}
+      mountChat();
+    }
     else {
       cont.style.display = "";
       const next = screens[idx + 1];
