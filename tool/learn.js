@@ -69,7 +69,13 @@ window.addEventListener("DOMContentLoaded", () => {
   let idx = 0;
   // The Duolingo part dissipates once you've finished it: on return, skip straight
   // to the live dramaturg (the last screen). "replay the walk" brings it back.
-  try { if (localStorage.getItem("rr_walk_complete")) idx = screens.length - 1; } catch {}
+  // ?chat=1 (used when hosted as the Chat mode of the unified workspace) always
+  // jumps straight to the live dramaturg — no walk.
+  try {
+    const chatOnly = /[?&]chat=1\b/.test(location.search);
+    if (chatOnly) { document.body.classList.add("chatonly"); idx = screens.length - 1; }
+    else if (localStorage.getItem("rr_walk_complete")) idx = screens.length - 1;
+  } catch {}
   let chatMessages = null; // persists across re-renders of the final screen
 
   function tile(cls, name, desc) {
@@ -94,7 +100,10 @@ window.addEventListener("DOMContentLoaded", () => {
         s.body.map((l) => `<p class="line">${fmt(l)}</p>`).join("") +
         `<div id="log" class="log"></div><div id="chips" class="chips"></div>` +
         `<div class="sayrow"><textarea id="say" rows="2" placeholder="bring the dramaturg a claim, a worry, a headline…"></textarea><button id="send" class="run">send</button></div>` +
-        `<p class="finlinks"><a href="/reality">try the anti-hype machine ↗</a> · <a href="/corpus">read the corpus ↗</a> · <a href="#" id="replay">↺ replay the walk</a></p></div>`;
+        (document.body.classList.contains("chatonly")
+          ? ""
+          : `<p class="finlinks"><a href="/dramaturg.html#lens">open the full workspace ↗</a> · <a href="/corpus">read the corpus ↗</a> · <a href="#" id="replay">↺ replay the walk</a></p>`) +
+        `</div>`;
     } else {
       html = `<div class="screen"><h1 class="big${s.book ? " book" : ""}">${fmt(s.big)}</h1>` +
         s.body.map((l) => `<p class="line">${fmt(l)}</p>`).join("") + `</div>`;

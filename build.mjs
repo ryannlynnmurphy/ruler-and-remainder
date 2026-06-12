@@ -81,7 +81,7 @@ function footnotes(md) {
 
 // One nav, everywhere — the suite. Two live instruments (Lens, Studio), the
 // library (Corpus), and the organized home of everything (Suite).
-const NAV = `<a href="/lens.html">Lens</a><a href="/studio.html">Studio</a><a href="/corpus">Corpus</a><a href="/instruments.html">Suite</a>`;
+const NAV = `<a href="/dramaturg.html">The Dramaturg</a><a href="/corpus">Corpus</a><a href="/instruments.html">Suite</a>`;
 
 function shell({ title, body, bodyClass = "", desc = "", route = "" }) {
   const d = (desc || DEFAULT_DESC).replace(/\s+/g, " ").trim();
@@ -1083,9 +1083,7 @@ render();
 
 // ---------- INSTRUMENTS (landing page for the runnable tools) ----------------
 const INSTRUMENTS = [
-  { url: "/lens.html", kicker: "Instrument · point it at the world", title: "The Lens", dek: "Bring anything from the world — a headline, a hype claim, a paragraph. The lens reads it through your own research: what it says, what it hides, and what your corpus says about it — cited and tiered. Your research, made an instrument." },
-  { url: "/learn.html", kicker: "Teaching app · in conversation", title: "Learn with the dramaturg", dek: "The way in. A character whose craft is making abstract ideas legible teaches what the corpus is trying to teach — ask anything, or bring a claim and argue it into shape. No wrong place to start." },
-  { url: "/studio.html", kicker: "Workstation · the workroom", title: "The Studio", dek: "The workroom, not the walk. Argue a claim into shape with the dramaturg, then keep what's worth keeping as an artifact — a living archive of research you grow by arguing. Propose-only: it proposes, you keep." },
+  { url: "/dramaturg.html", kicker: "The workspace · one tool, three ways", title: "The Dramaturg", dek: "One tool, one character, three ways to use it. <b>Chat</b> — talk a claim, a worry, a headline into shape. <b>Lens</b> — point it at the world and read that piece through your own corpus, cited and tiered. <b>Studio</b> — work the corpus into artifacts you keep. New here? The walk on the home page is the way in; it ends here." },
   { url: "/audit.html", kicker: "Tool · runs in browser", title: "The CRD Audit", dek: "Paste a system's copy and its real architecture; the audit surfaces every place stated confidence outruns what the system actually is. Deterministic — nothing leaves the page." },
   { url: "/reality.html", kicker: "Tool · no key needed", title: "The Reality Check", dek: "Paste an AI news story; it returns the likely reality, read against the corpus and the Cybersecurity Bill of Rights. No key needed — and what you check joins a public ledger." },
   { url: "/database.html", kicker: "Tool · searchable", title: "The Index", dek: "Search and filter the whole corpus — books, pamphlets, essays, dialogues, instruments, and apparatus." },
@@ -1103,7 +1101,7 @@ const suiteCard = (i) => `    <a class="item" href="${i.url}"><span class="kicke
 fs.writeFileSync(path.join(DIST, "instruments.html"), shell({
   title: "The Suite",
   route: "/instruments.html",
-  desc: "The Suite — one home for the whole workspace. The live instruments (the Lens, the Studio, the dramaturg, the Reality Check, the CRD Audit) and the library (the corpus, the index, the books).",
+  desc: "The Suite — one home for the whole workspace. The Dramaturg (chat, lens, and studio in one tool), the Reality Check, the CRD Audit, and the library (the corpus, the index, the books).",
   body: `<div class="piece doc">
   <a class="back" href="/">← Home</a>
   <header class="head reveal"><div class="kicker">The workspace</div><h1>The Suite</h1></header>
@@ -1185,7 +1183,7 @@ const cover = shell({
   <section class="dept" id="instruments">
     <div class="dept-head reveal"><span class="no" aria-hidden="true">03</span><h2>Instruments</h2><span class="gloss">runnable research tools</span></div>
     <div class="items">
-      <a class="item" href="/learn.html"><span class="kicker">Teaching app · in conversation</span><h3>Learn with the dramaturg</h3><p>A character who makes abstract ideas legible teaches what the corpus is trying to teach. Ask anything, or bring a claim to argue into shape.</p></a>
+      <a class="item" href="/dramaturg.html"><span class="kicker">The workspace · one tool, three ways</span><h3>The Dramaturg</h3><p>One tool. <b>Chat</b> talks a claim into shape, <b>Lens</b> reads the world through your corpus, <b>Studio</b> works it into artifacts. The same character, three ways to use it.</p></a>
       <a class="item" href="/audit.html"><span class="kicker">Tool · runs in browser</span><h3>The CRD Audit</h3><p>Paste copy and the architecture; surface where stated confidence contradicts what the system is. Nothing leaves the page.</p></a>
       <a class="item" href="/reality.html"><span class="kicker">Tool · no key needed</span><h3>The Reality Check</h3><p>Paste an AI news story; get the likely reality, read against the corpus and the Cybersecurity Bill of Rights. What you check joins a public ledger.</p></a>
       <a class="item" href="/database.html"><span class="kicker">Tool · searchable</span><h3>The Index</h3><p>Search and filter the whole corpus — books, pamphlets, essays, dialogues, apparatus.</p></a>
@@ -1220,7 +1218,7 @@ fs.writeFileSync(path.join(DIST, "index.html"), walkHome);
 
 // ---------- static assets ----------------------------------------------------
 fs.copyFileSync(path.join(ROOT, "styles.css"), path.join(DIST, "styles.css"));
-for (const f of ["audit.html", "audit.js", "reality.html", "reality.js", "learn.html", "learn.js", "studio.html", "studio.js", "lens.html", "lens.js"]) {
+for (const f of ["audit.html", "audit.js", "reality.html", "reality.js", "learn.html", "learn.js", "studio.html", "studio.js", "lens.html", "lens.js", "dramaturg.html"]) {
   if (exists(path.join(ROOT, "tool", f))) fs.copyFileSync(path.join(ROOT, "tool", f), path.join(DIST, f));
 }
 
