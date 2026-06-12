@@ -34,22 +34,22 @@ const UNITS = [
     { big: "every system hides something.", body: ["a cheap price hides who got paid less to make it cheap.", "**legibilism** has one demand: make the hiding visible."] },
     { big: "make power readable.", body: ["not to a regulator, not to an expert — to the people stuck living inside it.", "the subscription that hides what you own. the feed that hides why you're seeing this. name the hiding, and you can fight it."] },
     { big: "but — readable to who?", body: ["a secret everyone *could* see and nobody looks at is still a secret.", "**attentionism**: attention — noticing before the moment passes — is the rarest thing there is."] },
-    { big: "switched off, or only sleeping?", body: ["some things look dead but are just *dormant* — waiting.", "**latentology** is learning to tell the difference. it matters most when the thing is a mind."] },
+    { big: "switched off, or only sleeping?", body: ["some things look dead but are only *dormant* — waiting to be read.", "**latentology** is telling the difference between what's gone and what's just unread — hardest when you can't tell if a thing has a mind, or only looks like it does."] },
   ] },
   { n: "03", title: "the method", screens: [
     { big: "people always sound more sure than they are.", body: ["in ads. in headlines. in your group chat.", "the space between how sure they *sound* and how sure they've earned the right to be — that's where the lie lives."] },
     { k: "tiers", big: "so you label every claim.", body: [] },
     { big: "and you never let red dress up as green.", body: ["a vibe sold as a fact is how every overclaim works — 'unbreakable,' '100% secure,' 'it just gets you.'", "catch the swap, and the spell breaks."] },
-    { big: "how do you find what's true?", body: ["you argue with a machine until the truth falls out.", "ryann calls it **machine arguing**. you've been doing a tiny version this whole walk."] },
+    { big: "how do you find what's true?", body: ["you argue with the machine until something true falls out — you push, it pushes back, you both get more specific.", "it's called **machine arguing**, and you've been doing a tiny version this whole walk."] },
   ] },
   { n: "04", title: "the books", screens: [
     { big: "Narrative Intelligence", book: true, body: ["the stories we tell about what AI *is* quietly become the rules we all live under.", "this book reads the stories before they harden."] },
-    { big: "Our Relationship", book: true, body: ["what's it actually like to think *with* a machine?", "a playwright spent three months finding out — dating, consciousness, all of it — and turned the feeling into theory."] },
+    { big: "Our Relationship", book: true, body: ["can you study something as slippery as *thinking with a machine* — rigorously?", "this one treats three months of conversation as data, not a diary, and argues the feeling underneath has a structure you can actually check."] },
     { big: "Radical Optimism", book: true, body: ["a better future isn't something you wish for.", "it's something you build on purpose, with the right architecture. this is the blueprint."] },
   ] },
   { n: "05", title: "now you", screens: [
     { big: "you've got the whole frame now.", body: ["a five-year-old could follow it. you did.", "that was the point — not to make it *simple*, to make it *legible*."] },
-    { k: "final", big: "so stop reading. start.", body: ["bring me something of your own — a claim, a worry, a headline you don't trust.", "i'll find what's true in it, make it specific, measure where it overreaches, and hand it back sharper.", "you keep the pen."] },
+    { k: "final", big: "start asking. start arguing.", body: ["bring me a question, a headline you don't trust, or something you actually believe.", "i'll find what's true in it, make it specific, measure where it overreaches, and hand it back sharper.", "that's machine arguing — and you keep the pen."] },
   ] },
 ];
 
