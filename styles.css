@@ -353,8 +353,11 @@ main { padding-left: 36px; }
 .examples button:hover { border-color: var(--measure); color: var(--measure); }
 .field { display: block; margin: 1rem 0; }
 .field .fk { display: block; font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.1em; text-transform: lowercase; color: var(--measure); margin-bottom: 0.4rem; }
-#copy, #arch, #input { width: 100%; font-family: var(--mono); font-size: 0.88rem; line-height: 1.5; padding: 1rem; border: 2px solid var(--ink); background: var(--paper); color: var(--ink); resize: vertical; }
-#copy:focus, #arch:focus, #input:focus { outline: none; border-color: var(--measure); }
+#copy, #arch, #input, #story { width: 100%; font-family: var(--mono); font-size: 0.88rem; line-height: 1.5; padding: 1rem; border: 2px solid var(--ink); background: var(--paper); color: var(--ink); resize: vertical; }
+#copy:focus, #arch:focus, #input:focus, #story:focus { outline: none; border-color: var(--measure); }
+#copy::placeholder, #arch::placeholder, #input::placeholder, #story::placeholder { color: var(--faint); font-style: normal; }
+.field select, #model { width: 100%; font-family: var(--mono); font-size: 0.82rem; padding: 0.7rem 0.8rem; border: 2px solid var(--ink); border-radius: 0; background: var(--paper); color: var(--ink); cursor: pointer; }
+.field select:focus, #model:focus { outline: none; border-color: var(--measure); }
 .run { margin-top: 0.9rem; background: var(--ink); color: var(--paper); padding: 0.6rem 1.3rem; }
 .run:hover { background: var(--measure); border-color: var(--measure); }
 .results { margin-top: 2rem; }
