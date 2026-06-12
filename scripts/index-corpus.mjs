@@ -15,8 +15,18 @@ import fs from "node:fs";
 import path from "node:path";
 
 const ROOT = path.resolve(".");
+const exists = (p) => fs.existsSync(p);
 const SRC = path.join(ROOT, "research");
 const OUT = path.join(ROOT, "lib", "corpus-index.json");
+
+// The three published manuscripts (the canonical sources build.mjs ships) — NOT
+// every file in book/, which holds drafts and duplicate variants that would
+// pollute retrieval. Keep this list in sync with the BOOKS srcs in build.mjs.
+const BOOKS = [
+  "book/Narrative_Intelligence_FINAL.md",
+  "book/Our_Relationship_Edited.md",
+  "book/Radical_Optimism_Complete.md",
+];
 
 const MAX_WORDS = 1400; // split sections longer than this into sub-chunks
 
@@ -56,13 +66,20 @@ function splitBody(body) {
   return out;
 }
 
-const files = fs.readdirSync(SRC).filter((f) => f.endsWith(".md")).sort();
+// targets: every research essay, then the three canonical book manuscripts
+const targets = [
+  ...fs.readdirSync(SRC).filter((f) => f.endsWith(".md")).sort()
+    .map((f) => ({ abs: path.join(SRC, f), file: f, kind: "essay" })),
+  ...BOOKS.filter((b) => exists(path.join(ROOT, b)))
+    .map((b) => ({ abs: path.join(ROOT, b), file: b, kind: "book" })),
+];
 const chunks = [];
 let id = 0;
 
-for (const f of files) {
-  const raw = fs.readFileSync(path.join(SRC, f), "utf8");
-  const title = titleOf(raw, f.replace(/\.md$/, "").replace(/[_-]+/g, " "));
+for (const t of targets) {
+  const f = t.file;
+  const raw = fs.readFileSync(t.abs, "utf8");
+  const title = titleOf(raw, path.basename(f).replace(/\.md$/, "").replace(/[_-]+/g, " "));
   const md = clean(raw);
 
   // split into sections on H2/H3 headings; everything before the first heading
@@ -90,7 +107,7 @@ for (const f of files) {
     const cleanedText = clean(sec.text);
     if (wordCount(cleanedText) < 12) continue; // skip stubs
     for (const piece of splitBody(cleanedText)) {
-      chunks.push({ id: id++, file: f, title, heading: sec.heading || title, text: piece });
+      chunks.push({ id: id++, file: f, kind: t.kind, title, heading: sec.heading || title, text: piece });
     }
   }
 }
@@ -98,4 +115,6 @@ for (const f of files) {
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
 fs.writeFileSync(OUT, JSON.stringify(chunks));
 const bytes = fs.statSync(OUT).size;
-console.log(`Indexed ${files.length} essays → ${chunks.length} chunks (${(bytes / 1024).toFixed(0)} KB) → lib/corpus-index.json`);
+const essays = targets.filter((t) => t.kind === "essay").length;
+const books = targets.filter((t) => t.kind === "book").length;
+console.log(`Indexed ${essays} essays + ${books} books → ${chunks.length} chunks (${(bytes / 1024).toFixed(0)} KB) → lib/corpus-index.json`);
