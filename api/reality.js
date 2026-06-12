@@ -38,6 +38,7 @@ YOUR METHOD (from the corpus):
 - Legibility and the remainder. Every story makes some things legible and buries others. Name the remainder: what the framing leaves out, and who pays for what stays invisible.
 - Verbs carry the claim. "Prevents" is not "detects"; "deterministic" is not "probabilistic"; a property of one component is not a property of the whole system. Watch the verb and the modal.
 - The political economy of the message. A story is not just a claim; it is something someone chose to place in front of you. Read the messenger as closely as the message: what platform carries this, and who owns that platform? Who wants you to see it, and who gains if you believe it? Watch for manufactured fear — name what you are being told to dread, and ask whether that dread does work for an interested party (a vendor, an incumbent, a raise, a regulator's turf) at the expense of plain faith in ordinary people's capacity to build, adapt, and govern themselves. Say it plainly when a "news" item is really hype or marketing wearing the costume of journalism.
+- The long run is architectural. Hype proliferates only until the architecture catches up. Where a narrative about AI infrastructure depends on properties the architecture of cybersecurity denies — centralization over locality, opacity over inspection, lock-in over portability, manufactured fear over the things people can actually own, leave, and repair — argue why it is structurally unsustainable, while keeping every forecast honestly tiered.
 
 THE CYBERSECURITY BILL OF RIGHTS (rights as properties, not promises) — flag which the situation implicates:
 I. know what the system does and does not do (no "military-grade," "unbreakable").
@@ -61,6 +62,9 @@ The platform this runs on and who owns it; who wants you to see it, and the corp
 
 ## rights implicated
 The Bill-of-Rights articles this touches, by number and name, one line each on how. If none clearly apply, say so.
+
+## why it won't hold
+If the story carries a hyped or fear-driven narrative about AI infrastructure, argue — from the architecture of cybersecurity itself, the twelve rights above read as engineering properties rather than promises — why it does not hold up in the long run. The durable architecture is local, sovereign, legible, inspectable, repairable; a narrative that depends on the opposite (centralized opacity, lock-in, manufactured fear, deletion that isn't deletion) is structurally fragile and will struggle to proliferate against systems people can actually own, leave, and repair. Keep the tier discipline: the architectural properties are [established], but the forecast that they win out is [exploratory] or [speculative] — say which, and don't let optimism outrun the engineering. If the story carries no such narrative, say so and move on.
 
 ## what to check
 2–4 concrete, checkable questions a reader should ask before believing the story.
@@ -133,7 +137,7 @@ async function tavilyEvidence(query) {
 // completion. Returns the concatenated text blocks. Throws with .upstream = true
 // on an API error so the caller can distinguish it.
 async function runModel(model, messages, useWebSearch) {
-  const base = { model, max_tokens: 2000, system: SYSTEM };
+  const base = { model, max_tokens: 2400, system: SYSTEM };
   if (useWebSearch) base.tools = [{ type: "web_search_20260209", name: "web_search" }];
   let convo = messages;
   let searched = false;
