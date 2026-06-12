@@ -302,11 +302,22 @@ main { padding-left: 36px; }
 @media (max-width: 640px) { .feedgrid { grid-template-columns: 1fr; } }
 
 /* composed marks — a long-division plate per card (see markSVG in reality.js) */
+.antihype { font-family: var(--display); font-weight: 700; font-size: 1.1rem; color: var(--measure); text-transform: lowercase; letter-spacing: -0.01em; margin: 0.25rem 0 0; }
+
 .cardmark { background: var(--paper-2); line-height: 0; overflow: hidden; }
 .cardmark svg { width: 100%; height: 100%; display: block; }
-.feeditem .cardmark { height: 54px; margin: -0.9rem -1rem 0; border-bottom: 1px solid var(--rule); }
+.cardmark img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.feeditem .cardmark { height: 96px; margin: -0.9rem -1rem 0; border-bottom: 1px solid var(--rule); }
 .ledgeritem .cardmark { height: 58px; margin: -1rem -1.1rem 0; border-bottom: 1px solid var(--rule); }
 .verdictmark { height: 90px; margin: 0 0 1.6rem; border: 1px solid var(--rule); }
+
+/* feed cards are no longer one big button — they carry two actions */
+.feeditem { cursor: default; }
+.cardbtns { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.55rem; }
+.mini { font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.03em; text-transform: lowercase; cursor: pointer; border: 1px solid var(--ink); background: transparent; color: var(--ink); padding: 0.34rem 0.55rem; text-decoration: none; line-height: 1; }
+.mini:hover { border-color: var(--measure); color: var(--measure); }
+.runmini { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.runmini:hover { background: var(--measure); border-color: var(--measure); color: var(--paper); }
 
 /* the public ledger — recently checked stories */
 .ledger { margin-top: 2.6rem; border-top: 2px solid var(--ink); padding-top: 1.6rem; }

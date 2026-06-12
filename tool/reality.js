@@ -117,17 +117,28 @@ window.addEventListener("DOMContentLoaded", () => {
       if (!items.length) { feed.innerHTML = `<p class="empty" style="grid-column:1/-1">no stories right now — paste your own below.</p>`; return; }
       feed.innerHTML = "";
       items.forEach((it) => {
-        const card = document.createElement("button");
+        const card = document.createElement("article");
         card.className = "feeditem";
+        const mark = markSVG(it.source || it.domain || it.title);
+        const media = it.image ? `<img src="${esc(it.image)}" alt="" loading="lazy">` : mark;
         card.innerHTML =
-          `<div class="cardmark">${markSVG(it.source || it.domain || it.title)}</div>` +
+          `<div class="cardmark">${media}</div>` +
           `<span class="src">${esc(it.source || it.domain || "news")}</span>` +
           `<h4>${esc(it.title)}</h4>` +
-          `<span class="when">${when(it.date)}</span>`;
-        card.addEventListener("click", () => {
+          `<span class="when">${when(it.date)}</span>` +
+          `<div class="cardbtns">` +
+            `<button class="mini runmini">run the reality check</button>` +
+            (it.link ? `<a class="mini" href="${esc(it.link)}" target="_blank" rel="noopener noreferrer">read the article ↗</a>` : "") +
+          `</div>`;
+        // a broken/blocked article image falls back to the composed mark
+        const img = card.querySelector(".cardmark img");
+        if (img) img.addEventListener("error", () => { card.querySelector(".cardmark").innerHTML = mark; });
+        // "run the reality check" — load this story and run it
+        card.querySelector(".runmini").addEventListener("click", () => {
           selectedSource = it.source || it.domain || null;
           storyEl.value = it.title + (it.summary ? "\n\n" + it.summary : "") + (selectedSource ? `\n\n(source: ${selectedSource})` : "");
-          storyEl.scrollIntoView({ behavior: "smooth", block: "center" });
+          runCheck();
+          out.scrollIntoView({ behavior: "smooth", block: "start" });
         });
         feed.appendChild(card);
       });
@@ -169,7 +180,8 @@ window.addEventListener("DOMContentLoaded", () => {
   loadLedger();
 
   // ---- run the check (server-side at /api/reality) ----
-  runBtn.addEventListener("click", async () => {
+  runBtn.addEventListener("click", runCheck);
+  async function runCheck() {
     const story = storyEl.value.trim();
     if (!story) { out.innerHTML = `<p class="empty">paste an ai news story above, then run the check.</p>`; return; }
 
@@ -210,5 +222,5 @@ window.addEventListener("DOMContentLoaded", () => {
     } finally {
       runBtn.disabled = false; runBtn.textContent = "run the reality check";
     }
-  });
+  }
 });
