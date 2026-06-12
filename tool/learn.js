@@ -225,14 +225,14 @@ window.addEventListener("DOMContentLoaded", () => {
         else if (m.error) inner = `<div class="reality"><p>${esc(m.error)}</p></div>`;
         else if (!m.items || !m.items.length) inner = `<div class="reality"><p>no ai news came back just now — try again in a minute.</p></div>`;
         else inner = `<div class="newsfeed">${m.items.map((it, i) => newsCard(it, m.nid, i)).join("")}</div>`;
-        return `<div class="turn dram"><span class="who">the dramaturg · today's ai news</span>${inner}</div>`;
+        return `<div class="turn dram"><span class="who">dorothy · today's ai news</span>${inner}</div>`;
       }
       const tag = m.model ? ` <span class="bymodel">· ${modelLabel(m.model)}</span>` : "";
       let inner = "";
       if (m.thinking) inner += `<details class="thinkblock"${m.streaming ? " open" : ""}><summary>thinking</summary><div class="thinktext">${esc(m.thinking)}</div></details>`;
       if (m.content) inner += `<div class="reality">${mdToHtml(m.content)}</div>`;
       else if (!m.thinking && (m.pending || m.streaming)) inner += `<p class="thinking">thinking…</p>`;
-      return `<div class="turn dram"><span class="who">the dramaturg${tag}</span>${inner}</div>`;
+      return `<div class="turn dram"><span class="who">dorothy${tag}</span>${inner}</div>`;
     }
     // The conversation develops inside a fixed brick; we never auto-scroll the
     // user (no jump-to-bottom). On send we bring the new turn to the top once,
