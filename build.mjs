@@ -79,7 +79,9 @@ function footnotes(md) {
   return { withRefs, block };
 }
 
-const NAV = `<a href="/corpus#books">Books</a><a href="/corpus#corpus">Corpus</a><a href="/database.html">Index</a><a href="/instruments.html">Instruments</a><a href="/method.html">Method</a>`;
+// One nav, everywhere — the suite. Two live instruments (Lens, Studio), the
+// library (Corpus), and the organized home of everything (Suite).
+const NAV = `<a href="/lens.html">Lens</a><a href="/studio.html">Studio</a><a href="/corpus">Corpus</a><a href="/instruments.html">Suite</a>`;
 
 function shell({ title, body, bodyClass = "", desc = "", route = "" }) {
   const d = (desc || DEFAULT_DESC).replace(/\s+/g, " ").trim();
@@ -1087,19 +1089,33 @@ const INSTRUMENTS = [
   { url: "/reality.html", kicker: "Tool · no key needed", title: "The Reality Check", dek: "Paste an AI news story; it returns the likely reality, read against the corpus and the Cybersecurity Bill of Rights. No key needed — and what you check joins a public ledger." },
   { url: "/database.html", kicker: "Tool · searchable", title: "The Index", dek: "Search and filter the whole corpus — books, pamphlets, essays, dialogues, instruments, and apparatus." },
 ];
+// The Suite — one organized home for everything. Instruments (the live tools)
+// and Library (the reading), so nothing is scattered. No features lost; brought
+// into formation. The Index moves into the Library; books join it.
+const SUITE_INSTRUMENTS = INSTRUMENTS.filter((i) => i.url !== "/database.html");
+const SUITE_LIBRARY = [
+  { url: "/corpus", kicker: "The reading", title: "The Corpus", dek: "The whole body of research — books, pamphlets, essays, dialogues, and apparatus, laid out to read." },
+  { url: "/database.html", kicker: "Searchable", title: "The Index", dek: "Search and filter every piece of the corpus by title, kind, and concept." },
+  ...BOOKS.filter((b) => b.href).map((b) => ({ url: b.href, kicker: "Book", title: b.title, dek: b.dek })),
+];
+const suiteCard = (i) => `    <a class="item" href="${i.url}"><span class="kicker">${i.kicker}</span><h3>${i.title}</h3><p>${i.dek}</p></a>`;
 fs.writeFileSync(path.join(DIST, "instruments.html"), shell({
-  title: "Instruments",
+  title: "The Suite",
   route: "/instruments.html",
-  desc: "The runnable instruments of the corpus — the CRD Audit, the Reality Check, and the Index. Each runs in your browser.",
+  desc: "The Suite — one home for the whole workspace. The live instruments (the Lens, the Studio, the dramaturg, the Reality Check, the CRD Audit) and the library (the corpus, the index, the books).",
   body: `<div class="piece doc">
-  <a class="back" href="/">← Cover</a>
-  <header class="head reveal"><div class="kicker">Runnable research tools</div><h1>Instruments</h1></header>
-  <div class="prose reveal"><p>The corpus is not only argued — parts of it run. These are the instruments: small tools that turn the books' claims into something you can operate. Each runs in your browser.</p></div>
-  <div class="items" style="margin-top:1.8rem">
-${INSTRUMENTS.map((i) => `    <a class="item" href="${i.url}"><span class="kicker">${i.kicker}</span><h3>${i.title}</h3><p>${i.dek}</p></a>`).join("\n")}
-    <div class="item facecell"><span class="face">＾‿＾</span><span class="facenote">more instruments as the corpus grows</span></div>
+  <a class="back" href="/">← Home</a>
+  <header class="head reveal"><div class="kicker">The workspace</div><h1>The Suite</h1></header>
+  <div class="prose reveal"><p>One home for the whole thing. The <strong>instruments</strong> are the live tools — they read, argue, and check, grounded in your research. The <strong>library</strong> is the research itself, to read and search. Everything in one place.</p></div>
+  <h2 class="reveal" style="font-family:'Space Grotesk',sans-serif;font-size:0.82rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#e2300c;margin:2.6rem 0 0.9rem;border-top:2px solid #0e0d0a;padding-top:1rem;">Instruments</h2>
+  <div class="items">
+${SUITE_INSTRUMENTS.map(suiteCard).join("\n")}
   </div>
-  <div class="foot"><a href="/">← Cover</a></div>
+  <h2 class="reveal" style="font-family:'Space Grotesk',sans-serif;font-size:0.82rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#e2300c;margin:2.6rem 0 0.9rem;border-top:2px solid #0e0d0a;padding-top:1rem;">Library</h2>
+  <div class="items">
+${SUITE_LIBRARY.map(suiteCard).join("\n")}
+  </div>
+  <div class="foot"><a href="/">← Home</a></div>
 </div>`,
 }));
 
