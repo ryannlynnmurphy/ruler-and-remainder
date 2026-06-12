@@ -368,31 +368,67 @@ main { padding-left: 36px; }
 #copy:focus, #arch:focus, #input:focus, #story:focus, #say:focus { outline: none; border-color: var(--measure); }
 #copy::placeholder, #arch::placeholder, #input::placeholder, #story::placeholder, #say::placeholder { color: var(--faint); font-style: normal; }
 
-/* the teaching app — a screen-by-screen walk that collapses into the next */
-.walkpage { max-width: 44rem; }
-.walkpage .back { margin-bottom: 1rem; }
-.walkrail { display: flex; align-items: flex-end; gap: 0; height: 26px; border-bottom: 1px solid var(--ink); margin: 0 0 2.4rem; }
-.walkrail .rtick { flex: 1; height: 7px; padding: 0; border: 0; border-right: 1px solid var(--rule); background: transparent; cursor: pointer; transition: height 0.25s, background 0.25s; }
-.walkrail .rtick:last-child { border-right: 0; }
-.walkrail .rtick:hover { background: var(--paper-2); }
-.walkrail .rtick.passed { background: var(--measure); height: 13px; }
-.walkrail .rtick.now { background: var(--measure); height: 24px; }
-.walk { position: relative; min-height: 64vh; }
-.beat { display: none; }
-.beat.active { display: flex; flex-direction: column; justify-content: center; min-height: 60vh; }
-.beat.active .beat-body { animation: beatIn 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) both; }
-.beat.collapsing .beat-body { animation: beatOut 0.3s ease-in forwards; }
-@keyframes beatIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
-@keyframes beatOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-12px) scaleY(0.96); } }
-.beat-tick { display: none; }
-.beat-body p { font-family: var(--serif); font-size: 1.4rem; line-height: 1.5; margin: 0 0 1.1rem; color: var(--ink); }
-.beat-body p:has(.tierflag) { font-size: 1.15rem; }
-.beat-body strong { font-weight: 600; }
-.beat-body em { font-style: italic; }
-.beat-body a { color: var(--measure); }
-.goon { margin-top: 1.4rem; align-self: flex-start; font-family: var(--mono); font-size: 0.82rem; font-weight: 700; text-transform: lowercase; letter-spacing: 0.03em; cursor: pointer; border: 2px solid var(--ink); background: var(--ink); color: var(--paper); padding: 0.6rem 1.2rem; transition: background 0.15s, border-color 0.15s; }
-.goon:hover { background: var(--measure); border-color: var(--measure); }
-@media (max-width: 640px) { .beat-body p { font-size: 1.18rem; } }
+/* THE WALK — a web-app game. Duolingo for the corpus; the dramaturg is the guide. */
+body.walkgame { overflow-x: hidden; }
+.walkgame #main { padding: 0; max-width: none; }
+.walkgame .ruler-gutter { display: none; }
+.game { display: flex; flex-direction: column; min-height: 100vh; max-width: 52rem; margin: 0 auto; padding: 0 1.4rem; }
+
+/* top bar: mascot · progress · escape */
+.gamebar { display: flex; align-items: center; gap: 1rem; padding: 1.1rem 0 0.4rem; }
+.mascot { width: 46px; height: 52px; flex: 0 0 auto; }
+.mascot svg { width: 100%; height: 100%; overflow: visible; animation: mbob 3.2s ease-in-out infinite; }
+.mascot .eye { transform-box: fill-box; transform-origin: center; animation: blink 5s infinite; }
+.mascot.talk svg { animation: mtalk 0.5s ease; }
+@keyframes mbob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@keyframes mtalk { 0% { transform: translateY(0) scale(1); } 35% { transform: translateY(-5px) scale(1.06); } 100% { transform: translateY(0) scale(1); } }
+@keyframes blink { 0%,92%,100% { transform: scaleY(1); } 96% { transform: scaleY(0.1); } }
+.progress { flex: 1; height: 12px; background: var(--paper-2); border: 1.5px solid var(--ink); border-radius: 99px; overflow: hidden; }
+.pbar { height: 100%; width: 0; background: var(--measure); border-radius: 99px; transition: width 0.5s cubic-bezier(0.22, 0.61, 0.36, 1); }
+.leave { font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.06em; text-transform: lowercase; color: var(--muted); text-decoration: none; white-space: nowrap; }
+.leave:hover { color: var(--measure); }
+
+/* the stage — one screen at a time, centered, big */
+.stage { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 2rem 0; }
+.screen { width: 100%; }
+.big { font-family: var(--display); font-weight: 700; font-size: clamp(2.1rem, 6.5vw, 4rem); line-height: 1.02; letter-spacing: -0.03em; color: var(--ink); margin: 0 0 1.6rem; text-wrap: balance; }
+.big.book { color: var(--measure); font-style: normal; }
+.big i { font-style: italic; }
+.big b { color: var(--measure); }
+.line { font-family: var(--serif); font-size: clamp(1.15rem, 2.6vw, 1.6rem); line-height: 1.45; color: var(--ink-soft); margin: 0 0 0.9rem; max-width: 36rem; }
+.line.sub { font-family: var(--mono); font-size: 0.9rem; color: var(--muted); }
+.line b { color: var(--ink); font-weight: 600; }
+.line i { font-style: italic; }
+.line a, .finlinks a { color: var(--measure); }
+
+/* unit-intro screens */
+.unit-screen { text-align: left; }
+.unit-no { font-family: var(--mono); font-size: 1rem; font-weight: 700; letter-spacing: 0.3em; color: var(--measure); }
+.unit-title { font-family: var(--display); font-weight: 700; font-size: clamp(2.6rem, 9vw, 5.5rem); line-height: 0.95; letter-spacing: -0.04em; text-transform: lowercase; color: var(--ink); margin: 0.4rem 0 0; }
+
+/* the three tiers, as a traffic light */
+.tiers { display: flex; flex-direction: column; gap: 0.7rem; margin-top: 1.4rem; max-width: 34rem; }
+.tile { display: grid; grid-template-columns: auto auto 1fr; align-items: center; gap: 0.7rem; border: 2px solid var(--ink); padding: 0.7rem 0.9rem; }
+.tile .dot { width: 16px; height: 16px; border-radius: 99px; }
+.tile b { font-family: var(--mono); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
+.tile p { margin: 0; font-family: var(--serif); font-size: 0.98rem; color: var(--ink-soft); }
+.tile.g { border-color: #3c5a37; } .tile.g .dot { background: #3c5a37; } .tile.g b { color: #3c5a37; }
+.tile.y { border-color: #8a6d1f; } .tile.y .dot { background: #8a6d1f; } .tile.y b { color: #8a6d1f; }
+.tile.r { border-color: var(--measure); } .tile.r .dot { background: var(--measure); } .tile.r b { color: var(--measure); }
+
+/* reveal */
+.rin { animation: rin 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) both; }
+@keyframes rin { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+
+/* foot: back · the big continue button */
+.gamefoot { display: flex; align-items: center; gap: 1rem; padding: 1rem 0 1.8rem; border-top: 2px solid var(--ink); }
+.gback { font-family: var(--mono); font-size: 1.1rem; cursor: pointer; border: 2px solid var(--rule); background: transparent; color: var(--muted); padding: 0.55rem 0.9rem; line-height: 1; }
+.gback:hover { border-color: var(--ink); color: var(--ink); }
+.cont { margin-left: auto; font-family: var(--display); font-weight: 700; font-size: 1rem; text-transform: lowercase; letter-spacing: 0.01em; cursor: pointer; border: none; background: var(--ink); color: var(--paper); padding: 0.85rem 2.2rem; box-shadow: 0 4px 0 var(--measure); transition: transform 0.08s, box-shadow 0.08s; }
+.cont:hover { background: var(--measure); box-shadow: 0 4px 0 var(--ink); }
+.cont:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+.final-screen .finlinks { font-family: var(--mono); font-size: 0.78rem; margin-top: 1.4rem; }
+@media (max-width: 600px) { .gamebar { gap: 0.7rem; } .mascot { width: 38px; height: 44px; } }
 
 /* the conversation surface (the final screen) */
 .log { display: flex; flex-direction: column; gap: 1.4rem; margin: 1.6rem 0; }

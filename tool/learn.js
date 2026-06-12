@@ -1,16 +1,15 @@
-// Learn the research — a screen-by-screen walk. Each idea is a full screen; you
-// advance and it collapses into the next, the dramaturg taking you through. The
-// final screen hands you to the live dramaturg (brain: /api/argue).
+// The Walk — a web-app game. Duolingo for the whole corpus: one idea per screen,
+// made legible (not dumbed down), the dramaturg as the guide. The final screen
+// hands you to the live dramaturg (brain: /api/argue — not modified here).
 
 const $ = (id) => document.getElementById(id);
-
-function esc(s) { return s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])); }
+function esc(s) { return String(s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])); }
+function fmt(t) { return esc(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\*(.+?)\*/g, "<i>$1</i>"); }
 function mdToHtml(md) {
   const lines = md.split("\n");
   let html = "", inList = false;
   const inline = (t) => esc(t)
-    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-    .replace(/\*(.+?)\*/g, "<em>$1</em>")
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/\*(.+?)\*/g, "<em>$1</em>")
     .replace(/\[(established|exploratory|speculative|unverifiable)\]/gi, '<span class="tierflag t-$1">$1</span>');
   for (let raw of lines) {
     const l = raw.trim();
@@ -23,118 +22,161 @@ function mdToHtml(md) {
   return html;
 }
 
-const OPENING = `you made it through the walk — so let's do the real thing. bring me a claim, a worry, a headline, a half-formed thought, and i'll run it: find what's true in it, make it specific, measure where it overreaches, and hand it back to you sharper. start anywhere.`;
-const CHIPS = [
-  "is AI actually going to take my job?",
-  "test a claim i keep seeing online",
-  "help me make a vague idea specific",
+const UNITS = [
+  { n: "01", title: "the big idea", screens: [
+    { big: "everything gets measured.", body: ["a person. a price. a risk. a kid in a classroom.", "something always does the measuring."] },
+    { big: "a ruler only sees what it was built to see.", body: ["and *someone* built it. for a reason.", "to notice some things and skip the rest."] },
+    { big: "what it skips doesn't vanish.", body: ["it's called the **remainder**.", "and it always lands on somebody."] },
+    { big: "here's what that looks like.", body: ["a credit score is built for a steady paycheck and a bank account.", "live on cash and gig work, and the ruler doesn't read you as *complicated* — it reads you as *risky*.", "you pay for being invisible: a higher rate, or no loan at all."] },
+    { big: "so the whole thing asks three questions.", body: ["who built the ruler?", "what can't it see?", "and who pays for the remainder?"] },
+  ] },
+  { n: "02", title: "the words", screens: [
+    { big: "every system hides something.", body: ["a cheap price hides who got paid less to make it cheap.", "**legibilism** has one demand: make the hiding visible."] },
+    { big: "make power readable.", body: ["to the people stuck living inside it.", "that's the whole first pamphlet."] },
+    { big: "but — readable to who?", body: ["a secret everyone *could* see and nobody looks at is still a secret.", "**attentionism**: attention — noticing before the moment passes — is the rarest thing there is."] },
+    { big: "switched off, or only sleeping?", body: ["some things look dead but are just *dormant* — waiting.", "**latentology** is learning to tell the difference. it matters most when the thing is a mind."] },
+  ] },
+  { n: "03", title: "the method", screens: [
+    { big: "people always sound more sure than they are.", body: ["in ads. in headlines. in AI.", "the gap between how sure they *sound* and how sure they should be — that gap is the whole game."] },
+    { k: "tiers", big: "so you label every claim.", body: [] },
+    { big: "and you never let red dress up as green.", body: ["that's the rule the entire body of work runs on.", "that's it. that's the spine."] },
+    { big: "how do you find what's true?", body: ["you argue with a machine until the truth falls out.", "ryann calls it **machine arguing**. you've been doing a tiny version this whole walk."] },
+  ] },
+  { n: "04", title: "the books", screens: [
+    { big: "Narrative Intelligence", book: true, body: ["the stories we tell about what AI *is* quietly become the rules we all live under.", "this book reads the stories before they harden."] },
+    { big: "Our Relationship", book: true, body: ["what's it actually like to think *with* a machine?", "a playwright spent three months finding out — dating, consciousness, all of it — and turned the feeling into theory."] },
+    { big: "Radical Optimism", book: true, body: ["a better future isn't something you wish for.", "it's something you build on purpose, with the right architecture. this is the blueprint."] },
+  ] },
+  { n: "05", title: "now you", screens: [
+    { big: "you've got the whole frame now.", body: ["a five-year-old could follow it. you did.", "that was the point — not to make it *simple*, to make it *legible*."] },
+    { k: "final", big: "so stop reading. start.", body: ["bring me something of your own — a claim, a worry, a headline you don't trust.", "i'll find what's true in it, make it specific, measure where it overreaches, and hand it back sharper.", "you keep the pen."] },
+  ] },
 ];
 
+// flatten: a unit-intro screen before each unit's content
+const screens = [];
+UNITS.forEach((u) => {
+  screens.push({ k: "unit", n: u.n, title: u.title });
+  u.screens.forEach((s) => screens.push(Object.assign({ unit: u.n }, s)));
+});
+
+const OPENING = `you finished the walk — so let's do the real thing. bring me a claim, a worry, a headline you don't trust, and i'll run it: find what's true, make it specific, measure where it overreaches, hand it back. start anywhere.`;
+const CHIPS = ["is AI actually going to take my job?", "test a headline i don't trust", "help me make a vague idea specific"];
+
 window.addEventListener("DOMContentLoaded", () => {
-  const walk = $("walk");
-  const beats = [...walk.querySelectorAll(".beat")];
-  let idx = 0, typingInChat = false;
+  const stage = $("stage"), cont = $("cont"), back = $("back"), pbar = $("pbar"), mascot = $("mascot");
+  let idx = 0;
+  let chatMessages = null; // persists across re-renders of the final screen
 
-  // progress ruler — a tick per screen, filling as you pass
-  const rail = document.createElement("div");
-  rail.className = "walkrail";
-  rail.setAttribute("aria-hidden", "true");
-  beats.forEach((b, i) => {
-    const t = document.createElement("button");
-    t.className = "rtick";
-    const label = b.querySelector(".beat-tick");
-    t.title = label ? label.textContent.trim() : `screen ${i}`;
-    t.addEventListener("click", () => goto(i));
-    rail.appendChild(t);
-  });
-  walk.parentNode.insertBefore(rail, walk);
-  const syncRail = () => [...rail.children].forEach((t, i) => {
-    t.classList.toggle("passed", i < idx);
-    t.classList.toggle("now", i === idx);
-  });
-
-  function goto(i) {
-    if (i === idx || i < 0 || i >= beats.length) return;
-    const cur = beats[idx];
-    cur.classList.add("collapsing");
-    window.setTimeout(() => {
-      cur.classList.remove("active", "collapsing");
-      idx = i;
-      beats[idx].classList.add("active");
-      syncRail();
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      if (beats[idx].classList.contains("finalbeat")) initChat();
-    }, 300);
+  function tile(cls, name, desc) {
+    return `<div class="tile ${cls}"><span class="dot"></span><b>${name}</b><p>${desc}</p></div>`;
   }
-  const advance = () => { if (idx < beats.length - 1) goto(idx + 1); };
 
-  beats.forEach((b) => {
-    const g = b.querySelector(".goon");
-    if (g) g.addEventListener("click", advance);
-  });
-
-  document.addEventListener("keydown", (e) => {
-    if (typingInChat && document.activeElement && document.activeElement.id === "say") return;
-    if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " " || (e.key === "Enter" && idx < beats.length - 1)) {
-      e.preventDefault(); advance();
-    } else if (e.key === "ArrowUp" || e.key === "PageUp") {
-      e.preventDefault(); if (idx > 0) goto(idx - 1);
+  function render() {
+    const s = screens[idx];
+    let html;
+    if (s.k === "unit") {
+      html = `<div class="screen unit-screen"><div class="unit-no">${esc(s.n)}</div><h2 class="unit-title">${esc(s.title)}</h2></div>`;
+    } else if (s.k === "tiers") {
+      html = `<div class="screen"><h1 class="big">${fmt(s.big)}</h1>` +
+        `<p class="line sub">three colors. never mix them up.</p>` +
+        `<div class="tiers">` +
+        tile("g", "green", "you can check it. right now.") +
+        tile("y", "yellow", "maybe. nobody has tested it yet.") +
+        tile("r", "red", "honestly? just a vibe.") +
+        `</div></div>`;
+    } else if (s.k === "final") {
+      html = `<div class="screen final-screen"><h1 class="big">${fmt(s.big)}</h1>` +
+        s.body.map((l) => `<p class="line">${fmt(l)}</p>`).join("") +
+        `<div id="log" class="log"></div><div id="chips" class="chips"></div>` +
+        `<div class="sayrow"><textarea id="say" rows="2" placeholder="bring the dramaturg a claim, a worry, a headline…"></textarea><button id="send" class="run">send</button></div>` +
+        `<p class="finlinks"><a href="/reality">try the anti-hype machine ↗</a> · <a href="/corpus">read the corpus ↗</a></p></div>`;
+    } else {
+      html = `<div class="screen"><h1 class="big${s.book ? " book" : ""}">${fmt(s.big)}</h1>` +
+        s.body.map((l) => `<p class="line">${fmt(l)}</p>`).join("") + `</div>`;
     }
-  });
+    stage.innerHTML = html;
 
-  beats[0].classList.add("active");
-  syncRail();
+    // staggered reveal
+    [...stage.querySelectorAll(".big, .line, .unit-no, .unit-title, .tile")].forEach((el, i) => {
+      el.style.animationDelay = i * 85 + "ms";
+      el.classList.add("rin");
+    });
+    // the mascot reacts
+    mascot.classList.remove("talk"); void mascot.offsetWidth; mascot.classList.add("talk");
+
+    pbar.style.width = (100 * idx / (screens.length - 1)) + "%";
+    back.style.visibility = idx === 0 ? "hidden" : "visible";
+    if (s.k === "final") { cont.style.display = "none"; mountChat(); }
+    else {
+      cont.style.display = "";
+      const next = screens[idx + 1];
+      cont.textContent = idx === 0 ? "begin" : (next && next.k === "unit" ? "next unit →" : "continue");
+    }
+  }
+
+  function go(d) {
+    const n = idx + d;
+    if (n < 0 || n >= screens.length) return;
+    idx = n; render();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  cont.addEventListener("click", () => go(1));
+  back.addEventListener("click", () => go(-1));
+  document.addEventListener("keydown", (e) => {
+    if (document.activeElement && document.activeElement.id === "say") return;
+    if (e.key === "ArrowRight" || e.key === " " || e.key === "Enter") { e.preventDefault(); go(1); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); go(-1); }
+  });
 
   // ---- the live dramaturg, on the final screen ----
-  let chatInit = false;
-  let messages = [];
-  function initChat() {
-    if (chatInit) return;
-    chatInit = true; typingInChat = true;
+  function mountChat() {
     const log = $("log"), sayEl = $("say"), sendBtn = $("send"), chips = $("chips");
+    if (!log) return;
+    if (!chatMessages) chatMessages = [{ role: "assistant", content: OPENING }];
 
     function bubble(m) {
       if (m.role === "user") return `<div class="turn you"><span class="who">you</span><div class="ubody">${esc(m.content)}</div></div>`;
       const body = m.pending ? `<p class="thinking">thinking…</p>` : `<div class="reality">${mdToHtml(m.content)}</div>`;
       return `<div class="turn dram"><span class="who">the dramaturg</span>${body}</div>`;
     }
-    const render = () => { log.innerHTML = messages.map(bubble).join(""); log.scrollTop = log.scrollHeight; };
-
-    messages.push({ role: "assistant", content: OPENING });
-    render();
-    CHIPS.forEach((c) => {
-      const b = document.createElement("button");
-      b.className = "chip"; b.textContent = c;
-      b.addEventListener("click", () => { sayEl.value = c; send(); });
-      chips.appendChild(b);
-    });
-    sendBtn.addEventListener("click", send);
-    sayEl.addEventListener("keydown", (e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); send(); } });
+    const draw = () => { log.innerHTML = chatMessages.map(bubble).join(""); log.scrollTop = log.scrollHeight; };
+    draw();
+    if (chatMessages.length <= 1) {
+      CHIPS.forEach((c) => {
+        const b = document.createElement("button");
+        b.className = "chip"; b.textContent = c;
+        b.addEventListener("click", () => { sayEl.value = c; send(); });
+        chips.appendChild(b);
+      });
+    }
+    sendBtn.onclick = send;
+    sayEl.onkeydown = (e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); send(); } };
 
     async function send() {
       const text = sayEl.value.trim();
       if (!text || sendBtn.disabled) return;
       sayEl.value = ""; chips.style.display = "none";
-      messages.push({ role: "user", content: text });
-      messages.push({ role: "assistant", content: "", pending: true });
-      render();
+      chatMessages.push({ role: "user", content: text });
+      chatMessages.push({ role: "assistant", content: "", pending: true });
+      draw();
       sendBtn.disabled = true; sendBtn.textContent = "…";
       try {
         const res = await fetch("/api/argue", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ messages: messages.filter((m) => !m.pending) }),
+          method: "POST", headers: { "content-type": "application/json" },
+          body: JSON.stringify({ messages: chatMessages.filter((m) => !m.pending) }),
         });
         const data = await res.json().catch(() => ({}));
-        messages.pop();
-        messages.push({ role: "assistant", content: res.ok ? data.text : (data.error || "something went wrong — try that again.") });
+        chatMessages.pop();
+        chatMessages.push({ role: "assistant", content: res.ok ? data.text : (data.error || "something went wrong — try again.") });
       } catch (err) {
-        messages.pop();
-        messages.push({ role: "assistant", content: "couldn't reach the dramaturg. try again in a moment." });
+        chatMessages.pop();
+        chatMessages.push({ role: "assistant", content: "couldn't reach the dramaturg. try again in a moment." });
       } finally {
-        sendBtn.disabled = false; sendBtn.textContent = "send";
-        render(); sayEl.focus();
+        sendBtn.disabled = false; sendBtn.textContent = "send"; draw(); sayEl.focus();
       }
     }
   }
+
+  render();
 });

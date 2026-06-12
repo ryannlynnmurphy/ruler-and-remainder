@@ -4,13 +4,13 @@
 <script>document.documentElement.className+=' js';</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Learn the research — the dramaturg walks you through · The Ruler and the Remainder</title>
-<meta name="description" content="A guided walk through the research. One idea collapses into the next, the dramaturg taking you through — then you argue back. There is no wrong place to start.">
+<title>The Walk — learn the whole corpus, one screen at a time · The Ruler and the Remainder</title>
+<meta name="description" content="A game. The dramaturg walks you through the entire research, one idea per screen, made legible — not dumbed down. Get through the corpus like it's a level.">
 <link rel="canonical" href="https://ruler-and-remainder.vercel.app/learn.html">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="The Ruler and the Remainder">
-<meta property="og:title" content="Learn the research — the dramaturg walks you through">
-<meta property="og:description" content="A guided walk. One idea collapses into the next; the dramaturg takes you through, then you argue back.">
+<meta property="og:title" content="The Walk — learn the whole corpus, one screen at a time">
+<meta property="og:description" content="A game. The dramaturg walks you through the entire research, one idea per screen, made legible — not dumbed down.">
 <meta property="og:url" content="https://ruler-and-remainder.vercel.app/learn.html">
 <meta property="og:image" content="https://ruler-and-remainder.vercel.app/og.svg">
 <meta name="twitter:card" content="summary_large_image">
@@ -21,111 +21,32 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/styles.css">
 </head>
-<body class="tool">
-<a class="skip" href="#main">Skip to content</a>
-<div id="measure" aria-hidden="true"></div>
-<div class="ruler-gutter" aria-hidden="true"></div>
-<header class="topbar">
-  <a class="home" href="/">the ruler &amp; the remainder<small>vibe coding &amp; vibe research · r. murphy</small></a>
-  <nav aria-label="Primary"><a href="/corpus#books">Books</a><a href="/corpus#corpus">Corpus</a><a href="/database.html">Index</a><a href="/instruments.html">Instruments</a><a href="/method.html">Method</a></nav>
-</header>
+<body class="tool walkgame">
+<a class="skip" href="#stage">Skip to content</a>
 <main id="main">
-<article class="piece toolpage walkpage">
-  <a class="back" href="/corpus">browse the full corpus →</a>
-
-  <div id="walk" class="walk">
-
-    <section class="beat pending" data-n="00">
-      <div class="beat-tick"><span class="n">00</span> start</div>
-      <div class="beat-body">
-        <p>i'm the dramaturg. give me a few minutes and i'll walk you through this whole body of work — no jargon you don't already have, one idea at a time. each one folds into the next.</p>
-        <p>ready?</p>
-        <button class="goon">begin ↓</button>
+  <div class="game">
+    <header class="gamebar">
+      <div class="mascot" id="mascot" aria-hidden="true">
+        <svg viewBox="0 0 64 74">
+          <path d="M14 16 H50" stroke="#e2300c" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <path d="M14 16 Q3 41 14 64" stroke="#e2300c" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <path d="M50 16 Q61 41 50 64" stroke="#e2300c" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <line x1="14" y1="64" x2="50" y2="64" stroke="#e2300c" stroke-width="4" stroke-linecap="round"/>
+          <circle class="eye" cx="32" cy="41" r="5.4" fill="#0e0d0a"/>
+        </svg>
       </div>
-    </section>
+      <div class="progress"><div id="pbar" class="pbar"></div></div>
+      <a class="leave" href="/corpus" title="leave the walk — read the corpus">corpus ↗</a>
+    </header>
 
-    <section class="beat pending" data-n="01">
-      <div class="beat-tick"><span class="n">01</span> every ruler leaves a remainder</div>
-      <div class="beat-body">
-        <p>start here: <strong>every ruler leaves a remainder.</strong></p>
-        <p>when you measure something — a person, a price, a risk, a job — you reach for a tool. a category, a form, a score. and that tool was built by someone, for a purpose, to see <em>certain things</em> and not others.</p>
-        <button class="goon">and the remainder? ↓</button>
-      </div>
-    </section>
+    <section id="stage" class="stage" aria-live="polite"></section>
 
-    <section class="beat pending" data-n="02">
-      <div class="beat-tick"><span class="n">02</span> the remainder lands on someone</div>
-      <div class="beat-body">
-        <p>the remainder is what the ruler can't read. and it doesn't vanish because the ruler ignores it — <strong>it lands on someone.</strong> usually the person the ruler wasn't built to see.</p>
-        <p>a credit score is built around a steady paycheck, a bank account, a long history. if your life runs on cash and gig work, the ruler doesn't read you as <em>complex.</em> it reads you as <em>risky.</em> you pay for that invisibility — a higher rate, or no loan at all.</p>
-        <p>so the whole body of work asks three questions: <strong>who built the ruler, what can't it read, and who pays for the remainder?</strong></p>
-        <button class="goon">who decides what's visible? ↓</button>
-      </div>
-    </section>
-
-    <section class="beat pending" data-n="03">
-      <div class="beat-tick"><span class="n">03</span> legibilism — make power readable</div>
-      <div class="beat-body">
-        <p><strong>legibilism</strong> is the first move. every system hides something — it compresses the mess of reality into something you can navigate: a map, an interface, a price, a law. the compression is never neutral. someone chose what to show you and what to bury, and that choice never appears on a ballot.</p>
-        <p>one demand: <strong>make power readable</strong> — to the people living inside it.</p>
-        <button class="goon">readable to whom? ↓</button>
-      </div>
-    </section>
-
-    <section class="beat pending" data-n="04">
-      <div class="beat-tick"><span class="n">04</span> attentionism — attention is the scarce thing</div>
-      <div class="beat-body">
-        <p><strong>attentionism</strong> asks the harder question: readable <em>to whom?</em> a system everyone can see and nobody looks at is just an open secret.</p>
-        <p>attention — the capacity to notice what matters and act before the signal fades — is the scarce resource. not compute. not data. attention.</p>
-        <button class="goon">how do you keep it honest? ↓</button>
-      </div>
-    </section>
-
-    <section class="beat pending" data-n="05">
-      <div class="beat-tick"><span class="n">05</span> the three tiers — never let one pass for another</div>
-      <div class="beat-body">
-        <p>here's the spine. claims almost always <em>sound</em> more certain than the thing underneath can hold — in marketing, in institutions, in AI. the method measures that gap, and marks every single claim:</p>
-        <p><span class="tierflag t-established">established</span> you can check it now. <span class="tierflag t-exploratory">exploratory</span> plausible, untested. <span class="tierflag t-speculative">speculative</span> a shape, not a proof.</p>
-        <p>and it never lets one pass for another. that discipline is the whole game.</p>
-        <button class="goon">how is any of this made? ↓</button>
-      </div>
-    </section>
-
-    <section class="beat pending" data-n="06">
-      <div class="beat-tick"><span class="n">06</span> vibe coding &amp; machine arguing</div>
-      <div class="beat-body">
-        <p>last piece: <strong>how.</strong> all of this — the research, the software, this page you're reading — was built by arguing with a machine in plain language until something true fell out. ryann calls the arguing <em>machine arguing.</em></p>
-        <p>you don't memorize syntax; you have a conversation and keep correcting it. it's called <strong>vibe coding</strong> and <strong>vibe research</strong>, and the point is the opposite of a flex: <strong>you can do this too.</strong></p>
-        <button class="goon">okay — now what? ↓</button>
-      </div>
-    </section>
-
-    <section class="beat pending finalbeat" data-n="07">
-      <div class="beat-tick"><span class="n">07</span> now you</div>
-      <div class="beat-body">
-        <p>that's the frame. you now know what you're looking at — so it's your turn. that's the only way this method works.</p>
-        <p>or, if you'd rather read, the whole <a href="/corpus">corpus</a> is one click away — you'll know what you're seeing now.</p>
-        <div id="log" class="log" aria-live="polite"></div>
-        <div id="chips" class="chips"></div>
-        <div class="sayrow">
-          <textarea id="say" rows="2" placeholder="bring the dramaturg a claim, a worry, a half-formed thought…"></textarea>
-          <button id="send" class="run">send</button>
-        </div>
-        <p class="discipline">the dramaturg runs on a model, grounded in the corpus. it marks what's <span class="tierflag t-established">established</span>, <span class="tierflag t-exploratory">exploratory</span>, or <span class="tierflag t-speculative">speculative</span> — and it's still a model's read. you keep the pen.</p>
-      </div>
-    </section>
-
+    <footer class="gamefoot">
+      <button id="back" class="gback" aria-label="back">←</button>
+      <button id="cont" class="cont">begin</button>
+    </footer>
   </div>
-</article>
 </main>
-<footer><div class="colophon">
-  <span class="lead">The Ruler and the Remainder</span> — a personal research corpus.
-  Independent research by Ryann Murphy. Text released under
-  <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
-</div></footer>
-<script>
-(function(){var m=document.getElementById('measure');function p(){var h=document.documentElement;var s=h.scrollTop||document.body.scrollTop;var mx=(h.scrollHeight-h.clientHeight)||1;m.style.width=(100*s/mx)+'%';}document.addEventListener('scroll',p,{passive:true});p();})();
-</script>
 <script src="/learn.js"></script>
 </body>
 </html>
