@@ -454,6 +454,21 @@ body.walkgame { overflow-x: hidden; }
 .toolspanel .chip.tool { color: var(--ink); }
 .toolspanel .chip.tool:hover { color: var(--measure); border-color: var(--measure); }
 
+/* AI news tool — a live feed that develops in the conversation, story by story */
+.newsfeed { display: flex; flex-direction: column; gap: 0.7rem; margin: 0.3rem 0; }
+.newscard { border: 1px solid var(--rule); background: var(--paper); overflow: hidden; }
+.newscard .nc-img { height: 150px; background-size: cover; background-position: center; border-bottom: 1px solid var(--rule); }
+.nc-body { padding: 0.8rem 1rem 1rem; }
+.nc-src { font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--measure); }
+.nc-title { font-family: var(--serif); font-weight: 600; font-size: 1.12rem; line-height: 1.25; margin: 0.25rem 0 0.4rem; color: var(--ink); }
+.nc-sum { font-family: var(--serif); font-size: 0.92rem; line-height: 1.45; color: var(--ink-soft); margin: 0 0 0.6rem; }
+.nc-actions { display: flex; gap: 0.8rem; align-items: center; flex-wrap: wrap; }
+.nc-btn { font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.04em; text-transform: lowercase; border: 1.5px solid var(--measure); background: var(--measure); color: var(--paper); padding: 0.4rem 0.8rem; cursor: pointer; }
+.nc-btn:hover { background: var(--ink); border-color: var(--ink); }
+.nc-link { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.03em; color: var(--muted); text-decoration: none; }
+.nc-link:hover { color: var(--measure); }
+.nc-read { margin-top: 0.8rem; padding-top: 0.7rem; border-top: 1px solid var(--rule); font-size: 0.98rem; }
+
 .sayrow { display: flex; gap: 0.6rem; align-items: stretch; }
 .sayrow #say { flex: 1; }
 .sayrow .run { margin-top: 0; flex: 0 0 auto; align-self: stretch; }

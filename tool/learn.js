@@ -66,7 +66,7 @@ const CHIPS = ["so ai is bad for the environment…", "ai is going to take my jo
 // the dramaturg's tools. most render right here in the conversation (send/fill);
 // the last two open a deeper page for when you explicitly want that surface.
 const TOOLS = [
-  { label: "today's AI news — the real story", send: "what's actually going on with the biggest AI news right now? search it, cut the hype, and tier what's real against what's just a vibe." },
+  { label: "today's AI news — the real story", news: true },
   { label: "read a headline through the corpus", fill: "read this through the corpus and tier it: " },
   { label: "argue something i believe", fill: "here's something i'm pretty sure i believe — argue it with me: " },
   { label: "the lens — a focused reading ↗", nav: "/lens.html" },
@@ -91,6 +91,7 @@ window.addEventListener("DOMContentLoaded", () => {
   else if (replay) { idx = 0; }
   else { try { if (localStorage.getItem("rr_walk_complete")) { location.replace("/dramaturg.html"); return; } } catch {} }
   let chatMessages = null; // persists across re-renders of the final screen
+  let nidSeq = 0;          // stable ids for tool panels (e.g. the news feed) across redraws
 
   function tile(cls, name, desc) {
     return `<div class="tile ${cls}"><span class="dot"></span><b>${name}</b><p>${desc}</p></div>`;
@@ -174,8 +175,31 @@ window.addEventListener("DOMContentLoaded", () => {
     if (!log) return;
     if (!chatMessages) chatMessages = [{ role: "assistant", content: OPENING }];
 
+    function newsCard(it, nid, i) {
+      const img = it.image ? `<div class="nc-img" style="background-image:url('${esc(it.image)}')"></div>` : "";
+      const read = it.reading_pending
+        ? `<p class="thinking">reading the real story…</p>`
+        : it.reading ? `<div class="reality nc-read">${mdToHtml(it.reading)}</div>` : "";
+      const btn = (it.reading || it.reading_pending) ? ""
+        : `<button class="nc-btn" type="button" data-msg="${nid}" data-news="${i}">read the real story</button>`;
+      const link = it.link ? `<a class="nc-link" href="${esc(it.link)}" target="_blank" rel="noopener">the article ↗</a>` : "";
+      return `<div class="newscard">${img}<div class="nc-body">` +
+        (it.source ? `<span class="nc-src">${esc(it.source)}</span>` : "") +
+        `<h4 class="nc-title">${esc(it.title)}</h4>` +
+        (it.summary ? `<p class="nc-sum">${esc(it.summary)}</p>` : "") +
+        `<div class="nc-actions">${btn}${link}</div>${read}</div></div>`;
+    }
+
     function bubble(m) {
       if (m.role === "user") return `<div class="turn you"><span class="who">you</span><div class="ubody">${esc(m.content)}</div></div>`;
+      if (m.kind === "news") {
+        let inner;
+        if (m.pending) inner = `<p class="thinking">pulling today's ai news…</p>`;
+        else if (m.error) inner = `<div class="reality"><p>${esc(m.error)}</p></div>`;
+        else if (!m.items || !m.items.length) inner = `<div class="reality"><p>no ai news came back just now — try again in a minute.</p></div>`;
+        else inner = `<div class="newsfeed">${m.items.map((it, i) => newsCard(it, m.nid, i)).join("")}</div>`;
+        return `<div class="turn dram"><span class="who">the dramaturg · today's ai news</span>${inner}</div>`;
+      }
       const body = m.pending ? `<p class="thinking">thinking…</p>` : `<div class="reality">${mdToHtml(m.content)}</div>`;
       const tag = m.model ? ` <span class="bymodel">· ${modelLabel(m.model)}</span>` : "";
       return `<div class="turn dram"><span class="who">the dramaturg${tag}</span>${body}</div>`;
@@ -190,6 +214,46 @@ window.addEventListener("DOMContentLoaded", () => {
         chips.appendChild(b);
       });
     }
+    // the AI-news tool: pull a live feed into this same space as a scrollable
+    // panel; each story opens its tiered "real story" read inline (via /api/reality).
+    async function loadNews() {
+      const msg = { role: "assistant", kind: "news", nid: ++nidSeq, items: null, pending: true };
+      chatMessages.push(msg); chips.style.display = "none"; draw();
+      try {
+        const res = await fetch("/api/feed");
+        const data = await res.json().catch(() => ({}));
+        msg.items = (data.items || []).slice(0, 8).map((it) => ({
+          title: it.title, source: it.source || it.domain || "", image: it.image || "",
+          link: it.link || "", summary: it.summary || "", reading: null, reading_pending: false,
+        }));
+        if (!msg.items.length) msg.error = "no ai news came back just now — try again in a minute.";
+      } catch (e) { msg.error = "couldn't reach the news feed — try again in a moment."; }
+      msg.pending = false; draw();
+    }
+
+    async function runReality(it) {
+      if (it.reading || it.reading_pending) return;
+      it.reading_pending = true; draw();
+      try {
+        const res = await fetch("/api/reality", {
+          method: "POST", headers: { "content-type": "application/json" },
+          body: JSON.stringify({ story: it.title + (it.summary ? "\n\n" + it.summary : ""), source: it.source, publish: false }),
+        });
+        const data = await res.json().catch(() => ({}));
+        it.reading = res.ok ? (data.text || "the reader came back empty.") : (data.error || "couldn't read this one.");
+      } catch (e) { it.reading = "couldn't reach the reader — try again."; }
+      it.reading_pending = false; draw();
+    }
+
+    // one delegated handler on the log (survives redraws) for the news cards
+    log.addEventListener("click", (e) => {
+      const btn = e.target.closest(".nc-btn[data-news]");
+      if (!btn) return;
+      const msg = chatMessages.find((x) => x.kind === "news" && String(x.nid) === btn.getAttribute("data-msg"));
+      const it = msg && msg.items && msg.items[+btn.getAttribute("data-news")];
+      if (it) runReality(it);
+    });
+
     sendBtn.onclick = send;
     sayEl.onkeydown = (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } };
 
@@ -203,6 +267,7 @@ window.addEventListener("DOMContentLoaded", () => {
         b.className = "chip tool"; b.type = "button"; b.textContent = t.label;
         b.addEventListener("click", () => {
           toolsPanel.hidden = true; toolsBtn.setAttribute("aria-expanded", "false");
+          if (t.news) { loadNews(); return; }
           if (t.nav) { try { (window.top || window).location.href = t.nav; } catch (e) { location.href = t.nav; } return; }
           if (t.send) { sayEl.value = t.send; send(); }
           else if (t.fill) { sayEl.value = t.fill; sayEl.focus(); }
