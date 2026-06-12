@@ -521,6 +521,17 @@ body.chatonly .sayrow #say { resize: none; overflow-y: auto; max-height: 168px; 
 .run.stopping { background: var(--measure); border-color: var(--measure); }
 .run.stopping:hover { background: var(--ink); border-color: var(--ink); }
 
+/* multimodal: attach an image for a vision read */
+.sayrow .clip { flex: 0 0 auto; align-self: stretch; font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.05em; text-transform: lowercase; color: var(--muted); background: none; border: 1px solid var(--rule); padding: 0 0.65rem; cursor: pointer; white-space: nowrap; }
+.sayrow .clip:hover { color: var(--measure); border-color: var(--measure); }
+.attach { display: flex; gap: 0.5rem; margin: 0 0 0.5rem; }
+.attach[hidden] { display: none; }
+.attach .thumb { position: relative; display: inline-block; }
+.attach .thumb img { height: 64px; width: auto; max-width: 120px; object-fit: cover; border: 1px solid var(--rule); display: block; }
+.attach .thumb-x { position: absolute; top: -8px; right: -8px; width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); font-size: 0.82rem; line-height: 1; cursor: pointer; padding: 0; }
+.attach .thumb-x:hover { color: var(--measure); border-color: var(--measure); }
+.turn.you .uimg { max-width: 220px; max-height: 220px; border: 1px solid var(--rule); margin-bottom: 0.4rem; display: block; }
+
 /* AI news tool — a live feed that develops in the conversation, story by story */
 .newsfeed { display: flex; flex-direction: column; gap: 0.7rem; margin: 0.3rem 0; }
 .newscard { border: 1px solid var(--rule); background: var(--paper); overflow: hidden; }

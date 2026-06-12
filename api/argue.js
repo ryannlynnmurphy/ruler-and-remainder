@@ -22,6 +22,18 @@ const GLOBAL_PER_DAY = 1500;
 const MAX_TURNS = 40;        // cap a runaway conversation
 const MAX_CHARS = 6000;      // per user message
 
+// L0 — a local model tier (Ollama). It activates ONLY when OLLAMA_URL points at a
+// reachable endpoint: a mesh/tunnel URL, or localhost when Dorothy runs on the same
+// machine as Ollama. On Vercel's cloud there is no path to your laptop, so unset →
+// the cloud cascade below handles everything exactly as before. The whole tier is
+// best-effort: any failure falls through to the cloud, the client none the wiser.
+const OLLAMA_URL = (process.env.OLLAMA_URL || "").replace(/\/+$/, "");
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || "qwen2.5";
+const OLLAMA_VISION_MODEL = process.env.OLLAMA_VISION_MODEL || ""; // e.g. "llava" — enables local image turns
+const OLLAMA_TIMEOUT_MS = 30000; // cap local time so the 60s function budget keeps room for a cloud fallback
+let ollamaDown = false; // process-lifetime breaker: once it whiffs, stop paying the probe and use cloud
+const IMAGE_TYPES = new Set(["image/png", "image/jpeg", "image/webp", "image/gif"]);
+
 // FrugalGPT-style routing: a cheap model (haiku) decides how much model the turn
 // actually needs, so easy turns don't pay for Opus. Trivial/social turns skip the
 // router call entirely. The corpus preaches efficiency-as-a-property; the
@@ -54,6 +66,86 @@ async function route(userMsg) {
     return { tier, search: obj.search === true, by: "router" };
   } catch {
     return { tier: "medium", search: true, by: "fallback" };
+  }
+}
+
+// Local heuristic for "this turn needs current facts." It runs ON-DEVICE so a
+// private query is never shipped to the cloud router just to be classified — the
+// fail-closed property comes from the topology, not a policy bolt-on. Crude by
+// design: web-needing turns escalate to the cloud cascade (which can web_search),
+// and the local model clears the rest.
+function needsFreshFacts(t) {
+  return /\b(today|tonight|yesterday|tomorrow|this (?:week|month|year)|right now|currently|latest|newest|recent(?:ly)?|breaking|headline|news|as of|in 202\d|price|stock|weather|score|who(?:'s| is) the|what'?s new|just (?:announced|released))\b/i.test(t || "");
+}
+
+// Validate an inbound image (base64, no data: prefix). Returns null when unusable.
+function validImage(img) {
+  if (!img || typeof img !== "object") return null;
+  if (!IMAGE_TYPES.has(img.media_type) || typeof img.data !== "string") return null;
+  if (img.data.length < 8 || img.data.length > 7_000_000) return null; // ~5MB ceiling
+  return { media_type: img.media_type, data: img.data };
+}
+
+// Attach an image to the last user turn in Anthropic's content-block shape. Returns
+// a copy (never mutates the shared messages array, which routing/grounding read as text).
+function withImage(messages, image) {
+  if (!image) return messages;
+  const out = messages.map((m) => ({ ...m }));
+  const last = out[out.length - 1];
+  if (last && last.role === "user" && typeof last.content === "string") {
+    last.content = [
+      { type: "text", text: last.content },
+      { type: "image", source: { type: "base64", media_type: image.media_type, data: image.data } },
+    ];
+  }
+  return out;
+}
+
+// Build Ollama /api/chat messages: system first, then the turns, image (if any) as
+// a base64 entry on the last user message (Ollama's native multimodal shape).
+function toOllamaMessages(messages, system, image) {
+  const msgs = messages.map((m) => ({ role: m.role, content: m.content }));
+  if (image && msgs.length) {
+    const last = msgs[msgs.length - 1];
+    if (last.role === "user") last.images = [image.data];
+  }
+  return (system ? [{ role: "system", content: system }] : []).concat(msgs);
+}
+
+// Stream the local model's reply through the same SSE `send` the cloud path uses,
+// so the client can't tell the difference. Ollama streams newline-delimited JSON
+// ({ message:{content}, done }), not SSE — we translate. Returns { ok, got }:
+// got=true means it produced text (keep it); ok=false means the endpoint failed.
+async function streamOllama(send, { model, messages, system, image, signal }) {
+  let got = false;
+  try {
+    const r = await fetch(`${OLLAMA_URL}/api/chat`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ model, stream: true, messages: toOllamaMessages(messages, system, image) }),
+      signal,
+    });
+    if (!r.ok || !r.body) return { ok: false, got };
+    const reader = r.body.getReader();
+    const dec = new TextDecoder();
+    let buf = "";
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      let nl;
+      while ((nl = buf.indexOf("\n")) >= 0) {
+        const line = buf.slice(0, nl).trim(); buf = buf.slice(nl + 1);
+        if (!line) continue;
+        let d; try { d = JSON.parse(line); } catch { continue; }
+        const piece = d.message && d.message.content;
+        if (piece) { got = true; send("text", { delta: piece }); }
+        if (d.error) return { ok: false, got };
+      }
+    }
+    return { ok: true, got };
+  } catch {
+    return { ok: false, got };
   }
 }
 
@@ -212,14 +304,34 @@ function dedupeByUrl(list) {
   return out.slice(0, 8);
 }
 
-async function streamAnswer(res, { model, messages, useSearch, system, thinkingOn, effort, meta }) {
+async function streamAnswer(res, { model, messages, useSearch, system, thinkingOn, effort, meta, image, local }) {
   res.setHeader("content-type", "text/event-stream; charset=utf-8");
   res.setHeader("cache-control", "no-cache, no-transform");
   res.setHeader("connection", "keep-alive");
   res.setHeader("x-accel-buffering", "no"); // ask proxies not to buffer the stream
   if (res.flushHeaders) res.flushHeaders();
   const send = (event, data) => { try { res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`); } catch {} };
-  send("meta", meta);
+  // announce the planned route up front — local if we're about to try it, else the cloud tier
+  send("meta", local ? { model: local, routed: { tier: "local", by: "local" }, grounded: meta.grounded } : meta);
+
+  // L0: the local model takes first crack. Its tokens flow through the same `send`,
+  // so the client can't tell. On success we close here and never touch the cloud;
+  // on any miss we correct the route and fall through to the cloud cascade below.
+  if (local) {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), OLLAMA_TIMEOUT_MS);
+    const out = await streamOllama(send, { model: local, messages, system, image, signal: ctrl.signal });
+    clearTimeout(t);
+    if (out.got) {
+      const corpus = (meta.grounded && meta.grounded.sources) || [];
+      if (corpus.length) send("sources", { corpus, web: [] }); // local can't web_search; corpus receipts still apply
+      send("done", { model: local });
+      res.end();
+      return;
+    }
+    if (!out.ok) ollamaDown = true;  // unreachable — stop probing it for the rest of this process
+    send("meta", { ...meta, routed: { tier: "cloud", by: "local-fallback" } }); // be honest: it escalated
+  }
   // Adaptive thinking — NOT { type:"enabled", budget_tokens } which 400s on
   // claude-opus-4-8 (the heavy tier). display:"summarized" because Opus defaults
   // thinking display to "omitted", which would leave the "watch it think" panel
@@ -230,7 +342,7 @@ async function streamAnswer(res, { model, messages, useSearch, system, thinkingO
   if (effort) base.output_config = { effort };
   if (useSearch) base.tools = [{ type: "web_search_20260209", name: "web_search" }];
   const webSources = []; // the pages Dorothy actually read this turn — handed back as receipts
-  let convo = messages;
+  let convo = withImage(messages, image); // attach the image to the last user turn for the cloud model
   try {
     for (let turn = 0; turn < 4; turn++) {
       const r = await fetch("https://api.anthropic.com/v1/messages", {
@@ -298,24 +410,38 @@ export default async function handler(req, res) {
     }
   } catch { /* proceed */ }
 
-  // FrugalGPT-style routing: pick the cheapest model the turn actually needs.
-  let model, useSearch, tier = null, routedBy = "explicit";
-  if (explicitModel) {
+  // What did they send, and where should it go?
+  const image = validImage(body.image);
+  const lastUser = messages[messages.length - 1].content;
+
+  // Routing. When a local model is reachable it takes first crack, and the
+  // "does this need the web?" call is made by an on-device heuristic — a private
+  // turn is never shipped to the cloud router just to be sorted (fail-closed by
+  // topology, not policy). Web-needing turns, and image turns without a local
+  // vision model, escalate to the cloud cascade.
+  let model, useSearch = false, tier = null, routedBy = "explicit", local = null;
+  const localReady = OLLAMA_URL && !ollamaDown && !explicitModel;
+  const localCanSee = !image || !!OLLAMA_VISION_MODEL;
+  if (localReady && localCanSee && !needsFreshFacts(lastUser)) {
+    local = image ? OLLAMA_VISION_MODEL : OLLAMA_MODEL; // L0 takes it; `model` is the cloud fallback target
+    model = image ? "claude-sonnet-4-6" : DEFAULT_MODEL;
+    tier = "local"; routedBy = "local";
+  } else if (explicitModel) {
     model = explicitModel;
     useSearch = WEB_SEARCH_MODELS.has(model);
   } else {
-    const r = await route(messages[messages.length - 1].content);
+    const r = await route(lastUser);
     tier = r.tier; routedBy = r.by;
     model = TIER_MODEL[r.tier] || DEFAULT_MODEL;
     useSearch = r.search && WEB_SEARCH_MODELS.has(model);
   }
+  if (image && model === "claude-haiku-4-5") model = "claude-sonnet-4-6"; // vision wants a stronger cloud model
 
   // Corpus grounding: retrieve the actual passages relevant to this turn and put
   // them in front of the model, so the dramaturg answers from the real research
   // (e.g. "the theory of levity") instead of the hand-written summary. Skipped on
   // trivial/social turns, where there's nothing to ground. Best-effort: any error
   // falls back to the ungrounded SYSTEM, identical to the prior behavior.
-  const lastUser = messages[messages.length - 1].content;
   let grounded = { sources: [] };
   let system = SYSTEM;
   try {
@@ -327,7 +453,7 @@ export default async function handler(req, res) {
 
   // Extended thinking on the turns that warrant it (medium/heavy), so the user can
   // watch the dramaturg reason. Light/social turns stay fast and quiet.
-  const thinkingOn = explicitModel ? (model !== "claude-haiku-4-5") : (tier === "medium" || tier === "heavy");
+  const thinkingOn = explicitModel ? (model !== "claude-haiku-4-5") : (tier === "medium" || tier === "heavy" || tier === "local");
   // effort scales reasoning depth to the model. haiku rejects the param, so it
   // stays null there; opus → high (the hard turns), sonnet → medium (the common case).
   const effort = model === "claude-opus-4-8" ? "high" : model === "claude-sonnet-4-6" ? "medium" : null;
@@ -335,7 +461,7 @@ export default async function handler(req, res) {
   // Streaming path: forward thinking + text live. The non-streaming JSON path below
   // is preserved for any caller that doesn't ask to stream.
   if (body.stream === true) {
-    await streamAnswer(res, { model, messages, useSearch, system, thinkingOn, effort, meta: { model, routed: { tier, by: routedBy }, grounded } });
+    await streamAnswer(res, { model, messages, useSearch, system, thinkingOn, effort, image, local, meta: { model, routed: { tier, by: routedBy }, grounded } });
     return;
   }
 

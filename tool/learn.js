@@ -10,6 +10,8 @@ function modelLabel(m) { return !m ? "" : m.includes("haiku") ? "haiku" : m.incl
 // made visible — light turns stay quiet so the note never clutters small talk.
 function routeWhy(r) {
   if (!r || !r.tier) return "";
+  if (r.tier === "local") return "answered on the local model — no cloud call";
+  if (r.by === "local-fallback") return "the local model couldn't take it — escalated to the cloud";
   if (r.by === "explicit") return "you chose this model";
   if (r.tier === "heavy") return "routed up to the strongest model — this called for hard reasoning";
   if (r.tier === "medium") return "routed to the middle model — a real question worth reasoning about";
@@ -75,17 +77,15 @@ const UNITS = [
   ] },
   { n: "05", title: "now it's you", screens: [
     { big: "so that's the ladder.", body: ["build with it. think with it. argue with it.", "and don't you *ever* mistake a confident machine for an honest one."] },
-    { big: "Narrative Intelligence", book: true, body: ["the stories we tell about what AI *is* quietly become the rules the rest of us have to live under.", "this book reads those stories before they harden into law."] },
-    { big: "Our Relationship", book: true, body: ["can you study something as slippery as *thinking with a machine* — and do it rigorously?", "this one treats three months of conversation as data, not a diary, and finds the structure underneath the feeling."] },
-    { big: "Radical Optimism", book: true, body: ["a better future is not a thing you sit around wishing for.", "it's a thing you *build*, on purpose, with the right blueprint. here's the blueprint."] },
+    { big: "and there are three books.", book: true, body: ["**Narrative Intelligence** — the stories we tell about what AI *is* quietly become the rules the rest of us live under.", "**Our Relationship** — three months of thinking with a machine, treated as data, not a diary.", "**Radical Optimism** — a better future isn't a thing you wish for. it's a thing you *build*. here's the blueprint."] },
     { k: "final", big: "now. start arguing.", body: ["bring me a question, a headline you don't trust, or something you're pretty sure you believe.", "i'll find what's true in it, make it specific, show you exactly where it overreaches, and hand it back sharper than you brought it.", "that's machine arguing. and the pen stays right there in your hand."] },
   ] },
 ];
 
-// flatten: a unit-intro screen before each unit's content
+// flatten the units into one continuous run of screens (no chapter-card
+// interstitials — the walk is kept short; the voice and the ladder are intact)
 const screens = [];
 UNITS.forEach((u) => {
-  screens.push({ k: "unit", n: u.n, title: u.title });
   u.screens.forEach((s) => screens.push(Object.assign({ unit: u.n }, s)));
 });
 
@@ -132,7 +132,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const notifyShell = () => { try { if (window.parent !== window) window.parent.postMessage({ type: "rr-sessions" }, "*"); } catch {} };
   function persistChat() {
     if (!sessionId || !chatMessages) return;
-    const msgs = chatMessages.filter((m) => !m.pending);
+    const msgs = chatMessages.filter((m) => !m.pending).map((m) => (m.image ? { ...m, image: null } : m)); // don't bloat storage with base64
     const firstUser = msgs.find((m) => m.role === "user");
     if (!firstUser) return; // nothing worth saving until they've spoken
     const rest = readSessions().filter((s) => s.id !== sessionId);
@@ -179,7 +179,8 @@ window.addEventListener("DOMContentLoaded", () => {
         `<div id="greet" class="greet" hidden></div>` +
         `<div id="log" class="log" role="log" aria-live="polite"></div><div id="chips" class="chips"></div>` +
         `<div class="toolsrow"><button id="toolsbtn" class="toolsbtn" type="button" aria-expanded="false">⊕ tools</button><div id="toolspanel" class="toolspanel" hidden></div></div>` +
-        `<div class="sayrow"><textarea id="say" rows="2" aria-label="message to dorothy" placeholder="bring the dramaturg a claim, a worry, a headline…"></textarea><button id="send" class="run" aria-label="send">send</button></div>` +
+        `<div id="attach" class="attach" hidden></div>` +
+        `<div class="sayrow"><button id="clip" class="clip" type="button" aria-label="attach an image" title="attach an image">+ image</button><textarea id="say" rows="2" aria-label="message to dorothy" placeholder="bring the dramaturg a claim, a worry, a headline…"></textarea><button id="send" class="run" aria-label="send">send</button><input id="file" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden></div>` +
         `</div>`;
     } else {
       html = `<div class="screen"><h1 class="big${s.book ? " book" : ""}">${fmt(s.big)}</h1>` +
@@ -249,7 +250,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     function bubble(m, i) {
-      if (m.role === "user") return `<div class="turn you"><span class="who">you</span><div class="ubody">${esc(m.content)}</div></div>`;
+      if (m.role === "user") return `<div class="turn you"><span class="who">you</span>${m.image && m.image.url ? `<img class="uimg" src="${esc(m.image.url)}" alt="attached image">` : ""}<div class="ubody">${esc(m.content)}</div></div>`;
       if (m.kind === "news") {
         let inner;
         if (m.pending) inner = `<p class="thinking">pulling today's ai news…</p>`;
@@ -294,13 +295,13 @@ window.addEventListener("DOMContentLoaded", () => {
         ? ["welcome back.", "good to see you again.", "pick up where you left off.", "ready when you are."]
         : ["where do you want to start?", "ask me anything — i'll tier it.", "bring me a claim you don't trust.", "there's no wrong place to begin."];
       g.innerHTML = `<p class="greet-tod">${tod}.</p><p class="greet-rot" id="greetrot"></p>`;
-      const rot = $("greetrot"); let i = 0;
+      const rot = $("greetrot"); let i = 0, id = 0;
       const tick = () => {
-        if (!rot.isConnected) { clearInterval(greetTimer); greetTimer = null; return; }
+        if (!rot.isConnected) { clearInterval(id); if (greetTimer === id) greetTimer = null; return; }
         rot.textContent = lines[i % lines.length];
         rot.classList.remove("in"); void rot.offsetWidth; rot.classList.add("in"); i++;
       };
-      tick(); greetTimer = setInterval(tick, 3800);
+      tick(); id = setInterval(tick, 3800); greetTimer = id;
     }
     const draw = () => { log.innerHTML = chatMessages.map((m, i) => bubble(m, i)).join(""); renderGreeting(); };
     redrawChat = draw;
@@ -375,7 +376,39 @@ window.addEventListener("DOMContentLoaded", () => {
     function onComposerBtn() { if (aborter) aborter.abort(); else send(); }
     sendBtn.onclick = onComposerBtn;
     sayEl.addEventListener("input", autoGrow);
-    sayEl.onkeydown = (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } };
+    sayEl.onkeydown = (e) => {
+      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+      else if (e.key === "Escape" && aborter) { e.preventDefault(); aborter.abort(); } // Escape stops a stream, like Claude
+    };
+
+    // multimodal: attach one image; it rides along with the next turn for a vision read
+    const fileEl = $("file"), clipEl = $("clip"), attachEl = $("attach");
+    let pendingImage = null; // { media_type, data, url }
+    const renderAttach = () => {
+      if (!attachEl) return;
+      attachEl.hidden = !pendingImage;
+      attachEl.innerHTML = pendingImage
+        ? `<span class="thumb"><img src="${pendingImage.url}" alt="attached image"><button class="thumb-x" type="button" aria-label="remove image">×</button></span>`
+        : "";
+    };
+    const loadImageFile = (f) => {
+      if (!f || !/^image\/(png|jpe?g|webp|gif)$/.test(f.type) || f.size > 5 * 1024 * 1024) return;
+      const reader = new FileReader();
+      reader.onload = () => { const url = String(reader.result), comma = url.indexOf(","); pendingImage = { media_type: f.type, data: url.slice(comma + 1), url }; renderAttach(); };
+      reader.readAsDataURL(f);
+    };
+    if (clipEl && fileEl) {
+      clipEl.addEventListener("click", () => fileEl.click());
+      fileEl.addEventListener("change", () => { loadImageFile(fileEl.files && fileEl.files[0]); fileEl.value = ""; });
+    }
+    if (attachEl) attachEl.addEventListener("click", (e) => { if (e.target.closest(".thumb-x")) { pendingImage = null; renderAttach(); } });
+    // paste an image straight into the composer, like Claude
+    sayEl.addEventListener("paste", (e) => {
+      const items = (e.clipboardData && e.clipboardData.items) || [];
+      for (const it of items) {
+        if (it.type && it.type.indexOf("image/") === 0) { const f = it.getAsFile(); if (f) { loadImageFile(f); e.preventDefault(); } break; }
+      }
+    });
 
     // tools: one reveal of everything the dramaturg can do. Most run in this same
     // space (the conversation develops below); a couple open a deeper page.
@@ -402,8 +435,9 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     async function send() {
-      const text = sayEl.value.trim();
-      if (!text || aborter) return;
+      let text = sayEl.value.trim();
+      if ((!text && !pendingImage) || aborter) return;
+      if (!text && pendingImage) text = "read this image — tell me what you see, and tier what you can.";
       // routing: the chat is the one interface, but /lens or /studio opens the
       // deeper standalone tool when someone explicitly wants it.
       const slash = text.match(/^\/(lens|studio|chat)\b\s*([\s\S]*)$/i);
@@ -418,8 +452,9 @@ window.addEventListener("DOMContentLoaded", () => {
       }
       aborter = new AbortController();                   // lock FIRST (re-entry race) — also enables "stop"
       sendBtn.textContent = "stop"; sendBtn.classList.add("stopping");
+      const img = pendingImage; pendingImage = null; renderAttach();
       sayEl.value = ""; autoGrow(); chips.style.display = "none";
-      chatMessages.push({ role: "user", content: text });
+      chatMessages.push({ role: "user", content: text, image: img ? { url: img.url } : null });
       const pend = { role: "assistant", content: "", thinking: "", pending: true, streaming: true };
       chatMessages.push(pend);
       draw();
@@ -434,7 +469,7 @@ window.addEventListener("DOMContentLoaded", () => {
       try {
         const res = await fetch("/api/argue", {
           method: "POST", headers: { "content-type": "application/json" },
-          body: JSON.stringify({ messages: history, stream: true }), signal: aborter.signal,
+          body: JSON.stringify({ messages: history, stream: true, image: img ? { media_type: img.media_type, data: img.data } : undefined }), signal: aborter.signal,
         });
         if (!res.ok || !res.body) {
           let err = "something went wrong — try again.";
