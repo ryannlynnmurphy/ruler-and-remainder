@@ -105,7 +105,7 @@ const TOOLS = [
   { label: "the studio — work with documents ↗", nav: "/studio.html" },
 ];
 
-window.addEventListener("DOMContentLoaded", () => {
+function bootLearn() {
   const stage = $("stage"), cont = $("cont"), back = $("back"), pbar = $("pbar"), mascot = $("mascot");
   const pandora = document.body.classList.contains("pandora");
   let idx = 0;
@@ -687,4 +687,11 @@ window.addEventListener("DOMContentLoaded", () => {
   } else if (stage) {
     render();
   }
-});
+}
+
+// Scripts load at end of <body>, so DOMContentLoaded may have already fired.
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", bootLearn);
+} else {
+  bootLearn();
+}
