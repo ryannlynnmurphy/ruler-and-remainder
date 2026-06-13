@@ -203,7 +203,8 @@
     ss.forEach(function(s){
       var row=document.createElement("div"); row.className="hist-row";
       var b=document.createElement("button"); b.className="hist-it"; b.type="button";
-      b.innerHTML="<b>"+(s.title||"run")+"</b><time>"+ago(s.updatedAt||Date.now())+"</time><span class=\"status-pill\">"+(s.messages&&s.messages.some(function(m){return m.role===\"user\"})?"complete":"draft")+"</span>";
+      var done = s.messages && s.messages.some(function(m){ return m.role === 'user'; });
+      b.innerHTML = '<b>' + (s.title || 'run') + '</b><time>' + ago(s.updatedAt || Date.now()) + '</time><span class="status-pill">' + (done ? 'complete' : 'draft') + '</span>';
       b.onclick=function(){ tell({type:"rr-load",id:s.id}); closeNav(); };
       var del=document.createElement("button"); del.className="hist-del"; del.type="button"; del.textContent="×";
       del.onclick=function(ev){ ev.stopPropagation(); tell({type:"rr-deleted",id:s.id}); };

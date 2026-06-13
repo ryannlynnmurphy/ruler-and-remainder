@@ -475,6 +475,8 @@ function bootLearn() {
     });
 
     window.addEventListener("rr-stop", () => { if (aborter) aborter.abort(); });
+    // the send button doubles as "stop" mid-stream; Enter sends, Shift+Enter newlines
+    const autoGrow = () => { sayEl.style.height = "auto"; sayEl.style.height = Math.min(sayEl.scrollHeight, 168) + "px"; };
     function onComposerBtn() { if (aborter) aborter.abort(); else send(); }
     sendBtn.onclick = onComposerBtn;
     sayEl.addEventListener("input", autoGrow);
