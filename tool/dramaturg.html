@@ -71,7 +71,6 @@
         <button type="button" id="toolsbtn" class="ws-navbtn" aria-expanded="false" title="tools Dorothy can use">tools</button>
         <div id="toolspanel" class="toolspanel" hidden></div>
       </div>
-      <button type="button" id="localbtn" class="ws-navbtn localbtn" aria-pressed="false" hidden title="run a small model in your own browser">⚡ local</button>
       <a class="ws-navbtn" href="/corpus" title="the research corpus Dorothy reads from">corpus</a>
       <a class="ws-navbtn" href="/?walk=1" title="replay the walk">walk</a>
       <button type="button" id="global-stop" class="ws-stop" title="stop the current turn" hidden>stop</button>
@@ -123,13 +122,14 @@
       </div>
     </aside>
   </div>
-
-  <section class="pandora-corpus" id="corpus-chamber" data-unlock="corpus" hidden>
-    <p class="corpus-kicker">↓ the research corpus</p>
-    <a class="corpus-door" href="/corpus">read the full archive →</a>
-    <p class="corpus-sub">books, pamphlets, essays — what Dorothy reads when she answers you.</p>
-  </section>
 </div>
+
+<!-- the corpus footer is its own section below the chat screen, reached by scrolling -->
+<section class="pandora-corpus" id="corpus-chamber" data-unlock="corpus" hidden>
+  <p class="corpus-kicker">↓ the research corpus</p>
+  <a class="corpus-door" href="/corpus">read the full archive →</a>
+  <p class="corpus-sub">books, pamphlets, essays — what Dorothy reads when she answers you.</p>
+</section>
 
 <div id="unlock-toast" class="unlock-toast" role="status"></div>
 

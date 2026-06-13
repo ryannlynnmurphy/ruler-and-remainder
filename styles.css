@@ -470,6 +470,11 @@ body.walkgame { overflow-x: hidden; }
    walkthrough itself is never touched. */
 html:has(body.chatonly), body.chatonly { height: 100%; }
 body.chatonly { overflow: hidden; }
+/* …except the agentic workstation, which scrolls the page so the corpus footer
+   lives as its own section below the full-screen chat (the .ws-shell sizes the
+   chat to the viewport on its own, so the body no longer needs the 100% lock). */
+html:has(body.agentic.chatonly), body.agentic.chatonly { height: auto; }
+body.agentic.chatonly { overflow: visible; overflow-x: hidden; }
 body.chatonly #main { height: 100%; min-height: 0; }
 body.chatonly .game { height: 100%; min-height: 0; max-width: 52rem; }
 body.chatonly .gamebar, body.chatonly .gamefoot { display: none; } /* dramaturg bar above already brands + exits */
@@ -644,7 +649,7 @@ footer .colophon .lead { color: var(--measure); font-weight: 700; }
 
 body.pandora { margin: 0; background: var(--ink); color: var(--paper); font-family: var(--display); overflow-x: hidden; }
 body.pandora:has(.pandora-workspace.is-open),
-body.pandora:has(.ws-shell.is-open) { height: 100dvh; overflow: hidden; }
+body.pandora:has(.ws-shell.is-open) { min-height: 100dvh; }
 body.pandora .skip { background: var(--measure); }
 
 /* ── Walk chamber (sealed box) ── */
@@ -750,7 +755,8 @@ body.pandora .sayrow { flex-shrink: 0; margin-bottom: 0.25rem; }
 /* corpus chamber */
 .pandora-corpus {
   flex-shrink: 0; background: var(--paper); color: var(--ink); border-top: 3px solid var(--measure);
-  padding: clamp(2rem, 6vw, 3.5rem) 1.4rem; text-align: center;
+  padding: clamp(2.5rem, 8vw, 5rem) 1.4rem; text-align: center;
+  min-height: 48vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
   opacity: 0; transform: translateY(20px); transition: opacity 0.55s, transform 0.55s;
 }
 .pandora-corpus.is-open { opacity: 1; transform: none; }
@@ -800,10 +806,12 @@ body.agentic {
 
 .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
 
-body.agentic:has(.ws-shell.is-open) { height: 100dvh; overflow: hidden; }
+/* the chat fills the first screen; the corpus is its own section below the fold,
+   reached by scrolling the page — so the shell no longer locks body scroll. */
+body.agentic:has(.ws-shell.is-open) { min-height: 100dvh; }
 
 .ws-shell {
-  display: flex; flex-direction: column; height: 100dvh;
+  display: flex; flex-direction: column; height: 100dvh; position: relative;
   opacity: 0; transform: translateY(10px);
   transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -865,7 +873,7 @@ body.agentic:has(.ws-shell.is-open) { height: 100dvh; overflow: hidden; }
 .ws-rail.has-history ~ .ws-scrim ~ .ws-center { /* center only */ }
 
 .ws-rail {
-  position: fixed; top: 64px; left: 0; bottom: 0; width: 0; overflow: hidden; z-index: 20;
+  position: absolute; top: 64px; left: 0; bottom: 0; width: 0; overflow: hidden; z-index: 20;
   background: #16150f; border-right: 1px solid #2a2823;
   display: flex; flex-direction: column;
   transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
