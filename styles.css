@@ -1042,3 +1042,44 @@ body.agentic .ws-thread { padding-right: 0.3rem; }
 body.agentic .turn.you .who, body.agentic .turn.dram .who {
   font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint);
 }
+
+/* ====================================================================== */
+/* MOBILE — the workstation as a phone-native chat, not a shrunk desktop  */
+/* ====================================================================== */
+
+/* nothing may push the layout sideways */
+body.agentic, .ws-shell, .ws-center, .ws-topbar { max-width: 100vw; overflow-x: hidden; }
+
+@media (max-width: 720px) {
+  /* touch targets: 44px+ where a thumb lands */
+  .ws-hamb { width: 44px; height: 44px; }
+  .ws-navbtn { padding: 0.6rem 0.72rem; }
+  body.agentic .ws-composer .run { padding: 0.72rem 1.05rem; font-size: 0.78rem; }
+  body.agentic .ws-composer .clip { padding: 0.58rem 0.82rem; font-size: 0.62rem; }
+
+  /* the nav can never break the bar — it scrolls horizontally if it must */
+  .ws-nav { gap: 0.32rem; min-width: 0; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; }
+  .ws-nav::-webkit-scrollbar { display: none; }
+
+  /* composer rides above the home indicator + on-screen keyboard */
+  body.agentic .pandora-chat-root { padding: 0 0.9rem calc(0.9rem + env(safe-area-inset-bottom)); }
+  /* 16px input = iOS never zoom-jumps on focus */
+  body.agentic .ws-composer #say { font-size: 16px; }
+
+  /* long answers, URLs, and pasted text wrap instead of overflowing */
+  body.agentic .turn.you .ubody { max-width: 88%; }
+  body.agentic .reality, body.agentic .ubody, body.agentic .sysbody { overflow-wrap: break-word; }
+}
+
+@media (max-width: 480px) {
+  /* the wordmark would crowd the nav — collapse the brand to the bowtie */
+  .ws-topbar { gap: 0.4rem; padding: 0 0.7rem; }
+  .ws-brand span { display: none; }
+  /* secondary nav lives elsewhere on a phone: corpus is the footer below,
+     walk is a rare replay — keep sources / tools / stop inline */
+  .ws-nav a.ws-navbtn[href="/corpus"], .ws-nav a.ws-navbtn[href="/?walk=1"] { display: none; }
+  /* sources sheet taller for reading on a phone */
+  .ws-inspector { height: 62vh; }
+  /* corpus footer: gentler on a short screen */
+  .pandora-corpus { min-height: auto; padding: 2.6rem 1.1rem; }
+}
