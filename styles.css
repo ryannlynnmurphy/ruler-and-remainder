@@ -835,16 +835,23 @@ body.agentic:has(.ws-shell.is-open) { height: 100dvh; overflow: hidden; }
 
 .ws-spacer { flex: 1; }
 
-.ws-inspect-btn, .ws-stop, .ws-walk {
-  font-family: var(--mono); font-size: 0.62rem; font-weight: 500; letter-spacing: 0.06em;
-  text-transform: lowercase; padding: 0.42rem 0.8rem; border-radius: 7px; cursor: pointer;
-  border: 1px solid #34302a; background: #1b1913; color: #cfc8b8;
-  transition: background 0.15s, border-color 0.15s, color 0.15s; flex-shrink: 0;
+/* top-right nav: a single button system for sources / tools / corpus / walk */
+.ws-nav { display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0; }
+.ws-navbtn {
+  font-family: var(--mono); font-size: 0.62rem; font-weight: 500; letter-spacing: 0.04em;
+  text-transform: lowercase; padding: 0.44rem 0.8rem; border-radius: 8px; cursor: pointer;
+  border: 1px solid #34302a; background: #1b1913; color: #cfc8b8; text-decoration: none;
+  white-space: nowrap; transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
-.ws-inspect-btn:hover, .ws-walk:hover { border-color: #57514440; background: #221f18; color: var(--paper); }
-.ws-inspect-btn[aria-pressed="true"] { background: var(--measure); border-color: var(--measure); color: var(--paper); }
-.ws-walk { text-decoration: none; }
-.ws-stop { background: #2a1414; border-color: #5a2a2a; color: #f4a898; }
+.ws-navbtn:hover { border-color: #57514a; background: #262219; color: var(--paper); }
+.ws-navbtn[aria-pressed="true"], .ws-navbtn[aria-expanded="true"] { background: var(--measure); border-color: var(--measure); color: var(--paper); }
+.ws-tools-wrap { position: relative; display: inline-flex; }
+
+.ws-stop {
+  font-family: var(--mono); font-size: 0.62rem; font-weight: 500; letter-spacing: 0.04em;
+  text-transform: lowercase; padding: 0.44rem 0.8rem; border-radius: 8px; cursor: pointer;
+  background: #2a1414; border: 1px solid #5a2a2a; color: #f4a898; transition: background 0.15s;
+}
 .ws-stop:hover { background: var(--measure); border-color: var(--measure); color: var(--paper); }
 .ws-stop[hidden] { display: none; }
 
@@ -961,26 +968,40 @@ body.agentic .chip {
 }
 body.agentic .chip:hover { background: var(--paper); border-color: var(--measure); color: var(--measure); }
 
-/* tools → a button that opens a floating popover menu (closes on click-out/Esc) */
-body.agentic .toolsrow { position: relative; display: flex; gap: 0.5rem; margin: 0 0 0.7rem; }
-body.agentic .toolsbtn, body.agentic .localbtn {
-  font-size: 0.66rem; letter-spacing: 0.03em; color: var(--ink); border-radius: 999px;
-  border: 1px solid var(--rule); background: var(--paper); padding: 0.45rem 0.95rem; text-transform: lowercase;
-}
-body.agentic .toolsbtn::before { content: "⊕ "; color: var(--measure); }
-body.agentic .toolsbtn[aria-expanded="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-body.agentic .toolsbtn[aria-expanded="true"]::before { color: var(--paper); }
+/* tools → a dropdown from the top-right nav (closes on click-out / Esc) */
+body.agentic #toolsbtn::before { content: "⊕ "; color: var(--measure); }
+body.agentic #toolsbtn[aria-expanded="true"]::before { color: var(--paper); }
 body.agentic .toolspanel {
-  position: absolute; bottom: calc(100% + 0.5rem); left: 0; z-index: 30;
-  display: flex; flex-direction: column; gap: 0; min-width: 280px; margin: 0;
+  position: absolute; top: calc(100% + 0.55rem); right: 0; left: auto; z-index: 40;
+  display: flex; flex-direction: column; gap: 0; min-width: 300px; margin: 0;
   background: var(--paper); border: 1px solid var(--rule); border-radius: 12px;
-  box-shadow: 0 14px 44px rgba(14,13,10,0.2); padding: 0.4rem; overflow: hidden;
+  box-shadow: 0 16px 48px rgba(14,13,10,0.28); padding: 0.4rem; overflow: hidden;
 }
+body.agentic .toolspanel[hidden] { display: none; }
 body.agentic .toolspanel .chip.tool {
-  border: 0; border-radius: 8px; background: none; width: 100%; font-size: 0.78rem;
-  padding: 0.55rem 0.7rem; text-transform: none; letter-spacing: 0;
+  border: 0; border-radius: 8px; background: none; width: 100%; font-size: 0.8rem; color: var(--ink);
+  padding: 0.6rem 0.7rem; text-transform: none; letter-spacing: 0; font-family: var(--serif);
 }
 body.agentic .toolspanel .chip.tool:hover { background: var(--paper-2); color: var(--measure); }
+
+/* empty-state welcome card — clear, centered, with numbered example questions */
+body.agentic.fresh #log { flex: 0 0 auto; }
+body.agentic.fresh .greet { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; padding: 1rem 0 1.4rem; }
+.ws-welcome { max-width: 40rem; margin: 0 auto; width: 100%; }
+.ws-welcome-kicker { font-family: var(--mono); font-size: 0.6rem; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--measure); margin: 0 0 0.85rem; }
+.ws-welcome-title { font-family: var(--display); font-weight: 800; font-size: clamp(1.9rem, 4.6vw, 2.9rem); letter-spacing: -0.025em; line-height: 1.02; margin: 0 0 0.65rem; color: var(--ink); }
+.ws-welcome-sub { font-family: var(--serif); font-size: 1.02rem; line-height: 1.5; color: var(--muted); margin: 0 0 1.7rem; max-width: 33rem; }
+.ws-examples { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+.ws-example {
+  display: flex; gap: 1rem; align-items: baseline; width: 100%; text-align: left;
+  background: none; border: 0; border-bottom: 1px solid var(--rule); padding: 0.95rem 0.35rem; cursor: pointer;
+  font-family: var(--serif); font-size: 1rem; line-height: 1.4; color: var(--ink);
+  transition: background 0.14s, padding 0.14s, color 0.14s;
+}
+.ws-example:hover { background: var(--paper-2); padding-left: 0.75rem; color: var(--measure); }
+.ws-example-n { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.05em; color: var(--faint); flex-shrink: 0; }
+.ws-example:hover .ws-example-n { color: var(--measure); }
+@media (max-width: 720px) { .ws-welcome-title { font-size: clamp(1.6rem, 8vw, 2.1rem); } }
 
 /* composer → one rounded field, send affordance inside */
 body.agentic .ws-composer {

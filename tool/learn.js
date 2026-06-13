@@ -30,7 +30,6 @@ function sourcesBlock(s) {
   const n = (s.corpus ? s.corpus.length : 0) + (s.web ? s.web.length : 0);
   return `<details class="sources"><summary>sources · ${n}</summary><ul>${items}</ul></details>`;
 }
-let greetTimer = null; // the workspace greeting's rotation timer — module scope so it never doubles up
 function mdToHtml(md) {
   const lines = md.split("\n");
   let html = "", listType = null, inQuote = false;
@@ -93,7 +92,13 @@ UNITS.forEach((u) => {
 });
 
 const OPENING = `you made it through — so let's do the real thing. bring me a claim, a worry, a headline you don't trust, and i'll run it: find what's true, make it specific, show you where it overreaches, hand it back sharper. start wherever you want.`;
-const CHIPS = ["so ai is bad for the environment…", "ai is going to take my job…", "they say this new ai basically thinks like us…"];
+// the empty-state example questions — outcome-shaped, in Dorothy's voice
+const EXAMPLES = [
+  "Explain what AI is actually good at — like I'm new to this.",
+  "Where does AI lie, and how do I catch it before it costs me?",
+  "What's a context window, and why does AI forget what I said?",
+  "What's happening in AI news this week? Search the web.",
+];
 
 // the dramaturg's tools. most render right here in the conversation (send/fill);
 // the last two open a deeper page for when you explicitly want that surface.
@@ -356,23 +361,20 @@ function bootLearn() {
       const fresh = !chatMessages.some((m) => m.role === "user");
       if (fresh === greetFreshState) return;       // only rebuild on a real transition
       greetFreshState = fresh;
-      if (greetTimer) { clearInterval(greetTimer); greetTimer = null; }
       if (!fresh) { g.hidden = true; document.body.classList.remove("fresh"); return; }
       g.hidden = false; document.body.classList.add("fresh");
-      const h = new Date().getHours();
-      const tod = h < 5 ? "still up" : h < 12 ? "good morning" : h < 17 ? "good afternoon" : "good evening";
       const returning = readSessions().some((s) => s.id !== sessionId);
-      const lines = returning
-        ? ["welcome back.", "good to see you again.", "pick up where you left off.", "ready when you are."]
-        : ["where do you want to start?", "ask me anything — i'll tier it.", "bring me a claim you don't trust.", "there's no wrong place to begin."];
-      g.innerHTML = `<p class="greet-tod">${tod}.</p><p class="greet-rot" id="greetrot"></p>`;
-      const rot = $("greetrot"); let i = 0, id = 0;
-      const tick = () => {
-        if (!rot.isConnected) { clearInterval(id); if (greetTimer === id) greetTimer = null; return; }
-        rot.textContent = lines[i % lines.length];
-        rot.classList.remove("in"); void rot.offsetWidth; rot.classList.add("in"); i++;
-      };
-      tick(); id = setInterval(tick, 3800); greetTimer = id;
+      g.innerHTML =
+        `<div class="ws-welcome">` +
+        `<p class="ws-welcome-kicker">${returning ? "welcome back" : "the dramaturg"}</p>` +
+        `<h2 class="ws-welcome-title">Ask for an outcome.</h2>` +
+        `<p class="ws-welcome-sub">Bring a claim, a worry, or a headline you don't trust. I'll find what's true, tier every part of it, and hand it back sharper — with the receipts.</p>` +
+        `<ul class="ws-examples">` +
+        EXAMPLES.map((q, i) => `<li><button type="button" class="ws-example" data-q="${esc(q)}"><span class="ws-example-n">0${i + 1}</span><span class="ws-example-q">${esc(q)}</span></button></li>`).join("") +
+        `</ul></div>`;
+      g.querySelectorAll(".ws-example").forEach((btn) => {
+        btn.addEventListener("click", () => { sayEl.value = btn.getAttribute("data-q"); send(); });
+      });
     }
     const draw = () => {
       chatMessages.forEach((m) => {
@@ -394,14 +396,6 @@ function bootLearn() {
     };
     draw();
     syncPandoraUsage();
-    if (chatMessages.length <= 1) {
-      CHIPS.forEach((c) => {
-        const b = document.createElement("button");
-        b.className = "chip"; b.textContent = c;
-        b.addEventListener("click", () => { sayEl.value = c; send(); });
-        chips.appendChild(b);
-      });
-    }
     // the AI-news tool: pull a live feed into this same space as a scrollable
     // panel; each story opens its tiered "real story" read inline (via /api/reality).
     async function loadNews() {

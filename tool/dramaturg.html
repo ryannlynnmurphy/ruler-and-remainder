@@ -65,9 +65,17 @@
 
     <div class="ws-spacer"></div>
 
-    <button type="button" id="inspect-toggle" class="ws-inspect-btn" aria-pressed="false" title="toggle sources">sources</button>
-    <button type="button" id="global-stop" class="ws-stop" title="stop the current turn" hidden>stop</button>
-    <a class="ws-walk" href="/?walk=1" title="replay the walk">walk</a>
+    <nav class="ws-nav" aria-label="workstation">
+      <button type="button" id="inspect-toggle" class="ws-navbtn" aria-pressed="false" title="show the sources behind the last answer">sources</button>
+      <div class="ws-tools-wrap">
+        <button type="button" id="toolsbtn" class="ws-navbtn" aria-expanded="false" title="tools Dorothy can use">tools</button>
+        <div id="toolspanel" class="toolspanel" hidden></div>
+      </div>
+      <button type="button" id="localbtn" class="ws-navbtn localbtn" aria-pressed="false" hidden title="run a small model in your own browser">⚡ local</button>
+      <a class="ws-navbtn" href="/corpus" title="the research corpus Dorothy reads from">corpus</a>
+      <a class="ws-navbtn" href="/?walk=1" title="replay the walk">walk</a>
+      <button type="button" id="global-stop" class="ws-stop" title="stop the current turn" hidden>stop</button>
+    </nav>
   </header>
 
   <div class="ws-grid">
@@ -92,11 +100,6 @@
         <div id="greet" class="greet" hidden></div>
         <div id="log" class="log ws-thread" role="log" aria-live="polite"></div>
         <div id="chips" class="chips"></div>
-        <div class="toolsrow">
-          <button id="toolsbtn" class="toolsbtn" type="button" aria-expanded="false">tools</button>
-          <button id="localbtn" class="toolsbtn localbtn" type="button" aria-pressed="false" hidden>⚡ local</button>
-          <div id="toolspanel" class="toolspanel" hidden></div>
-        </div>
         <div id="attach" class="attach" hidden></div>
         <div class="sayrow ws-composer">
           <button id="clip" class="clip" type="button" aria-label="attach image">+ image</button>
