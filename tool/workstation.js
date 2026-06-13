@@ -17,14 +17,20 @@
         bar.hidden = true;
       }
     }
+    const stop = $("global-stop");
+    if (stop) stop.hidden = state !== "executing";
     document.body.dataset.run = state;
+  }
+
+  function showInspector(on) {
+    document.getElementById("workspace")?.classList.toggle("has-inspector", on);
+    const tg = $("inspect-toggle");
+    if (tg) tg.setAttribute("aria-pressed", on ? "true" : "false");
   }
 
   function setMission(text) {
     const title = $("mission-title");
-    const obj = $("mission-objective");
     if (title) title.textContent = text ? text.slice(0, 72) + (text.length > 72 ? "…" : "") : "new inquiry";
-    if (obj) obj.textContent = text || "ask for an outcome — Dorothy will tier what's real.";
   }
 
   function setRoute(routed, model) {
@@ -50,10 +56,9 @@
       }
     }
     const rail = $("source-list");
-    if (rail && total) {
-      rail.innerHTML = ev?.querySelector(".source-list")?.innerHTML || "";
-      if (global.Pandora) Pandora.unlock("retrieval", false);
-    }
+    if (rail && total) rail.innerHTML = ev?.querySelector(".source-list")?.innerHTML || "";
+    // surface the panel only when an answer actually produced receipts
+    if (total) showInspector(true);
   }
 
   function escapeHtml(s) {
@@ -101,14 +106,6 @@
     setRunState("idle");
     initGlobalStop();
     global.addEventListener("rr-workstation", onWorkstationEvent);
-    if (global.Pandora?.isOpen("retrieval")) {
-      document.getElementById("workspace")?.classList.add("has-inspector");
-    }
-    global.addEventListener("pandora:unlock", (e) => {
-      if (e.detail?.layer === "retrieval") {
-        document.getElementById("workspace")?.classList.add("has-inspector");
-      }
-    });
   }
 
   function emit(type, detail) {

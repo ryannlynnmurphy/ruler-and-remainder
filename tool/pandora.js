@@ -77,15 +77,6 @@
       }
     });
 
-    const strip = document.getElementById("chamber-strip");
-    if (strip) {
-      strip.querySelectorAll("[data-chamber]").forEach((chip) => {
-        const k = chip.getAttribute("data-chamber");
-        chip.classList.toggle("is-earned", isOpen(k));
-        chip.setAttribute("aria-hidden", isOpen(k) ? "false" : "true");
-      });
-    }
-
     const toast = document.getElementById("unlock-toast");
     if (toast && opts !== false) {
       toast.textContent = `chamber opened · ${LABELS[layer] || layer}`;

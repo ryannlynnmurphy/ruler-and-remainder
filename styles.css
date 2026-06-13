@@ -668,16 +668,6 @@ body.pandora .walk-label { font-family: var(--mono); font-size: 0.58rem; letter-
 .pandora-brand b { font-weight: 700; font-size: 0.94rem; letter-spacing: -0.01em; }
 .pandora-brand small { font-family: var(--mono); font-size: 0.48rem; letter-spacing: 0.14em; text-transform: lowercase; color: #8a8478; margin-top: 2px; }
 
-.chamber-strip { display: flex; gap: 0.35rem; flex: 1; justify-content: center; flex-wrap: wrap; }
-.chamber-chip {
-  font-family: var(--mono); font-size: 0.52rem; letter-spacing: 0.12em; text-transform: lowercase;
-  padding: 0.22rem 0.55rem; border: 1px solid #2a2823; color: #4a463c;
-  opacity: 0; transform: scale(0.92); transition: opacity 0.35s, transform 0.35s, border-color 0.2s, color 0.2s;
-  pointer-events: none;
-}
-.chamber-chip.is-earned { opacity: 1; transform: none; color: #b7b0a0; border-color: #3a3830; }
-.chamber-chip.is-earned:last-of-type { color: var(--measure); border-color: var(--measure); }
-
 .pandora-exits { margin-left: auto; display: flex; gap: 0.85rem; font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.04em; }
 .pandora-exits a { color: #b7b0a0; text-decoration: none; }
 .pandora-exits a:hover { color: var(--measure); }
@@ -731,14 +721,6 @@ body.pandora .greet { padding: 1.2rem 0 0.35rem; }
 body.pandora .greet-tod { font-family: var(--display); font-weight: 600; font-size: clamp(1.35rem, 3.2vw, 1.85rem); letter-spacing: -0.01em; margin: 0 0 0.2rem; }
 body.pandora .sayrow { flex-shrink: 0; margin-bottom: 0.25rem; }
 
-/* learning CTAs — doors to the next chamber */
-.learn-ctas { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0 0 0.65rem; }
-.learn-cta {
-  font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.04em; text-transform: lowercase;
-  border: 1px dashed var(--rule); background: transparent; color: var(--muted); padding: 0.35rem 0.65rem; cursor: pointer;
-}
-.learn-cta:hover { border-color: var(--measure); color: var(--measure); border-style: solid; }
-
 /* side panels — chambers */
 .pandora-panel {
   position: fixed; top: 52px; bottom: 0; width: min(280px, 88vw); z-index: 8;
@@ -749,8 +731,6 @@ body.pandora .sayrow { flex-shrink: 0; margin-bottom: 0.25rem; }
 .pandora-panel.is-open { opacity: 1; pointer-events: auto; }
 .panel-context { left: 0; transform: translateX(-100%); border-left: 3px solid var(--remainder); }
 .panel-context.is-open { transform: translateX(0); }
-.panel-lens { right: 0; transform: translateX(100%); border-right: 3px solid var(--measure); }
-.panel-lens.is-open { transform: translateX(0); }
 .panel-sources { right: 0; transform: translateX(100%); border-right: 3px solid var(--remainder); max-height: calc(100dvh - 52px); }
 .panel-sources.is-open { transform: translateX(0); }
 .panel-head { font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--measure); margin-bottom: 0.85rem; }
@@ -760,10 +740,7 @@ body.pandora .sayrow { flex-shrink: 0; margin-bottom: 0.25rem; }
   border: 1px solid var(--ink); background: transparent; color: var(--ink); padding: 0.4rem 0.7rem; cursor: pointer; margin-top: 0.5rem;
 }
 .panel-act:hover { background: var(--ink); color: var(--paper); }
-.panel-link { display: inline-block; text-decoration: none; margin-top: 0.75rem; }
-.lens-block { margin-bottom: 0.85rem; }
-.lens-k { font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 0.25rem; }
-.lens-block p { font-family: var(--serif); font-size: 0.9rem; line-height: 1.45; margin: 0; color: var(--ink-soft); }
+.panel-link { display: inline-block; text-decoration: none; margin-top: 1rem; font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.04em; color: var(--measure); border-bottom: 1px solid var(--measure); }
 .source-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
 .source-list li { font-size: 0.82rem; line-height: 1.35; }
 .source-list a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--rule); }
@@ -798,23 +775,28 @@ body.pandora .sayrow { flex-shrink: 0; margin-bottom: 0.25rem; }
 @media (max-width: 720px) {
   .pandora-hamb { display: block; }
   .pandora-brand small { display: none; }
-  .chamber-strip { display: none; }
   .pandora-nav.has-history { width: 0; transform: translateX(-100%); }
   body.pandora.nav-open .pandora-nav.has-history { width: min(280px, 85vw); transform: none; }
   body.pandora.nav-open .pandora-scrim { display: block; position: fixed; inset: 52px 0 0; background: rgba(14,13,10,0.45); z-index: 15; }
   body.pandora .pandora-nav.has-history ~ .pandora-scrim ~ .panel-context ~ .pandora-core,
   body.pandora .pandora-nav.has-history ~ .pandora-scrim ~ .pandora-core { margin-left: 0; }
   .pandora-panel { width: min(260px, 92vw); }
-  .learn-ctas { gap: 0.35rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pandora-workspace, .ws-shell, .chamber-walk, .pandora-panel, .pandora-corpus, .chamber-chip, .unlock-toast { transition: none; }
+  .pandora-workspace, .ws-shell, .chamber-walk, .pandora-panel, .pandora-corpus, .unlock-toast { transition: none; }
 }
 
 /* ====================================================================== */
-/* AGENTIC WORKSTATION — 3-pane command center (1440 spec, fluid)         */
+/* AGENTIC WORKSTATION — Dorothy's command center                         */
 /* ====================================================================== */
+
+/* iconic type, scoped to the workstation: Bricolage for display, a clean
+   grotesque mono for the chrome, Newsreader for what Dorothy actually says. */
+body.agentic {
+  --display: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
 
 .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
 
@@ -833,34 +815,38 @@ body.agentic:has(.ws-shell.is-open) { height: 100dvh; overflow: hidden; }
 }
 .ws-alert[data-tone="error"] { background: #3a1810; color: #f4c4b8; border-color: var(--measure); }
 
-/* top bar · 64px */
+/* top bar */
 .ws-topbar {
-  display: flex; align-items: center; gap: 0.5rem 0.75rem; flex-wrap: wrap;
-  min-height: 64px; padding: 0 1rem; flex-shrink: 0;
-  background: var(--ink); border-bottom: 1px solid #2a2823; z-index: 12;
+  display: flex; align-items: center; gap: 0.6rem; flex-wrap: nowrap;
+  min-height: 60px; padding: 0 1.1rem; flex-shrink: 0;
+  background: var(--ink); border-bottom: 1px solid #26241d; z-index: 12;
 }
-.ws-hamb { display: none; appearance: none; background: none; border: 0; color: var(--paper); font-size: 1.1rem; cursor: pointer; }
-.ws-brand { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: var(--paper); flex-shrink: 0; }
-.ws-brand .face { width: 24px; height: 28px; }
+.ws-hamb {
+  display: grid; place-items: center; width: 34px; height: 34px; appearance: none;
+  background: none; border: 1px solid transparent; border-radius: 7px; color: #cfc8b8;
+  font-size: 1rem; cursor: pointer; transition: background 0.15s, border-color 0.15s;
+}
+.ws-hamb:hover { background: #221f18; border-color: #34302a; color: var(--paper); }
+.ws-brand { display: flex; align-items: center; gap: 0.55rem; text-decoration: none; color: var(--paper); flex-shrink: 0; }
+.ws-brand .face { width: 22px; height: 26px; }
 .ws-brand span { display: flex; flex-direction: column; line-height: 1.05; }
-.ws-brand b { font-size: 0.92rem; font-weight: 700; }
-.ws-brand small { font-family: var(--mono); font-size: 0.48rem; letter-spacing: 0.14em; text-transform: lowercase; color: #8a8478; }
+.ws-brand b { font-family: var(--display); font-size: 1.02rem; font-weight: 700; letter-spacing: -0.01em; }
+.ws-brand small { font-family: var(--mono); font-size: 0.46rem; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: #8a8478; margin-top: 1px; }
 
-.ws-intent-wrap { flex: 1; min-width: 140px; max-width: 420px; }
-.ws-intent {
-  margin: 0; font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.02em;
-  color: #b7b0a0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
+.ws-spacer { flex: 1; }
 
-.ws-stop {
-  font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase;
-  padding: 0.35rem 0.65rem; border: 1px solid #5a3030; background: #2a1818; color: #f4a898; cursor: pointer;
+.ws-inspect-btn, .ws-stop, .ws-walk {
+  font-family: var(--mono); font-size: 0.62rem; font-weight: 500; letter-spacing: 0.06em;
+  text-transform: lowercase; padding: 0.42rem 0.8rem; border-radius: 7px; cursor: pointer;
+  border: 1px solid #34302a; background: #1b1913; color: #cfc8b8;
+  transition: background 0.15s, border-color 0.15s, color 0.15s; flex-shrink: 0;
 }
+.ws-inspect-btn:hover, .ws-walk:hover { border-color: #57514440; background: #221f18; color: var(--paper); }
+.ws-inspect-btn[aria-pressed="true"] { background: var(--measure); border-color: var(--measure); color: var(--paper); }
+.ws-walk { text-decoration: none; }
+.ws-stop { background: #2a1414; border-color: #5a2a2a; color: #f4a898; }
 .ws-stop:hover { background: var(--measure); border-color: var(--measure); color: var(--paper); }
-
-.ws-exits { display: flex; gap: 0.75rem; font-family: var(--mono); font-size: 0.6rem; margin-left: auto; }
-.ws-exits a { color: #b7b0a0; text-decoration: none; }
-.ws-exits a:hover { color: var(--measure); }
+.ws-stop[hidden] { display: none; }
 
 /* 3-pane grid */
 .ws-grid {
@@ -920,18 +906,18 @@ body.agentic .ws-thread { flex: 1; min-height: 0; overflow-y: auto; }
 }
 .ws-shell:not(.has-inspector) .ws-inspector { display: none; }
 
-.ws-inspect-btn {
-  font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase;
-  padding: 0.35rem 0.65rem; border: 1px solid var(--rule); background: transparent; color: #b7b0a0; cursor: pointer;
+.insp-head-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.9rem 1.1rem 0.7rem; border-bottom: 1px solid var(--rule); flex-shrink: 0;
 }
-.ws-inspect-btn:hover { border-color: var(--measure); color: var(--measure); }
-.ws-inspect-btn[aria-pressed="true"] { background: var(--measure); border-color: var(--measure); color: var(--paper); }
-
+.insp-close {
+  appearance: none; border: 0; background: none; color: var(--muted);
+  font-size: 1.2rem; line-height: 1; cursor: pointer; padding: 0 0.2rem;
+}
+.insp-close:hover { color: var(--measure); }
 .insp-body { flex: 1; overflow-y: auto; padding: 1rem 1.1rem; }
-.insp-panel { display: none; }
-.insp-panel.is-active { display: block; }
-.insp-head { font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--measure); margin: 0 0 0.75rem; }
-.insp-copy { font-family: var(--serif); font-size: 0.88rem; line-height: 1.5; color: var(--ink-soft); margin: 0 0 0.65rem; }
+.insp-head { font-family: var(--mono); font-size: 0.58rem; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--measure); margin: 0; }
+.insp-copy { font-family: var(--serif); font-size: 0.92rem; line-height: 1.5; color: var(--ink-soft); margin: 0 0 0.65rem; }
 .insp-copy.muted { color: var(--muted); }
 
 .status-pill {
@@ -939,27 +925,91 @@ body.agentic .ws-thread { flex: 1; min-height: 0; overflow-y: auto; }
   color: var(--muted);
 }
 
-body.agentic .panel-lens {
-  top: 64px; right: 360px; width: 260px;
-}
-body.agentic .ws-shell:not(.has-inspector) .panel-lens { right: 0; }
-
 @media (max-width: 1100px) {
   .ws-shell.has-inspector .ws-grid { grid-template-columns: 0 minmax(0, 1fr) 0; }
   .ws-inspector {
     position: fixed; right: 0; top: auto; bottom: 0; left: 0; height: 45vh; z-index: 25;
     grid-column: auto; border-left: none; border-top: 2px solid var(--measure);
   }
-  body.agentic .panel-lens { right: 0; bottom: 45vh; }
 }
 
 @media (max-width: 720px) {
-  .ws-hamb { display: block; }
-  .ws-intent-wrap, .chamber-strip { display: none; }
+  .ws-hamb { display: grid; }
   .ws-rail.has-history { width: 0; }
   body.agentic.nav-open .ws-rail.has-history { width: min(280px, 88vw); }
   body.agentic.nav-open .ws-scrim { display: block; position: fixed; inset: 64px 0 0; background: rgba(14,13,10,0.45); z-index: 15; }
   .ws-rail.has-history ~ .ws-scrim ~ .ws-center { margin-left: 0; }
   .mission-header { padding-left: 1rem; padding-right: 1rem; }
   body.agentic .pandora-chat-root { padding: 0 1rem 1rem; }
+}
+
+/* ---------------------------------------------------------------------- */
+/* workstation polish — composer, tools popover, chips, thread            */
+/* ---------------------------------------------------------------------- */
+body.agentic .mission-header { padding: 1.1rem 1.6rem 0.75rem; }
+body.agentic .mission-title { font-weight: 800; font-size: clamp(1.2rem, 2.4vw, 1.6rem); }
+body.agentic .route-note { font-size: 0.6rem; letter-spacing: 0.05em; }
+body.agentic .greet-tod { font-weight: 700; font-size: clamp(1.7rem, 4vw, 2.5rem); }
+body.agentic .greet-rot { font-size: 0.74rem; }
+
+/* starter chips → soft pills */
+body.agentic .chips { gap: 0.45rem; margin-bottom: 0.9rem; }
+body.agentic .chip {
+  font-size: 0.74rem; border-radius: 999px; border: 1px solid var(--rule);
+  background: color-mix(in srgb, var(--paper-2) 55%, transparent);
+  padding: 0.5rem 0.9rem; transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+body.agentic .chip:hover { background: var(--paper); border-color: var(--measure); color: var(--measure); }
+
+/* tools → a button that opens a floating popover menu (closes on click-out/Esc) */
+body.agentic .toolsrow { position: relative; display: flex; gap: 0.5rem; margin: 0 0 0.7rem; }
+body.agentic .toolsbtn, body.agentic .localbtn {
+  font-size: 0.66rem; letter-spacing: 0.03em; color: var(--ink); border-radius: 999px;
+  border: 1px solid var(--rule); background: var(--paper); padding: 0.45rem 0.95rem; text-transform: lowercase;
+}
+body.agentic .toolsbtn::before { content: "⊕ "; color: var(--measure); }
+body.agentic .toolsbtn[aria-expanded="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+body.agentic .toolsbtn[aria-expanded="true"]::before { color: var(--paper); }
+body.agentic .toolspanel {
+  position: absolute; bottom: calc(100% + 0.5rem); left: 0; z-index: 30;
+  display: flex; flex-direction: column; gap: 0; min-width: 280px; margin: 0;
+  background: var(--paper); border: 1px solid var(--rule); border-radius: 12px;
+  box-shadow: 0 14px 44px rgba(14,13,10,0.2); padding: 0.4rem; overflow: hidden;
+}
+body.agentic .toolspanel .chip.tool {
+  border: 0; border-radius: 8px; background: none; width: 100%; font-size: 0.78rem;
+  padding: 0.55rem 0.7rem; text-transform: none; letter-spacing: 0;
+}
+body.agentic .toolspanel .chip.tool:hover { background: var(--paper-2); color: var(--measure); }
+
+/* composer → one rounded field, send affordance inside */
+body.agentic .ws-composer {
+  align-items: center; gap: 0.5rem; background: var(--paper);
+  border: 1.5px solid var(--rule); border-radius: 16px; padding: 0.35rem 0.45rem 0.35rem 0.85rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+body.agentic .ws-composer:focus-within {
+  border-color: var(--measure);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--measure) 14%, transparent);
+}
+body.agentic .ws-composer #say {
+  border: 0; padding: 0.55rem 0.2rem; background: none; font-family: var(--serif);
+  font-size: 1rem; line-height: 1.5; resize: none;
+}
+body.agentic .ws-composer #say:focus { outline: none; }
+body.agentic .ws-composer .clip {
+  align-self: center; border: 1px solid var(--rule); border-radius: 999px;
+  padding: 0.42rem 0.7rem; font-size: 0.58rem; color: var(--muted);
+}
+body.agentic .ws-composer .clip:hover { border-color: var(--measure); color: var(--measure); }
+body.agentic .ws-composer .run {
+  align-self: center; border: 0; border-radius: 11px; background: var(--measure); color: var(--paper);
+  padding: 0.62rem 1.2rem; font-weight: 700; font-size: 0.72rem; margin: 0;
+}
+body.agentic .ws-composer .run:hover { background: var(--ink); }
+body.agentic .ws-composer .run.stopping { background: var(--ink); }
+
+body.agentic .ws-thread { padding-right: 0.3rem; }
+body.agentic .turn.you .who, body.agentic .turn.dram .who {
+  font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint);
 }

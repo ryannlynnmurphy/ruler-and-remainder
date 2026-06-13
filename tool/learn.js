@@ -171,15 +171,6 @@ function bootLearn() {
   }
   function updatePandoraPanels(lastUser, lastAsst) {
     if (!window.Pandora) return;
-    const lensAsked = document.getElementById("lens-asked");
-    const lensStrong = document.getElementById("lens-stronger");
-    if (lensAsked && lastUser) lensAsked.textContent = lastUser.content || "—";
-    if (lensStrong && lastUser) {
-      const t = (lastUser.content || "").trim();
-      lensStrong.textContent = t.length < 40
-        ? `Try: "Explain ${t || "this"} for a beginner — one metaphor, one example, tier every claim."`
-        : "You gave a topic. Add a role, a format, or a constraint to sharpen the read.";
-    }
     const list = document.getElementById("source-list");
     if (list && lastAsst && lastAsst.sources) {
       const corpus = lastAsst.sources.corpus || [];
@@ -401,14 +392,6 @@ function bootLearn() {
         if (last) last.scrollIntoView({ block: "start", behavior: "smooth" });
       });
     };
-    const lensApply = document.getElementById("lens-apply");
-    if (lensApply) {
-      lensApply.addEventListener("click", () => {
-        const strong = document.getElementById("lens-stronger");
-        if (strong && strong.textContent) { sayEl.value = strong.textContent.replace(/^Try:\s*"/, "").replace(/"$/, ""); sayEl.focus(); }
-        if (window.Pandora) Pandora.unlock("prompting", false);
-      });
-    }
     draw();
     syncPandoraUsage();
     if (chatMessages.length <= 1) {
@@ -513,12 +496,16 @@ function bootLearn() {
     // space (the conversation develops below); a couple open a deeper page.
     const toolsBtn = $("toolsbtn"), toolsPanel = $("toolspanel");
     if (toolsBtn && toolsPanel) {
+      const setTools = (open) => {
+        toolsPanel.hidden = !open;
+        toolsBtn.setAttribute("aria-expanded", open ? "true" : "false");
+      };
       toolsPanel.innerHTML = "";
       TOOLS.forEach((t) => {
         const b = document.createElement("button");
         b.className = "chip tool"; b.type = "button"; b.textContent = t.label;
         b.addEventListener("click", () => {
-          toolsPanel.hidden = true; toolsBtn.setAttribute("aria-expanded", "false");
+          setTools(false);
           if (t.news) { loadNews(); return; }
           if (t.nav) { try { (window.top || window).location.href = t.nav; } catch (e) { location.href = t.nav; } return; }
           if (t.send) { sayEl.value = t.send; send(); }
@@ -526,13 +513,13 @@ function bootLearn() {
         });
         toolsPanel.appendChild(b);
       });
-      // tools are first-class in an agentic workstation: surface the dock open.
-      toolsPanel.hidden = false; toolsBtn.setAttribute("aria-expanded", "true");
-      toolsBtn.addEventListener("click", () => {
-        const open = toolsPanel.hidden;
-        toolsPanel.hidden = !open;
-        toolsBtn.setAttribute("aria-expanded", open ? "true" : "false");
+      setTools(false); // closed by default
+      toolsBtn.addEventListener("click", (e) => { e.stopPropagation(); setTools(toolsPanel.hidden); });
+      // click anywhere outside (or Escape) closes the dock
+      document.addEventListener("click", (e) => {
+        if (!toolsPanel.hidden && !toolsPanel.contains(e.target) && e.target !== toolsBtn) setTools(false);
       });
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !toolsPanel.hidden) setTools(false); });
     }
 
     // ---- local mode: the in-browser L0 (WebLLM). Opt-in, because it's a one-time
@@ -581,7 +568,6 @@ function bootLearn() {
       wsEmit("mission", { text });
       syncPandoraUsage();
       if (window.Workstation) Workstation.setMission(text);
-      if (window.Pandora && text.length > 80) Pandora.unlock("prompting", false);
       wsEmit("run-start");
       const pend = { role: "assistant", content: "", thinking: "", pending: true, streaming: true };
       chatMessages.push(pend);
