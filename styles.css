@@ -608,6 +608,25 @@ footer .colophon .lead { color: var(--measure); font-weight: 700; }
   .autotheory .prose h1 { font-size: clamp(1.6rem, 7vw, 2.1rem); }
   footer { padding-left: 1.1rem; padding-right: 1.1rem; }
   .searchbox { font-size: 1.3rem; }
+
+  /* every focusable text field ≥16px so iOS Safari never zooms in on focus
+     (the chat composer was ~14px, which forced the tap-to-zoom in the screenshots) */
+  #copy, #arch, #input, #story, #say, .field select, #model { font-size: 16px; }
+
+  /* composer, restructured for phones: the textarea takes the full width and the
+     controls sit on a tidy row beneath it, instead of three cramped columns */
+  .sayrow { flex-wrap: wrap; gap: 0.5rem; }
+  .sayrow #say { order: 0; flex: 1 1 100%; min-height: 3rem; line-height: 1.45; padding: 0.8rem; }
+  .sayrow .clip { order: 1; align-self: auto; flex: 0 0 auto; padding: 0.65rem 0.9rem; font-size: 0.72rem; }
+  .sayrow .run { order: 2; align-self: auto; flex: 1 1 auto; padding: 0.7rem 1rem; font-size: 0.82rem; }
+  body.chatonly .sayrow #say { max-height: 40vh; }
+
+  /* tighten the workspace chrome so the conversation gets the room on small screens */
+  body.chatonly .greet { padding: 0.9rem 0 0.4rem; }
+  .greet-tod { font-size: clamp(1.5rem, 8vw, 1.9rem); }
+  body.chatonly #log { margin: 0.5rem 0 0.5rem; }
+  .chips { gap: 0.45rem; margin-bottom: 0.8rem; }
+  .chip { font-size: 0.78rem; padding: 0.55rem 0.75rem; }
 }
 
 /* ---------- motion ---------- */
