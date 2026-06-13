@@ -1218,7 +1218,7 @@ fs.writeFileSync(path.join(DIST, "index.html"), walkHome);
 
 // ---------- static assets ----------------------------------------------------
 fs.copyFileSync(path.join(ROOT, "styles.css"), path.join(DIST, "styles.css"));
-for (const f of ["audit.html", "audit.js", "reality.html", "reality.js", "learn.html", "learn.js", "local.js", "studio.html", "studio.js", "lens.html", "lens.js", "dramaturg.html"]) {
+for (const f of ["audit.html", "audit.js", "reality.html", "reality.js", "learn.html", "learn.js", "local.js", "pandora.js", "workstation.js", "studio.html", "studio.js", "lens.html", "lens.js", "dramaturg.html"]) {
   if (exists(path.join(ROOT, "tool", f))) fs.copyFileSync(path.join(ROOT, "tool", f), path.join(DIST, f));
 }
 

@@ -107,20 +107,35 @@ const TOOLS = [
 
 window.addEventListener("DOMContentLoaded", () => {
   const stage = $("stage"), cont = $("cont"), back = $("back"), pbar = $("pbar"), mascot = $("mascot");
+  const pandora = document.body.classList.contains("pandora");
   let idx = 0;
   // Three ways in:
-  //  ?chat=1  — hosted as the Chat mode inside the workspace: show the live
-  //             dramaturg chat right here, never the walk, never redirect.
-  //  ?walk=1  — replay: always start the walk from the top.
-  //  default  — first time, walk it; once finished, the home of the work is the
-  //             workspace, so a returning visitor goes straight there.
+  //  body.pandora — unified Pandora shell on dramaturg.html: walk + chat, no redirect.
+  //  ?chat=1      — legacy iframe embed: chat only.
+  //  ?walk=1      — replay: always start the walk from the top.
+  //  default      — index.html: walk once, then dramaturg.
   let chatOnly = false, replay = false;
   try {
-    chatOnly = /[?&]chat=1\b/.test(location.search);
+    chatOnly = pandora || /[?&]chat=1\b/.test(location.search);
     replay = /[?&]walk=1\b/.test(location.search);
   } catch {}
-  if (chatOnly) { document.body.classList.add("chatonly"); document.documentElement.style.height = "100%"; document.body.style.height = "100%"; idx = screens.length - 1; }
-  else if (replay) { idx = 0; }
+  if (pandora) {
+    document.body.classList.add("chatonly");
+    if (replay) idx = 0;
+    else {
+      try {
+        if (localStorage.getItem("rr_walk_complete")) {
+          idx = screens.length - 1;
+          if (window.Pandora) { Pandora.unlock("chat", false); Pandora.checkUsage({ walkComplete: true, messages: countUserMessages() }); }
+        }
+      } catch {}
+    }
+  } else if (chatOnly) {
+    document.body.classList.add("chatonly");
+    document.documentElement.style.height = "100%";
+    document.body.style.height = "100%";
+    idx = screens.length - 1;
+  } else if (replay) { idx = 0; }
   else { try { if (localStorage.getItem("rr_walk_complete")) { location.replace("/dramaturg.html"); return; } } catch {} }
   let chatMessages = null; // persists across re-renders of the final screen
   let nidSeq = 0;          // stable ids for tool panels (e.g. the news feed) across redraws
@@ -132,7 +147,53 @@ window.addEventListener("DOMContentLoaded", () => {
   const readSessions = () => { try { return JSON.parse(localStorage.getItem(SKEY) || "[]"); } catch { return []; } };
   const writeSessions = (a) => { try { localStorage.setItem(SKEY, JSON.stringify(a.slice(0, 24))); } catch {} };
   const newId = () => "s" + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36);
-  const notifyShell = () => { try { if (window.parent !== window) window.parent.postMessage({ type: "rr-sessions" }, "*"); } catch {} };
+  const notifyShell = () => {
+    try { window.dispatchEvent(new Event("rr-sessions")); } catch {}
+    try { if (window.parent !== window) window.parent.postMessage({ type: "rr-sessions" }, "*"); } catch {}
+  };
+  function countUserMessages() {
+    let n = 0;
+    try {
+      const ss = readSessions();
+      for (const s of ss) for (const m of s.messages || []) if (m.role === "user") n++;
+    } catch {}
+    return n;
+  }
+  function syncPandoraUsage() {
+    if (!window.Pandora) return;
+    Pandora.checkUsage({ walkComplete: !!localStorage.getItem("rr_walk_complete"), messages: countUserMessages() });
+  }
+  function wsEmit(type, detail) {
+    try { window.dispatchEvent(new CustomEvent("rr-workstation", { detail: { type, ...(detail || {}) } })); } catch {}
+  }
+  function updatePandoraPanels(lastUser, lastAsst) {
+    if (!window.Pandora) return;
+    const lensAsked = document.getElementById("lens-asked");
+    const lensStrong = document.getElementById("lens-stronger");
+    if (lensAsked && lastUser) lensAsked.textContent = lastUser.content || "—";
+    if (lensStrong && lastUser) {
+      const t = (lastUser.content || "").trim();
+      lensStrong.textContent = t.length < 40
+        ? `Try: "Explain ${t || "this"} for a beginner — one metaphor, one example, tier every claim."`
+        : "You gave a topic. Add a role, a format, or a constraint to sharpen the read.";
+    }
+    const fill = document.getElementById("context-fill");
+    const copy = document.getElementById("context-copy");
+    if (fill && chatMessages) {
+      const turns = chatMessages.filter((m) => !m.pending && m.kind !== "news").length;
+      const pct = Math.min(92, 12 + turns * 8);
+      fill.style.width = pct + "%";
+      if (copy && pct > 55) copy.textContent = "this conversation is getting dense — earlier details may compress.";
+    }
+    const list = document.getElementById("source-list");
+    if (list && lastAsst && lastAsst.sources) {
+      const corpus = lastAsst.sources.corpus || [];
+      const web = lastAsst.sources.web || [];
+      const items = corpus.map((t) => `<li><a href="/corpus">${esc(t)}</a><span class="src-tag">corpus</span></li>`)
+        .concat(web.map((w) => `<li><a href="${esc(w.url)}" target="_blank" rel="noopener">${esc(w.title || w.url)}</a><span class="src-tag">web</span></li>`));
+      if (items.length) { list.innerHTML = items.join(""); Pandora.unlock("retrieval", false); }
+    }
+  }
   function persistChat() {
     if (!sessionId || !chatMessages) return;
     const msgs = chatMessages.filter((m) => !m.pending).map((m) => (m.image ? { ...m, image: null } : m)); // don't bloat storage with base64
@@ -140,7 +201,7 @@ window.addEventListener("DOMContentLoaded", () => {
     if (!firstUser) return; // nothing worth saving until they've spoken
     const rest = readSessions().filter((s) => s.id !== sessionId);
     rest.unshift({ id: sessionId, title: (firstUser.content || "conversation").slice(0, 64), updatedAt: Date.now(), messages: msgs });
-    writeSessions(rest); notifyShell();
+    writeSessions(rest); notifyShell(); syncPandoraUsage();
   }
   function newChat() { sessionId = newId(); chatMessages = [{ role: "assistant", content: OPENING }]; redrawChat(); notifyShell(); }
   function loadChat(id) { const s = readSessions().find((x) => x.id === id); if (!s) return; sessionId = id; chatMessages = (s.messages || []).slice(); redrawChat(); }
@@ -149,7 +210,13 @@ window.addEventListener("DOMContentLoaded", () => {
     const d = e.data || {};
     if (d.type === "rr-new") newChat();
     else if (d.type === "rr-load" && d.id) loadChat(d.id);
-    else if (d.type === "rr-deleted" && d.id === sessionId) newChat(); // the open one was deleted — start fresh
+    else if (d.type === "rr-deleted" && d.id === sessionId) newChat();
+  });
+  window.addEventListener("rr-shell", (e) => {
+    const d = e.detail || {};
+    if (d.type === "rr-new") newChat();
+    else if (d.type === "rr-load" && d.id) loadChat(d.id);
+    else if (d.type === "rr-deleted" && d.id === sessionId) newChat();
   });
 
   function tile(cls, name, desc) {
@@ -170,11 +237,19 @@ window.addEventListener("DOMContentLoaded", () => {
         tile("r", "red", "honestly? just a vibe.") +
         `</div></div>`;
     } else if (s.k === "final") {
-      // Finishing the walk lands you in the full workspace. The inline chat only
-      // renders when this page is hosted as the workspace's Chat mode (chatonly).
       if (!document.body.classList.contains("chatonly")) {
         try { localStorage.setItem("rr_walk_complete", "1"); } catch {}
         location.href = "/dramaturg.html";
+        return;
+      }
+      if (pandora) {
+        try { localStorage.setItem("rr_walk_complete", "1"); } catch {}
+        if (window.Pandora) Pandora.unlock("chat");
+        const walkEl = document.getElementById("walk-chamber");
+        if (walkEl) walkEl.classList.add("is-sealed");
+        if (cont) cont.style.display = "none";
+        if (pbar) pbar.style.width = "100%";
+        mountChat();
         return;
       }
       html = `<div class="screen final-screen"><h1 class="big">${fmt(s.big)}</h1>` +
@@ -189,30 +264,34 @@ window.addEventListener("DOMContentLoaded", () => {
       html = `<div class="screen"><h1 class="big${s.book ? " book" : ""}">${fmt(s.big)}</h1>` +
         s.body.map((l) => `<p class="line">${fmt(l)}</p>`).join("") + `</div>`;
     }
+    if (!stage) return;
     stage.innerHTML = html;
 
     // staggered reveal
-    [...stage.querySelectorAll(".big, .line, .unit-no, .unit-title, .tile")].forEach((el, i) => {
-      el.style.animationDelay = i * 85 + "ms";
-      el.classList.add("rin");
-    });
-    // the mascot reacts
-    mascot.classList.remove("talk"); void mascot.offsetWidth; mascot.classList.add("talk");
+    if (stage) {
+      [...stage.querySelectorAll(".big, .line, .unit-no, .unit-title, .tile")].forEach((el, i) => {
+        el.style.animationDelay = i * 85 + "ms";
+        el.classList.add("rin");
+      });
+    }
+    if (mascot) { mascot.classList.remove("talk"); void mascot.offsetWidth; mascot.classList.add("talk"); }
 
     const rp = $("replay");
     if (rp) rp.addEventListener("click", (e) => { e.preventDefault(); idx = 0; render(); window.scrollTo({ top: 0, behavior: "smooth" }); });
 
-    pbar.style.width = (100 * idx / (screens.length - 1)) + "%";
-    back.style.visibility = idx === 0 ? "hidden" : "visible";
+    if (pbar) pbar.style.width = (100 * idx / (screens.length - 1)) + "%";
+    if (back) back.style.visibility = idx === 0 ? "hidden" : "visible";
     if (s.k === "final") {
-      cont.style.display = "none";
+      if (cont) cont.style.display = "none";
       try { localStorage.setItem("rr_walk_complete", "1"); } catch {}
       mountChat();
     }
     else {
-      cont.style.display = "";
-      const next = screens[idx + 1];
-      cont.textContent = idx === 0 ? "begin" : (next && next.k === "unit" ? "next unit →" : "continue");
+      if (cont) {
+        cont.style.display = "";
+        const next = screens[idx + 1];
+        cont.textContent = idx === 0 ? "begin" : (next && next.k === "unit" ? "next unit →" : "continue");
+      }
     }
   }
 
@@ -222,8 +301,8 @@ window.addEventListener("DOMContentLoaded", () => {
     idx = n; render();
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
-  cont.addEventListener("click", () => go(1));
-  back.addEventListener("click", () => go(-1));
+  if (cont) cont.addEventListener("click", () => go(1));
+  if (back) back.addEventListener("click", () => go(-1));
   document.addEventListener("keydown", (e) => {
     if (document.activeElement && document.activeElement.id === "say") return;
     if (e.key === "ArrowRight" || e.key === " " || e.key === "Enter") { e.preventDefault(); go(1); }
@@ -231,9 +310,11 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   // ---- the live dramaturg, on the final screen ----
+  let chatMounted = false;
   function mountChat() {
     const log = $("log"), sayEl = $("say"), sendBtn = $("send"), chips = $("chips");
-    if (!log) return;
+    if (!log || chatMounted) return;
+    chatMounted = true;
     if (!chatMessages) chatMessages = [{ role: "assistant", content: OPENING }];
     if (!sessionId) sessionId = newId();
 
@@ -254,6 +335,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     function bubble(m, i) {
       if (m.role === "user") return `<div class="turn you"><span class="who">you</span>${m.image && m.image.url ? `<img class="uimg" src="${esc(m.image.url)}" alt="attached image">` : ""}<div class="ubody">${esc(m.content)}</div></div>`;
+      if (m.role === "system") return `<div class="turn system"><span class="who">${esc(m.agent || "system")}</span><div class="sysbody${m.tool ? " tool" : ""}">${esc(m.content)}</div></div>`;
       if (m.kind === "news") {
         let inner;
         if (m.pending) inner = `<p class="thinking">pulling today's ai news…</p>`;
@@ -306,7 +388,16 @@ window.addEventListener("DOMContentLoaded", () => {
       };
       tick(); id = setInterval(tick, 3800); greetTimer = id;
     }
-    const draw = () => { log.innerHTML = chatMessages.map((m, i) => bubble(m, i)).join(""); renderGreeting(); };
+    const draw = () => {
+      chatMessages.forEach((m) => {
+        if (m.content && window.Pandora) m.content = Pandora.parseUnlockTags(m.content);
+      });
+      log.innerHTML = chatMessages.map((m, i) => bubble(m, i)).join("");
+      renderGreeting();
+      const users = chatMessages.filter((m) => m.role === "user");
+      const assts = chatMessages.filter((m) => m.role === "assistant" && m.content && !m.pending);
+      updatePandoraPanels(users[users.length - 1], assts[assts.length - 1]);
+    };
     redrawChat = draw;
     const scrollIntoTop = (sel) => {
       requestAnimationFrame(() => {
@@ -315,7 +406,16 @@ window.addEventListener("DOMContentLoaded", () => {
         if (last) last.scrollIntoView({ block: "start", behavior: "smooth" });
       });
     };
+    const lensApply = document.getElementById("lens-apply");
+    if (lensApply) {
+      lensApply.addEventListener("click", () => {
+        const strong = document.getElementById("lens-stronger");
+        if (strong && strong.textContent) { sayEl.value = strong.textContent.replace(/^Try:\s*"/, "").replace(/"$/, ""); sayEl.focus(); }
+        if (window.Pandora) Pandora.unlock("prompting", false);
+      });
+    }
     draw();
+    syncPandoraUsage();
     if (chatMessages.length <= 1) {
       CHIPS.forEach((c) => {
         const b = document.createElement("button");
@@ -374,8 +474,7 @@ window.addEventListener("DOMContentLoaded", () => {
       if (it) runReality(it);
     });
 
-    // the send button doubles as "stop" mid-stream; Enter sends, Shift+Enter newlines
-    const autoGrow = () => { sayEl.style.height = "auto"; sayEl.style.height = Math.min(sayEl.scrollHeight, 168) + "px"; };
+    window.addEventListener("rr-stop", () => { if (aborter) aborter.abort(); });
     function onComposerBtn() { if (aborter) aborter.abort(); else send(); }
     sendBtn.onclick = onComposerBtn;
     sayEl.addEventListener("input", autoGrow);
@@ -450,10 +549,10 @@ window.addEventListener("DOMContentLoaded", () => {
       if (!L.supported()) { setLocalLabel("⚡ no webgpu here"); localBtn.disabled = true; return; }
       setLocalLabel("⚡ loading…", true);
       const ok = await L.warm((r) => { const p = r && typeof r.progress === "number" ? Math.round(r.progress * 100) : null; setLocalLabel(p != null ? `⚡ loading ${p}%` : "⚡ loading…", true); });
-      if (ok && !L.isUnavailable()) { localOn = true; setLocalLabel("⚡ local: on", true); try { localStorage.setItem("rr_local", "1"); } catch {} }
+      if (ok && !L.isUnavailable()) { localOn = true; setLocalLabel("⚡ local: on", true); try { localStorage.setItem("rr_local", "1"); } catch {} wsEmit("local-on"); }
       else { localOn = false; setLocalLabel("⚡ local unavailable", false); localBtn.disabled = true; }
     }
-    function disableLocal() { localOn = false; setLocalLabel("⚡ local mode", false); try { localStorage.removeItem("rr_local"); } catch {} }
+    function disableLocal() { localOn = false; setLocalLabel("⚡ local mode", false); try { localStorage.removeItem("rr_local"); } catch {} wsEmit("local-off"); }
     if (localBtn) {
       lib().then((L) => { if (L.supported()) { localBtn.hidden = false; let pref = false; try { pref = localStorage.getItem("rr_local") === "1"; } catch {} if (pref) enableLocal(); } });
       localBtn.addEventListener("click", () => { if (localOn) disableLocal(); else enableLocal(); });
@@ -480,6 +579,11 @@ window.addEventListener("DOMContentLoaded", () => {
       const img = pendingImage; pendingImage = null; renderAttach();
       sayEl.value = ""; autoGrow(); chips.style.display = "none";
       chatMessages.push({ role: "user", content: text, image: img ? { url: img.url } : null });
+      wsEmit("mission", { text });
+      syncPandoraUsage();
+      if (window.Workstation) Workstation.setMission(text);
+      if (window.Pandora && text.length > 80) Pandora.unlock("prompting", false);
+      wsEmit("run-start");
       const pend = { role: "assistant", content: "", thinking: "", pending: true, streaming: true };
       chatMessages.push(pend);
       draw();
@@ -501,7 +605,7 @@ window.addEventListener("DOMContentLoaded", () => {
           if (local.looksTrivial(text)) {
             pend.routed = { tier: "browser", by: "browser" };
             const out = await local.answerTrivial(history, (delta) => { pend.content += delta; pend.pending = false; flush(); });
-            if (out) { pend.model = "browser"; pend.pending = false; pend.streaming = false; aborter = null; sendBtn.textContent = "send"; sendBtn.classList.remove("stopping"); draw(); persistChat(); sayEl.focus(); return; }
+            if (out) { pend.model = "browser"; pend.pending = false; pend.streaming = false; aborter = null; sendBtn.textContent = "send"; sendBtn.classList.remove("stopping"); draw(); persistChat(); wsEmit("run-complete", { routed: pend.routed, model: pend.model, sources: pend.sources, turns: chatMessages.length }); sayEl.focus(); return; }
             pend.content = ""; // local whiffed — clear the partial and let the cloud take it
           }
           // Everything else: route on-device, hand the decision to the server so it
@@ -537,10 +641,21 @@ window.addEventListener("DOMContentLoaded", () => {
               }
               if (!dataStr) continue;
               let d; try { d = JSON.parse(dataStr); } catch { continue; }
-              if (ev === "thinking") { pend.thinking += d.delta || ""; flush(); }
-              else if (ev === "text") { pend.content += d.delta || ""; pend.pending = false; flush(); }
-              else if (ev === "meta") { if (d.model) pend.model = d.model; if (d.routed) pend.routed = d.routed; }
-              else if (ev === "sources") { pend.sources = d; }
+              if (ev === "thinking") { pend.thinking += d.delta || ""; wsEmit("run-thinking"); flush(); }
+              else if (ev === "text") {
+                let delta = d.delta || "";
+                if (window.Pandora) delta = Pandora.parseUnlockTags(delta);
+                if (delta) wsEmit("run-text");
+                pend.content += delta;
+                pend.pending = false;
+                flush();
+              }
+              else if (ev === "meta") {
+                if (d.model) pend.model = d.model;
+                if (d.routed) pend.routed = d.routed;
+                wsEmit("run-route", { routed: d.routed, model: d.model, search: !!(d.routed && d.routed.search) });
+              }
+              else if (ev === "sources") { pend.sources = d; wsEmit("run-sources", { sources: d }); }
               else if (ev === "done") { if (d.model) pend.model = d.model; }
               else if (ev === "error") { streamErr = d.message || "the machine hit an error."; }
             }
@@ -549,14 +664,27 @@ window.addEventListener("DOMContentLoaded", () => {
           if (!pend.content && !pend.thinking) pend.content = "the machine returned nothing readable. try again.";
         }
       } catch (err) {
-        if (err && err.name === "AbortError") { if (!pend.content && !pend.thinking) pend.content = "_(stopped)_"; }
-        else if (!pend.content) pend.content = "couldn't reach the dramaturg. try again in a moment.";
+        if (err && err.name === "AbortError") {
+          if (!pend.content && !pend.thinking) pend.content = "_(stopped)_";
+          wsEmit("run-stop");
+        } else {
+          if (!pend.content) pend.content = "couldn't reach the dramaturg. try again in a moment.";
+          wsEmit("run-error", { message: pend.content });
+        }
       } finally {
         pend.pending = false; pend.streaming = false;
-        aborter = null; sendBtn.textContent = "send"; sendBtn.classList.remove("stopping"); draw(); persistChat(); sayEl.focus();
+        aborter = null; sendBtn.textContent = "send"; sendBtn.classList.remove("stopping"); draw(); persistChat();
+        if (pend.content && pend.content !== "_(stopped)_") {
+          wsEmit("run-complete", { routed: pend.routed, model: pend.model, sources: pend.sources, turns: chatMessages.filter((m) => !m.pending).length });
+        }
+        sayEl.focus();
       }
     }
   }
 
-  render();
+  if (pandora && idx >= screens.length - 1) {
+    mountChat();
+  } else if (stage) {
+    render();
+  }
 });
