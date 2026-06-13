@@ -68,13 +68,7 @@
       <p id="mission-objective" class="ws-intent">ask for an outcome — Dorothy will tier what's real.</p>
     </div>
 
-    <div class="ws-modes" role="group" aria-label="mode">
-      <span class="mode-chip is-active">co-pilot</span>
-    </div>
-
-    <div id="connector-row" class="ws-connectors" aria-label="connectors"></div>
-
-    <button type="button" id="inspect-toggle" class="ws-inspect-btn" aria-pressed="false" title="toggle inspector">inspect</button>
+    <button type="button" id="inspect-toggle" class="ws-inspect-btn" aria-pressed="false" title="toggle sources">sources</button>
     <button type="button" id="global-stop" class="ws-stop" title="stop all agents">stop</button>
 
     <nav id="chamber-strip" class="chamber-strip" aria-label="chambers">
@@ -105,12 +99,9 @@
       <header class="mission-header">
         <h1 id="mission-title" class="mission-title">new inquiry</h1>
         <div class="mission-meta">
-          <span class="autonomy-tag">auto with approval</span>
           <span id="route-note" class="route-note"></span>
         </div>
       </header>
-
-      <div id="plan-strip" class="plan-strip" aria-label="execution plan"></div>
 
       <div class="screen final-screen pandora-chat-root">
         <div id="greet" class="greet" hidden></div>
@@ -118,8 +109,7 @@
         <div id="chips" class="chips"></div>
         <div class="learn-ctas" id="learn-ctas">
           <button type="button" class="learn-cta" data-unlock-trigger="prompting">shape the prompt</button>
-          <button type="button" class="learn-cta" data-unlock-trigger="context">what are you holding?</button>
-          <button type="button" class="learn-cta" data-unlock-trigger="retrieval">show evidence</button>
+          <button type="button" class="learn-cta" data-unlock-trigger="retrieval">show sources</button>
         </div>
         <div class="toolsrow">
           <button id="toolsbtn" class="toolsbtn" type="button" aria-expanded="true">⊕ tools</button>
@@ -136,34 +126,14 @@
       </div>
     </main>
 
-    <!-- right inspector · 360px -->
+    <!-- right inspector · 360px — the sources the last answer stood on -->
     <aside class="ws-inspector" id="inspector">
-      <div class="insp-tabs" role="tablist">
-        <button type="button" class="insp-tab is-active" data-tab="context" role="tab">context</button>
-        <button type="button" class="insp-tab" data-tab="agents" role="tab">agents</button>
-        <button type="button" class="insp-tab" data-tab="evidence" role="tab">evidence</button>
-        <button type="button" class="insp-tab" data-tab="output" role="tab">output</button>
-      </div>
       <div class="insp-body">
-        <section class="insp-panel is-active" data-panel="context" role="tabpanel">
-          <h2 class="insp-head">context</h2>
-          <div id="inspector-context"></div>
-          <div class="context-bar"><div class="context-fill" id="context-fill"></div></div>
-          <p class="insp-copy" id="context-copy">thread memory fills as you talk.</p>
-        </section>
-        <section class="insp-panel" data-panel="agents" role="tabpanel" hidden>
-          <h2 class="insp-head">agents</h2>
-          <div id="agent-list" class="agent-list"></div>
-        </section>
-        <section class="insp-panel" data-panel="evidence" role="tabpanel" hidden>
-          <h2 class="insp-head">evidence</h2>
+        <section class="insp-panel is-active" data-panel="evidence">
+          <h2 class="insp-head">sources</h2>
           <div id="inspector-evidence"></div>
           <ul id="source-list" class="source-list"></ul>
           <a class="panel-link" href="/corpus">open archive ↗</a>
-        </section>
-        <section class="insp-panel" data-panel="output" role="tabpanel" hidden>
-          <h2 class="insp-head">output</h2>
-          <div id="inspector-output"></div>
         </section>
       </div>
     </aside>
@@ -219,14 +189,13 @@
   window.addEventListener("storage", function(e){ if(e.key===SKEY) render(); });
   window.addEventListener("focus", render);
   render();
-  function openInspector(tab){
+  function openInspector(){
     var shell=document.getElementById("workspace");
     if(shell) shell.classList.add("has-inspector");
     var insp=document.getElementById("inspector");
     if(insp) insp.removeAttribute("hidden");
     var tg=document.getElementById("inspect-toggle");
     if(tg) tg.setAttribute("aria-pressed","true");
-    if(tab){ var t=document.querySelector('.insp-tab[data-tab="'+tab+'"]'); if(t) t.click(); }
   }
   function toggleInspector(){
     var shell=document.getElementById("workspace"); if(!shell) return;
@@ -243,8 +212,7 @@
         var lens=document.getElementById("prompt-lens");
         if(lens){ lens.removeAttribute("hidden"); lens.classList.add("is-open"); }
       }
-      if(layer==="context") openInspector("context");
-      if(layer==="retrieval") openInspector("evidence");
+      if(layer==="retrieval") openInspector();
     });
   });
 })();

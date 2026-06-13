@@ -1,82 +1,26 @@
-// Agentic workstation — mission control for Dorothy's workspace.
-// Surfaces intent, plan, agents, connectors, and evidence as first-class UI.
+// Workstation shell for Dorothy's workspace. Reflects only real state:
+// the live mission, how a turn routed, the sources it stood on, and errors.
 
 (function (global) {
-  const STEPS = [
-    { id: "parse", label: "parse" },
-    { id: "research", label: "research" },
-    { id: "synthesize", label: "synthesize" },
-    { id: "tier", label: "tier" },
-    { id: "deliver", label: "deliver" },
-  ];
-
-  const CONNECTORS = [
-    { id: "corpus", label: "corpus", status: "connected" },
-    { id: "web", label: "web", status: "idle" },
-    { id: "cloud", label: "cloud", status: "connected" },
-    { id: "local", label: "local", status: "idle" },
-  ];
-
-  const AGENTS = [
-    { id: "dorothy", name: "Dorothy", role: "dramaturg", status: "idle" },
-    { id: "router", name: "Router", role: "tier pick", status: "idle" },
-    { id: "corpus", name: "Corpus", role: "retrieval", status: "idle" },
-  ];
-
-  let run = {
-    state: "idle",
-    step: null,
-    mission: "",
-    route: null,
-    sources: null,
-    streaming: false,
-  };
-
   function $(id) { return document.getElementById(id); }
 
+  // The only alert that fires is a real failure from the stream; everything
+  // else clears it. No fabricated "waiting on approval" states.
   function setRunState(state) {
-    run.state = state;
     const bar = $("ws-alert");
-    if (!bar) return;
-    if (state === "partial failure" || state === "blocked") {
-      bar.hidden = false;
-      bar.textContent = "execution paused — repair or simplify the request.";
-      bar.dataset.tone = "error";
-    } else if (state === "waiting on user") {
-      bar.hidden = false;
-      bar.textContent = "waiting on you — review or approve the next move.";
-      bar.dataset.tone = "warn";
-    } else {
-      bar.hidden = true;
+    if (bar) {
+      if (state === "error") {
+        bar.hidden = false;
+        bar.textContent = "that turn failed — try again or simplify the request.";
+        bar.dataset.tone = "error";
+      } else {
+        bar.hidden = true;
+      }
     }
-    document.body.dataset.run = state.replace(/\s+/g, "-");
-  }
-
-  function setStep(stepId, stepState) {
-    run.step = stepId;
-    const strip = $("plan-strip");
-    if (!strip) return;
-    strip.querySelectorAll(".plan-step").forEach((el) => {
-      const id = el.dataset.step;
-      let st = "pending";
-      const idx = STEPS.findIndex((s) => s.id === id);
-      const cur = STEPS.findIndex((s) => s.id === stepId);
-      if (id === stepId && stepState) st = stepState;
-      else if (idx < cur) st = "complete";
-      else if (idx === cur && !stepState) st = "running";
-      el.dataset.state = st;
-    });
-  }
-
-  function resetPlan() {
-    run.step = null;
-    $("plan-strip")?.querySelectorAll(".plan-step").forEach((el) => {
-      el.dataset.state = el.dataset.step === "parse" ? "running" : "pending";
-    });
+    document.body.dataset.run = state;
   }
 
   function setMission(text) {
-    run.mission = text || "";
     const title = $("mission-title");
     const obj = $("mission-objective");
     if (title) title.textContent = text ? text.slice(0, 72) + (text.length > 72 ? "…" : "") : "new inquiry";
@@ -84,7 +28,6 @@
   }
 
   function setRoute(routed, model) {
-    run.route = routed;
     const el = $("route-note");
     if (!el) return;
     if (!routed && !model) { el.textContent = ""; return; }
@@ -93,54 +36,19 @@
     el.textContent = [tier && `tier · ${tier}`, model, by && `via ${by}`].filter(Boolean).join(" · ");
   }
 
-  function setConnectors(patch) {
-    Object.assign(
-      CONNECTORS.reduce((m, c) => ({ ...m, [c.id]: c.status }), {}),
-      patch || {},
-    );
-    const row = $("connector-row");
-    if (!row) return;
-    row.innerHTML = CONNECTORS.map((c) => {
-      const st = (patch && patch[c.id]) || c.status;
-      return `<span class="conn-badge" data-conn="${c.id}" data-status="${st}" title="${c.label}">${c.label}</span>`;
-    }).join("");
-  }
-
-  function setAgents(patch) {
-    const list = $("agent-list");
-    if (!list) return;
-    AGENTS.forEach((a) => {
-      if (patch && patch[a.id]) Object.assign(a, patch[a.id]);
-    });
-    list.innerHTML = AGENTS.map((a) =>
-      `<div class="agent-row" data-agent="${a.id}" data-status="${a.status}">` +
-      `<div class="agent-row-top"><span class="agent-name">${a.name}</span><span class="status-pill">${a.status}</span></div>` +
-      `<span class="agent-role">${a.role}</span>` +
-      (a.task ? `<span class="agent-task">${a.task}</span>` : "") +
-      `</div>`,
-    ).join("");
-  }
-
   function setEvidence(sources) {
-    run.sources = sources;
-    const ctx = $("inspector-context");
     const ev = $("inspector-evidence");
-    const out = $("inspector-output");
     const nCorpus = sources?.corpus?.length || 0;
     const nWeb = sources?.web?.length || 0;
     const total = nCorpus + nWeb;
-    if (ctx) ctx.innerHTML = total
-      ? `<p class="insp-copy">${total} source${total === 1 ? "" : "s"} attached to the last answer.</p>`
-      : `<p class="insp-copy muted">no sources yet — ask something that needs receipts.</p>`;
     if (ev) {
-      if (!total) ev.innerHTML = `<p class="insp-copy muted">evidence appears here after Dorothy grounds an answer.</p>`;
+      if (!total) ev.innerHTML = `<p class="insp-copy muted">sources appear here once Dorothy grounds an answer in the corpus or the web.</p>`;
       else {
         const items = (sources.corpus || []).map((t) => `<li><a href="/corpus">${escapeHtml(t)}</a><span class="src-tag">corpus</span></li>`)
           .concat((sources.web || []).map((w) => `<li><a href="${escapeHtml(w.url)}" target="_blank" rel="noopener">${escapeHtml(w.title || w.url)}</a><span class="src-tag">web</span></li>`));
         ev.innerHTML = `<ul class="source-list">${items.join("")}</ul>`;
       }
     }
-    if (out) out.innerHTML = `<p class="insp-copy muted">structured outputs (briefs, tiers) land in the thread for now.</p>`;
     const rail = $("source-list");
     if (rail && total) {
       rail.innerHTML = ev?.querySelector(".source-list")?.innerHTML || "";
@@ -152,99 +60,35 @@
     return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   }
 
-  function setContextMeter(turns) {
-    const fill = $("context-fill");
-    const copy = $("context-copy");
-    const pct = Math.min(92, 12 + (turns || 0) * 8);
-    if (fill) fill.style.width = pct + "%";
-    if (copy && pct > 55) copy.textContent = "this thread is dense — earlier details may compress.";
-  }
-
   function onWorkstationEvent(e) {
     const d = e.detail || {};
     switch (d.type) {
       case "run-start":
-        run.streaming = true;
         setRunState("executing");
-        resetPlan();
-        setStep("parse", "running");
-        setAgents({ dorothy: { status: "running", task: "reading your ask" }, router: { status: "running", task: "picking tier" } });
-        setConnectors({ web: "idle" });
         break;
       case "run-route":
-        setStep("parse", "complete");
-        setStep("research", d.search ? "running" : "complete");
         setRoute(d.routed, d.model);
-        setAgents({
-          router: { status: "complete", task: d.routed?.tier ? `→ ${d.routed.tier}` : "routed" },
-          corpus: { status: d.search ? "running" : "idle", task: d.search ? "searching corpus + web" : "" },
-        });
-        if (d.search) setConnectors({ web: "connected", corpus: "connected" });
-        break;
-      case "run-thinking":
-        setStep("research", "running");
-        setAgents({ dorothy: { status: "running", task: "reasoning" } });
         break;
       case "run-sources":
-        setStep("research", "complete");
-        setStep("synthesize", "complete");
-        setStep("tier", "running");
         setEvidence(d.sources);
-        setAgents({ corpus: { status: "complete", task: `${(d.sources?.corpus?.length || 0) + (d.sources?.web?.length || 0)} sources` } });
-        break;
-      case "run-text":
-        setStep("tier", "complete");
-        setStep("deliver", "running");
-        setAgents({ dorothy: { status: "running", task: "writing answer" } });
         break;
       case "run-complete":
-        run.streaming = false;
-        setRunState("complete");
-        setStep("deliver", "complete");
-        setAgents({ dorothy: { status: "complete", task: "" }, router: { status: "idle", task: "" }, corpus: { status: "idle", task: "" } });
-        setConnectors({ web: "idle" });
+        setRunState("idle");
         if (d.routed || d.model) setRoute(d.routed, d.model);
         if (d.sources) setEvidence(d.sources);
-        if (d.turns != null) setContextMeter(d.turns);
         break;
       case "run-error":
-        run.streaming = false;
-        setRunState("partial failure");
-        setAgents({ dorothy: { status: "blocked", task: d.message || "failed" } });
+        setRunState("error");
         break;
       case "run-stop":
-        run.streaming = false;
         setRunState("idle");
-        setAgents({ dorothy: { status: "idle", task: "" } });
         break;
       case "mission":
         setMission(d.text);
         break;
-      case "local-on":
-        setConnectors({ local: "connected", cloud: "idle" });
-        break;
-      case "local-off":
-        setConnectors({ local: "idle", cloud: "connected" });
-        break;
       default:
         break;
     }
-  }
-
-  function initInspectorTabs() {
-    const tabs = document.querySelectorAll(".insp-tab");
-    const panels = document.querySelectorAll(".insp-panel");
-    tabs.forEach((tab) => {
-      tab.addEventListener("click", () => {
-        const name = tab.dataset.tab;
-        tabs.forEach((t) => { t.classList.toggle("is-active", t === tab); t.setAttribute("aria-selected", t === tab ? "true" : "false"); });
-        panels.forEach((p) => {
-          const on = p.dataset.panel === name;
-          p.classList.toggle("is-active", on);
-          p.hidden = !on;
-        });
-      });
-    });
   }
 
   function initGlobalStop() {
@@ -254,37 +98,24 @@
   }
 
   function init() {
-    buildPlanStrip();
-    setConnectors({});
-    setAgents({});
     setRunState("idle");
-    initInspectorTabs();
     initGlobalStop();
     global.addEventListener("rr-workstation", onWorkstationEvent);
     if (global.Pandora?.isOpen("retrieval")) {
       document.getElementById("workspace")?.classList.add("has-inspector");
     }
     global.addEventListener("pandora:unlock", (e) => {
-      if (e.detail?.layer === "retrieval" || e.detail?.layer === "context" || e.detail?.layer === "tools") {
+      if (e.detail?.layer === "retrieval") {
         document.getElementById("workspace")?.classList.add("has-inspector");
       }
     });
-  }
-
-  function buildPlanStrip() {
-    const strip = $("plan-strip");
-    if (!strip || strip.children.length) return;
-    strip.innerHTML = STEPS.map((s, i) =>
-      `<div class="plan-step" data-step="${s.id}" data-state="${i === 0 ? "running" : "pending"}">` +
-      `<span class="plan-num">${i + 1}</span><span class="plan-label">${s.label}</span></div>`,
-    ).join("");
   }
 
   function emit(type, detail) {
     global.dispatchEvent(new CustomEvent("rr-workstation", { detail: { type, ...detail } }));
   }
 
-  global.Workstation = { emit, setMission, STEPS };
+  global.Workstation = { emit, setMission };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
   else init();

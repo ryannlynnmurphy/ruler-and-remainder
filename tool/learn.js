@@ -180,14 +180,6 @@ function bootLearn() {
         ? `Try: "Explain ${t || "this"} for a beginner — one metaphor, one example, tier every claim."`
         : "You gave a topic. Add a role, a format, or a constraint to sharpen the read.";
     }
-    const fill = document.getElementById("context-fill");
-    const copy = document.getElementById("context-copy");
-    if (fill && chatMessages) {
-      const turns = chatMessages.filter((m) => !m.pending && m.kind !== "news").length;
-      const pct = Math.min(92, 12 + turns * 8);
-      fill.style.width = pct + "%";
-      if (copy && pct > 55) copy.textContent = "this conversation is getting dense — earlier details may compress.";
-    }
     const list = document.getElementById("source-list");
     if (list && lastAsst && lastAsst.sources) {
       const corpus = lastAsst.sources.corpus || [];
@@ -556,10 +548,10 @@ function bootLearn() {
       if (!L.supported()) { setLocalLabel("⚡ no webgpu here"); localBtn.disabled = true; return; }
       setLocalLabel("⚡ loading…", true);
       const ok = await L.warm((r) => { const p = r && typeof r.progress === "number" ? Math.round(r.progress * 100) : null; setLocalLabel(p != null ? `⚡ loading ${p}%` : "⚡ loading…", true); });
-      if (ok && !L.isUnavailable()) { localOn = true; setLocalLabel("⚡ local: on", true); try { localStorage.setItem("rr_local", "1"); } catch {} wsEmit("local-on"); }
+      if (ok && !L.isUnavailable()) { localOn = true; setLocalLabel("⚡ local: on", true); try { localStorage.setItem("rr_local", "1"); } catch {} }
       else { localOn = false; setLocalLabel("⚡ local unavailable", false); localBtn.disabled = true; }
     }
-    function disableLocal() { localOn = false; setLocalLabel("⚡ local mode", false); try { localStorage.removeItem("rr_local"); } catch {} wsEmit("local-off"); }
+    function disableLocal() { localOn = false; setLocalLabel("⚡ local mode", false); try { localStorage.removeItem("rr_local"); } catch {} }
     if (localBtn) {
       lib().then((L) => { if (L.supported()) { localBtn.hidden = false; let pref = false; try { pref = localStorage.getItem("rr_local") === "1"; } catch {} if (pref) enableLocal(); } });
       localBtn.addEventListener("click", () => { if (localOn) disableLocal(); else enableLocal(); });
@@ -648,11 +640,10 @@ function bootLearn() {
               }
               if (!dataStr) continue;
               let d; try { d = JSON.parse(dataStr); } catch { continue; }
-              if (ev === "thinking") { pend.thinking += d.delta || ""; wsEmit("run-thinking"); flush(); }
+              if (ev === "thinking") { pend.thinking += d.delta || ""; flush(); }
               else if (ev === "text") {
                 let delta = d.delta || "";
                 if (window.Pandora) delta = Pandora.parseUnlockTags(delta);
-                if (delta) wsEmit("run-text");
                 pend.content += delta;
                 pend.pending = false;
                 flush();
