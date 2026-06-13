@@ -98,10 +98,13 @@ const CHIPS = ["so ai is bad for the environment…", "ai is going to take my jo
 // the dramaturg's tools. most render right here in the conversation (send/fill);
 // the last two open a deeper page for when you explicitly want that surface.
 const TOOLS = [
-  { label: "today's AI news — the real story", news: true },
+  { label: "today's AI news", news: true },
   { label: "read a headline through the corpus", fill: "read this through the corpus and tier it: " },
-  { label: "argue something i believe", fill: "here's something i'm pretty sure i believe — argue it with me: " },
-  { label: "the lens — a focused reading ↗", nav: "/lens.html" },
+  { label: "argue a claim i believe", fill: "here's something i'm pretty sure i believe — argue it with me: " },
+  { label: "CRD audit — confidence vs reality ↗", nav: "/audit.html" },
+  { label: "reality check — anti-hype ↗", nav: "/reality.html" },
+  { label: "the index — search the corpus ↗", nav: "/database.html" },
+  { label: "the lens — focused reading ↗", nav: "/lens.html" },
   { label: "the studio — work with documents ↗", nav: "/studio.html" },
 ];
 
@@ -531,6 +534,8 @@ function bootLearn() {
         });
         toolsPanel.appendChild(b);
       });
+      // tools are first-class in an agentic workstation: surface the dock open.
+      toolsPanel.hidden = false; toolsBtn.setAttribute("aria-expanded", "true");
       toolsBtn.addEventListener("click", () => {
         const open = toolsPanel.hidden;
         toolsPanel.hidden = !open;

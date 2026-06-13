@@ -74,6 +74,7 @@
 
     <div id="connector-row" class="ws-connectors" aria-label="connectors"></div>
 
+    <button type="button" id="inspect-toggle" class="ws-inspect-btn" aria-pressed="false" title="toggle inspector">inspect</button>
     <button type="button" id="global-stop" class="ws-stop" title="stop all agents">stop</button>
 
     <nav id="chamber-strip" class="chamber-strip" aria-label="chambers">
@@ -121,7 +122,7 @@
           <button type="button" class="learn-cta" data-unlock-trigger="retrieval">show evidence</button>
         </div>
         <div class="toolsrow">
-          <button id="toolsbtn" class="toolsbtn" type="button" aria-expanded="false" data-unlock="tools" hidden>⊕ tools</button>
+          <button id="toolsbtn" class="toolsbtn" type="button" aria-expanded="true">⊕ tools</button>
           <button id="localbtn" class="toolsbtn localbtn" type="button" aria-pressed="false" hidden>⚡ local</button>
           <div id="toolspanel" class="toolspanel" hidden></div>
         </div>
@@ -136,7 +137,7 @@
     </main>
 
     <!-- right inspector · 360px -->
-    <aside class="ws-inspector" id="inspector" data-unlock="retrieval" hidden>
+    <aside class="ws-inspector" id="inspector">
       <div class="insp-tabs" role="tablist">
         <button type="button" class="insp-tab is-active" data-tab="context" role="tab">context</button>
         <button type="button" class="insp-tab" data-tab="agents" role="tab">agents</button>
@@ -218,11 +219,32 @@
   window.addEventListener("storage", function(e){ if(e.key===SKEY) render(); });
   window.addEventListener("focus", render);
   render();
+  function openInspector(tab){
+    var shell=document.getElementById("workspace");
+    if(shell) shell.classList.add("has-inspector");
+    var insp=document.getElementById("inspector");
+    if(insp) insp.removeAttribute("hidden");
+    var tg=document.getElementById("inspect-toggle");
+    if(tg) tg.setAttribute("aria-pressed","true");
+    if(tab){ var t=document.querySelector('.insp-tab[data-tab="'+tab+'"]'); if(t) t.click(); }
+  }
+  function toggleInspector(){
+    var shell=document.getElementById("workspace"); if(!shell) return;
+    var on=shell.classList.toggle("has-inspector");
+    var tg=document.getElementById("inspect-toggle");
+    if(tg) tg.setAttribute("aria-pressed", on ? "true" : "false");
+  }
+  document.getElementById("inspect-toggle")?.addEventListener("click", toggleInspector);
   document.querySelectorAll("[data-unlock-trigger]").forEach(function(btn){
     btn.addEventListener("click", function(){
       var layer=btn.getAttribute("data-unlock-trigger");
       if(window.Pandora) Pandora.unlock(layer);
-      if(layer==="retrieval") document.getElementById("workspace")?.classList.add("has-inspector");
+      if(layer==="prompting"){
+        var lens=document.getElementById("prompt-lens");
+        if(lens){ lens.removeAttribute("hidden"); lens.classList.add("is-open"); }
+      }
+      if(layer==="context") openInspector("context");
+      if(layer==="retrieval") openInspector("evidence");
     });
   });
 })();
