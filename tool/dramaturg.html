@@ -71,6 +71,10 @@
         <button type="button" id="toolsbtn" class="ws-navbtn" aria-expanded="false" title="tools Dorothy can use">tools</button>
         <div id="toolspanel" class="toolspanel" hidden></div>
       </div>
+      <button type="button" id="localtoggle" class="ws-navbtn localtoggle" aria-pressed="false" title="auto — clears locally, escalates to the cloud only when needed">
+        <span class="localdot" id="localdot" data-state="checking" aria-hidden="true"></span><span id="localtoggle-label">auto</span>
+      </button>
+      <button type="button" id="runlocal" class="ws-navbtn" title="run the models on your own machine, one command">↓ run local</button>
       <a class="ws-navbtn" href="/corpus" title="the research corpus Dorothy reads from">corpus</a>
       <a class="ws-navbtn" href="/?walk=1" title="replay the walk">walk</a>
       <button type="button" id="global-stop" class="ws-stop" title="stop the current turn" hidden>stop</button>
@@ -131,6 +135,33 @@
   <p class="corpus-sub">books, pamphlets, essays — what Dorothy reads when she answers you.</p>
 </section>
 
+<!-- run-it-locally: a web page can't install on a visitor's machine, so the real
+     "one click" is a single copy-paste line that pulls the setup script -->
+<div id="localsetup" class="localsetup" hidden role="dialog" aria-modal="true" aria-label="run it locally">
+  <div class="localsetup-card">
+    <div class="localsetup-head">
+      <div>
+        <p class="ls-kicker">run it locally</p>
+        <h2 class="ls-title">your own models, one command</h2>
+      </div>
+      <button type="button" id="localsetup-close" class="ls-close" aria-label="close">close</button>
+    </div>
+    <div class="localsetup-body">
+      <p class="ls-status" id="ls-status"><span class="localdot" data-state="checking"></span>checking for a local node…</p>
+      <p class="ls-copy">This installs <b>Ollama</b>, starts it, and pulls the models Dorothy's local rung runs on. Everything stays on your machine. Paste it into a terminal:</p>
+      <div class="ls-cmdrow">
+        <pre class="ls-cmd" id="ls-cmd">curl -fsSL …/setup-local.sh | sh</pre>
+        <button type="button" id="ls-copy" class="ls-copybtn">copy</button>
+      </div>
+      <div class="ls-foot">
+        <a href="/setup-local.sh" download class="ls-dl">↓ download script</a>
+        <span class="ls-models">installs qwen2.5 · llava</span>
+      </div>
+      <p class="ls-note">Once it finishes, the dot turns green and the workstation routes there first. To use your node from the deployed site, expose it (Tailscale funnel) and set <code>OLLAMA_URL</code>.</p>
+    </div>
+  </div>
+</div>
+
 <div id="unlock-toast" class="unlock-toast" role="status"></div>
 
 <script src="/pandora.js"></script>
@@ -176,6 +207,74 @@
     setInspector(!document.getElementById("workspace").classList.contains("has-inspector"));
   });
   document.getElementById("insp-close")?.addEventListener("click", function(){ setInspector(false); });
+
+  // ---- local-first: auto / local-only toggle + honest health dot ----
+  // learn.js reads localStorage "rr_local_only" and sends { localOnly } to /api/argue.
+  var LKEY = "rr_local_only";
+  var toggle = document.getElementById("localtoggle");
+  var label = document.getElementById("localtoggle-label");
+  var dot = document.getElementById("localdot");
+  var lsStatus = document.getElementById("ls-status");
+  var localOnly = false;
+  try { localOnly = localStorage.getItem(LKEY) === "1"; } catch(e){}
+  var health = null; // {configured, reachable, model}
+
+  function nodeWord(){
+    if(!health) return "checking the local node…";
+    if(health.reachable) return "local node online" + (health.model ? " (" + health.model + ")" : "");
+    if(health.configured) return "local node configured but offline";
+    return "no local node reachable from this deployment";
+  }
+  function dotState(){
+    if(!health) return "checking";
+    return health.reachable ? "online" : health.configured ? "offline" : "none";
+  }
+  function paint(){
+    if(label) label.textContent = localOnly ? "local-only" : "auto";
+    if(toggle){
+      toggle.setAttribute("aria-pressed", localOnly ? "true" : "false");
+      toggle.classList.toggle("is-localonly", localOnly);
+      toggle.title = (localOnly
+        ? "local-only: every turn stays on the local node, nothing reaches the cloud. "
+        : "auto: clears locally first, escalates to the cloud only when the local node can't. ") + nodeWord() + ".";
+    }
+    var st = dotState();
+    if(dot) dot.setAttribute("data-state", st);
+    var sdot = lsStatus && lsStatus.querySelector(".localdot");
+    if(sdot) sdot.setAttribute("data-state", st);
+    if(lsStatus) lsStatus.childNodes[1] && (lsStatus.lastChild.textContent = nodeWord() + ".");
+  }
+  toggle?.addEventListener("click", function(){
+    localOnly = !localOnly;
+    try { localStorage.setItem(LKEY, localOnly ? "1" : "0"); } catch(e){}
+    try { window.dispatchEvent(new CustomEvent("rr-localmode", { detail:{ localOnly: localOnly } })); } catch(e){}
+    paint();
+  });
+  function checkHealth(){
+    fetch("/api/health", { cache: "no-store" })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(d){ health = d || { configured:false, reachable:false, model:"" }; paint(); })
+      .catch(function(){ health = { configured:false, reachable:false, model:"" }; paint(); });
+  }
+  paint(); checkHealth();
+  setInterval(checkHealth, 30000);
+  window.addEventListener("focus", checkHealth);
+
+  // ---- run-local modal ----
+  var setup = document.getElementById("localsetup");
+  var cmdEl = document.getElementById("ls-cmd");
+  var oneLiner = "curl -fsSL " + location.origin + "/setup-local.sh | sh";
+  if(cmdEl) cmdEl.textContent = oneLiner;
+  function openSetup(){ if(setup){ setup.hidden = false; checkHealth(); } }
+  function closeSetup(){ if(setup) setup.hidden = true; }
+  document.getElementById("runlocal")?.addEventListener("click", openSetup);
+  document.getElementById("localsetup-close")?.addEventListener("click", closeSetup);
+  setup?.addEventListener("click", function(e){ if(e.target === setup) closeSetup(); });
+  document.addEventListener("keydown", function(e){ if(e.key === "Escape" && setup && !setup.hidden) closeSetup(); });
+  document.getElementById("ls-copy")?.addEventListener("click", function(){
+    var btn = this;
+    if(navigator.clipboard) navigator.clipboard.writeText(oneLiner).then(function(){ btn.textContent="copied"; setTimeout(function(){ btn.textContent="copy"; }, 1600); }).catch(function(){});
+  });
 })();
 </script>
 <script src="/learn.js"></script>

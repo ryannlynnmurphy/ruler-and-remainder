@@ -314,7 +314,7 @@ function dedupeByUrl(list) {
   return out.slice(0, 8);
 }
 
-async function streamAnswer(res, { model, messages, useSearch, system, thinkingOn, effort, meta, image, local }) {
+async function streamAnswer(res, { model, messages, useSearch, system, thinkingOn, effort, meta, image, local, noEscalate }) {
   res.setHeader("content-type", "text/event-stream; charset=utf-8");
   res.setHeader("cache-control", "no-cache, no-transform");
   res.setHeader("connection", "keep-alive");
@@ -340,6 +340,12 @@ async function streamAnswer(res, { model, messages, useSearch, system, thinkingO
       return;
     }
     if (!out.ok) ollamaDown = true;  // unreachable — stop probing it for the rest of this process
+    if (noEscalate) { // local-only: never touch the cloud — fail closed, honestly
+      send("error", { message: "local-only: the local node didn't answer. it may be offline — switch to auto to use the cloud." });
+      send("done", { model: local });
+      res.end();
+      return;
+    }
     send("meta", { ...meta, routed: { tier: "cloud", by: "local-fallback" } }); // be honest: it escalated
   }
   // Adaptive thinking — NOT { type:"enabled", budget_tokens } which 400s on
@@ -388,17 +394,20 @@ export default async function handler(req, res) {
     res.status(405).json({ error: "method not allowed" });
     return;
   }
-  if (!process.env.ANTHROPIC_API_KEY) {
-    res.status(503).json({ error: "the machine isn't configured yet." });
-    return;
-  }
-
   let body;
   try { body = await readJsonBody(req); }
   catch { res.status(400).json({ error: "couldn't read the request." }); return; }
 
   const explicitModel = ALLOWED_MODELS.has(body.model) ? body.model : null; // honor a manual override, else route
   const clientRoute = validClientRoute(body.route); // a route the browser L0 already decided, if any
+  const localOnly = body.localOnly === true; // workstation pinned to the local node — fail closed, never escalate
+
+  // The Claude key is only required for turns that can reach the cloud. A local-only
+  // turn against a configured node never does, so it must work without a key.
+  if (!process.env.ANTHROPIC_API_KEY && !(localOnly && OLLAMA_URL)) {
+    res.status(503).json({ error: "the machine isn't configured yet." });
+    return;
+  }
   const messages = normalizeMessages(body.messages);
   if (!messages) {
     res.status(400).json({ error: "say something to start the argument." });
@@ -430,23 +439,40 @@ export default async function handler(req, res) {
   // turn is never shipped to the cloud router just to be sorted (fail-closed by
   // topology, not policy). Web-needing turns, and image turns without a local
   // vision model, escalate to the cloud cascade.
-  let model, useSearch = false, tier = null, routedBy = "explicit", local = null;
-  const localReady = OLLAMA_URL && !ollamaDown && !explicitModel;
+  let model, useSearch = false, tier = null, routedBy = "explicit", local = null, noEscalate = false;
   const localCanSee = !image || !!OLLAMA_VISION_MODEL;
-  if (localReady && localCanSee && !needsFreshFacts(lastUser)) {
-    local = image ? OLLAMA_VISION_MODEL : OLLAMA_MODEL; // L0 takes it; `model` is the cloud fallback target
-    model = image ? "claude-sonnet-4-6" : DEFAULT_MODEL;
-    tier = "local"; routedBy = "local";
-  } else if (explicitModel) {
-    model = explicitModel;
-    useSearch = WEB_SEARCH_MODELS.has(model);
+  if (localOnly) {
+    // Pinned to the local node by the user. Try local regardless of the breaker,
+    // and never escalate to the cloud — if it can't answer, say so (fail closed).
+    noEscalate = true;
+    if (!OLLAMA_URL) {
+      res.status(503).json({ error: "local-only is on, but no local node is configured. start a node and set OLLAMA_URL, or switch to auto." });
+      return;
+    }
+    if (!localCanSee) {
+      res.status(503).json({ error: "local-only is on, but this node has no vision model for images. switch to auto, or set OLLAMA_VISION_MODEL." });
+      return;
+    }
+    local = image ? OLLAMA_VISION_MODEL : OLLAMA_MODEL;
+    model = image ? "claude-sonnet-4-6" : DEFAULT_MODEL; // declared for shape; never reached under noEscalate
+    tier = "local"; routedBy = "local-only";
   } else {
-    // The browser may have already routed this turn on-device; trust it and skip
-    // the cloud router call. Otherwise fall back to the haiku router as before.
-    const r = clientRoute || await route(lastUser);
-    tier = r.tier; routedBy = clientRoute ? "client" : r.by;
-    model = TIER_MODEL[r.tier] || DEFAULT_MODEL;
-    useSearch = r.search && WEB_SEARCH_MODELS.has(model);
+    const localReady = OLLAMA_URL && !ollamaDown && !explicitModel;
+    if (localReady && localCanSee && !needsFreshFacts(lastUser)) {
+      local = image ? OLLAMA_VISION_MODEL : OLLAMA_MODEL; // L0 takes it; `model` is the cloud fallback target
+      model = image ? "claude-sonnet-4-6" : DEFAULT_MODEL;
+      tier = "local"; routedBy = "local";
+    } else if (explicitModel) {
+      model = explicitModel;
+      useSearch = WEB_SEARCH_MODELS.has(model);
+    } else {
+      // The browser may have already routed this turn on-device; trust it and skip
+      // the cloud router call. Otherwise fall back to the haiku router as before.
+      const r = clientRoute || await route(lastUser);
+      tier = r.tier; routedBy = clientRoute ? "client" : r.by;
+      model = TIER_MODEL[r.tier] || DEFAULT_MODEL;
+      useSearch = r.search && WEB_SEARCH_MODELS.has(model);
+    }
   }
   if (image && model === "claude-haiku-4-5") model = "claude-sonnet-4-6"; // vision wants a stronger cloud model
 
@@ -474,7 +500,7 @@ export default async function handler(req, res) {
   // Streaming path: forward thinking + text live. The non-streaming JSON path below
   // is preserved for any caller that doesn't ask to stream.
   if (body.stream === true) {
-    await streamAnswer(res, { model, messages, useSearch, system, thinkingOn, effort, image, local, meta: { model, routed: { tier, by: routedBy }, grounded } });
+    await streamAnswer(res, { model, messages, useSearch, system, thinkingOn, effort, image, local, noEscalate, meta: { model, routed: { tier, by: routedBy }, grounded } });
     return;
   }
 

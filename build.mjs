@@ -1218,6 +1218,8 @@ fs.writeFileSync(path.join(DIST, "index.html"), walkHome);
 
 // ---------- static assets ----------------------------------------------------
 fs.copyFileSync(path.join(ROOT, "styles.css"), path.join(DIST, "styles.css"));
+// the one-click local-model installer the "run local" panel serves
+if (exists(path.join(ROOT, "setup-local.sh"))) fs.copyFileSync(path.join(ROOT, "setup-local.sh"), path.join(DIST, "setup-local.sh"));
 for (const f of ["audit.html", "audit.js", "reality.html", "reality.js", "learn.html", "learn.js", "pandora.js", "workstation.js", "studio.html", "studio.js", "lens.html", "lens.js", "dramaturg.html"]) {
   if (exists(path.join(ROOT, "tool", f))) fs.copyFileSync(path.join(ROOT, "tool", f), path.join(DIST, f));
 }

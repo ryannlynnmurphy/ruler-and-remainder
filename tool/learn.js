@@ -290,7 +290,7 @@ function bootLearn() {
     const n = idx + d;
     if (n < 0 || n >= screens.length) return;
     idx = n; render();
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "auto" }); // instant: smooth-scroll stacking on rapid taps reads as a glitch
   }
   if (cont) cont.addEventListener("click", () => go(1));
   if (back) back.addEventListener("click", () => go(-1));
@@ -552,10 +552,13 @@ function bootLearn() {
       const history = chatMessages.filter((m) => m !== pend && !m.pending && m.kind !== "news" && typeof m.content === "string")
         .map((m) => ({ role: m.role, content: m.content }));
 
+      // local-first: the top-bar toggle pins this turn to the local node (fail closed)
+      let localOnly = false;
+      try { localOnly = localStorage.getItem("rr_local_only") === "1"; } catch {}
       try {
         const res = await fetch("/api/argue", {
           method: "POST", headers: { "content-type": "application/json" },
-          body: JSON.stringify({ messages: history, stream: true, image: img ? { media_type: img.media_type, data: img.data } : undefined }), signal: aborter.signal,
+          body: JSON.stringify({ messages: history, stream: true, localOnly, image: img ? { media_type: img.media_type, data: img.data } : undefined }), signal: aborter.signal,
         });
         if (!res.ok || !res.body) {
           let err = "something went wrong — try again.";

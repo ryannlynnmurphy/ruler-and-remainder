@@ -372,7 +372,9 @@ main { padding-left: 36px; }
 body.walkgame { overflow-x: hidden; }
 .walkgame #main { padding: 0; max-width: none; }
 .walkgame .ruler-gutter { display: none; }
-.game { display: flex; flex-direction: column; min-height: 100vh; max-width: 52rem; margin: 0 auto; padding: 0 1.4rem; }
+.game { display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; max-width: 52rem; margin: 0 auto; padding: 0 1.4rem; touch-action: manipulation; }
+/* kill the iOS double-tap-to-zoom that makes rapid walk taps "zoom in and out" */
+.cont, .gback, .stage, .chamber-walk { touch-action: manipulation; }
 
 /* top bar: mascot · progress · escape */
 .gamebar { display: flex; align-items: center; gap: 1rem; padding: 1.1rem 0 0.4rem; }
@@ -791,6 +793,9 @@ body.pandora .sayrow { flex-shrink: 0; margin-bottom: 0.25rem; }
 
 @media (prefers-reduced-motion: reduce) {
   .pandora-workspace, .ws-shell, .chamber-walk, .pandora-panel, .pandora-corpus, .unlock-toast { transition: none; }
+  /* the walk's reveal + mascot motion off for anyone who asked for less */
+  .rin, .mascot svg, .mascot.talk svg, .mascot .eye { animation: none; }
+  .rin { opacity: 1; transform: none; }
 }
 
 /* ====================================================================== */
@@ -1076,10 +1081,45 @@ body.agentic, .ws-shell, .ws-center, .ws-topbar { max-width: 100vw; overflow-x: 
   .ws-topbar { gap: 0.4rem; padding: 0 0.7rem; }
   .ws-brand span { display: none; }
   /* secondary nav lives elsewhere on a phone: corpus is the footer below,
-     walk is a rare replay — keep sources / tools / stop inline */
+     walk is a rare replay — keep sources / tools / local / stop inline */
   .ws-nav a.ws-navbtn[href="/corpus"], .ws-nav a.ws-navbtn[href="/?walk=1"] { display: none; }
+  #runlocal { display: none; } /* the run-local panel is a desktop affordance */
   /* sources sheet taller for reading on a phone */
   .ws-inspector { height: 62vh; }
   /* corpus footer: gentler on a short screen */
   .pandora-corpus { min-height: auto; padding: 2.6rem 1.1rem; }
 }
+
+/* ---- local-first: toggle dot + run-local modal ---- */
+.localtoggle { display: inline-flex; align-items: center; gap: 0.4rem; }
+.localtoggle.is-localonly { background: var(--measure); border-color: var(--measure); color: var(--paper); }
+.localdot { width: 7px; height: 7px; border-radius: 999px; flex: 0 0 auto; background: #6a655a; }
+.localdot[data-state="online"] { background: #46c37b; box-shadow: 0 0 0 2px rgba(70,195,123,0.22); }
+.localdot[data-state="offline"] { background: #d9a441; }
+.localdot[data-state="none"] { background: #6a655a; }
+.localdot[data-state="checking"] { background: #6a655a; animation: think-pulse 1.1s ease-in-out infinite; }
+
+.localsetup {
+  position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+  background: rgba(14,13,10,0.6); padding: 1rem;
+}
+.localsetup[hidden] { display: none; }
+.localsetup-card { width: 100%; max-width: 34rem; background: var(--paper); color: var(--ink); border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; box-shadow: 0 24px 60px rgba(14,13,10,0.4); }
+.localsetup-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; padding: 1rem 1.2rem; border-bottom: 1px solid var(--rule); }
+.ls-kicker { font-family: var(--mono); font-size: 0.56rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--measure); margin: 0 0 0.3rem; }
+.ls-title { font-family: var(--display); font-weight: 800; font-size: 1.05rem; letter-spacing: -0.01em; margin: 0; }
+.ls-close { appearance: none; border: 0; background: none; font-family: var(--mono); font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); cursor: pointer; padding: 0.4rem; }
+.ls-close:hover { color: var(--measure); }
+.localsetup-body { padding: 1.1rem 1.2rem; display: flex; flex-direction: column; gap: 0.9rem; }
+.ls-status { display: flex; align-items: center; gap: 0.5rem; font-family: var(--mono); font-size: 0.72rem; color: var(--muted); margin: 0; }
+.ls-copy { font-family: var(--serif); font-size: 0.94rem; line-height: 1.5; color: var(--ink-soft); margin: 0; }
+.ls-cmdrow { position: relative; }
+.ls-cmd { font-family: var(--mono); font-size: 0.74rem; background: var(--ink); color: var(--paper); border-radius: 8px; padding: 0.85rem 4.5rem 0.85rem 0.9rem; margin: 0; overflow-x: auto; white-space: pre; }
+.ls-copybtn { position: absolute; right: 0.5rem; top: 0.5rem; font-family: var(--mono); font-size: 0.56rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--paper); background: transparent; border: 1px solid #3a382f; border-radius: 6px; padding: 0.4rem 0.6rem; cursor: pointer; }
+.ls-copybtn:hover { border-color: var(--measure); color: var(--measure); }
+.ls-foot { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; }
+.ls-dl { font-family: var(--mono); font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); text-decoration: none; }
+.ls-dl:hover { color: var(--measure); }
+.ls-models { font-family: var(--mono); font-size: 0.56rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.ls-note { font-family: var(--serif); font-size: 0.8rem; line-height: 1.5; color: var(--muted); margin: 0; border-top: 1px solid var(--rule); padding-top: 0.8rem; }
+.ls-note code { font-family: var(--mono); font-size: 0.74rem; color: var(--ink); }
