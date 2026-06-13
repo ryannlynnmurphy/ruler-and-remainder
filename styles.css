@@ -458,6 +458,8 @@ body.walkgame { overflow-x: hidden; }
 .toolsbtn { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.05em; text-transform: lowercase; color: var(--measure); background: none; border: 1px solid var(--rule); padding: 0.32rem 0.75rem; cursor: pointer; }
 .toolsbtn:hover { border-color: var(--measure); }
 .toolsbtn[aria-expanded="true"] { background: var(--measure); color: var(--paper); border-color: var(--measure); }
+.localbtn[aria-pressed="true"] { background: var(--measure); color: var(--paper); border-color: var(--measure); }
+.localbtn[disabled] { opacity: 0.5; cursor: default; }
 .toolspanel { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.55rem; }
 .toolspanel[hidden] { display: none; }
 .toolspanel .chip.tool { color: var(--ink); }

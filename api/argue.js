@@ -78,6 +78,15 @@ function needsFreshFacts(t) {
   return /\b(today|tonight|yesterday|tomorrow|this (?:week|month|year)|right now|currently|latest|newest|recent(?:ly)?|breaking|headline|news|as of|in 202\d|price|stock|weather|score|who(?:'s| is) the|what'?s new|just (?:announced|released))\b/i.test(t || "");
 }
 
+// A route the client computed on-device (its in-browser L0). Trusted only as a
+// classification — it picks the tier, never the model name or anything privileged —
+// so a hostile client can at most make its own turn cheaper or dearer, nothing more.
+function validClientRoute(r) {
+  if (!r || typeof r !== "object") return null;
+  if (!["light", "medium", "heavy"].includes(r.tier)) return null;
+  return { tier: r.tier, search: r.search === true };
+}
+
 // Validate an inbound image (base64, no data: prefix). Returns null when unusable.
 function validImage(img) {
   if (!img || typeof img !== "object") return null;
@@ -388,6 +397,7 @@ export default async function handler(req, res) {
   catch { res.status(400).json({ error: "couldn't read the request." }); return; }
 
   const explicitModel = ALLOWED_MODELS.has(body.model) ? body.model : null; // honor a manual override, else route
+  const clientRoute = validClientRoute(body.route); // a route the browser L0 already decided, if any
   const messages = normalizeMessages(body.messages);
   if (!messages) {
     res.status(400).json({ error: "say something to start the argument." });
@@ -430,8 +440,10 @@ export default async function handler(req, res) {
     model = explicitModel;
     useSearch = WEB_SEARCH_MODELS.has(model);
   } else {
-    const r = await route(lastUser);
-    tier = r.tier; routedBy = r.by;
+    // The browser may have already routed this turn on-device; trust it and skip
+    // the cloud router call. Otherwise fall back to the haiku router as before.
+    const r = clientRoute || await route(lastUser);
+    tier = r.tier; routedBy = clientRoute ? "client" : r.by;
     model = TIER_MODEL[r.tier] || DEFAULT_MODEL;
     useSearch = r.search && WEB_SEARCH_MODELS.has(model);
   }

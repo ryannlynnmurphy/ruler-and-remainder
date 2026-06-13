@@ -10,11 +10,14 @@ function modelLabel(m) { return !m ? "" : m.includes("haiku") ? "haiku" : m.incl
 // made visible — light turns stay quiet so the note never clutters small talk.
 function routeWhy(r) {
   if (!r || !r.tier) return "";
+  if (r.tier === "browser") return "answered in your browser — nothing left this page";
   if (r.tier === "local") return "answered on the local model — no cloud call";
   if (r.by === "local-fallback") return "the local model couldn't take it — escalated to the cloud";
   if (r.by === "explicit") return "you chose this model";
-  if (r.tier === "heavy") return "routed up to the strongest model — this called for hard reasoning";
-  if (r.tier === "medium") return "routed to the middle model — a real question worth reasoning about";
+  const dev = r.by === "client" ? " (routed on your device)" : "";
+  if (r.tier === "heavy") return "routed up to the strongest model — this called for hard reasoning" + dev;
+  if (r.tier === "medium") return "routed to the middle model — a real question worth reasoning about" + dev;
+  if (r.tier === "light" && dev) return "kept light — a simple turn, decided on your device";
   return "";
 }
 // receipts: the corpus passages and web pages the answer actually stood on.
@@ -178,7 +181,7 @@ window.addEventListener("DOMContentLoaded", () => {
         s.body.map((l) => `<p class="line">${fmt(l)}</p>`).join("") +
         `<div id="greet" class="greet" hidden></div>` +
         `<div id="log" class="log" role="log" aria-live="polite"></div><div id="chips" class="chips"></div>` +
-        `<div class="toolsrow"><button id="toolsbtn" class="toolsbtn" type="button" aria-expanded="false">⊕ tools</button><div id="toolspanel" class="toolspanel" hidden></div></div>` +
+        `<div class="toolsrow"><button id="toolsbtn" class="toolsbtn" type="button" aria-expanded="false">⊕ tools</button><button id="localbtn" class="toolsbtn localbtn" type="button" aria-pressed="false" hidden title="run a small model in your own browser — small talk and routing never leave this page">⚡ local mode</button><div id="toolspanel" class="toolspanel" hidden></div></div>` +
         `<div id="attach" class="attach" hidden></div>` +
         `<div class="sayrow"><button id="clip" class="clip" type="button" aria-label="attach an image" title="attach an image">+ image</button><textarea id="say" rows="2" aria-label="message to dorothy" placeholder="bring the dramaturg a claim, a worry, a headline…"></textarea><button id="send" class="run" aria-label="send">send</button><input id="file" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden></div>` +
         `</div>`;
@@ -434,6 +437,28 @@ window.addEventListener("DOMContentLoaded", () => {
       });
     }
 
+    // ---- local mode: the in-browser L0 (WebLLM). Opt-in, because it's a one-time
+    // ~1GB download; once warm, it answers small talk on-device and routes the rest
+    // on-device, so a greeting never leaves the page and the cloud router is skipped.
+    let local = null;         // the loaded /local.js module, or null until imported
+    let localOn = false;      // user has it switched on AND the engine is warm
+    const localBtn = $("localbtn");
+    async function lib() { if (!local) local = await import("/local.js"); return local; }
+    function setLocalLabel(t, pressed) { if (!localBtn) return; localBtn.textContent = t; if (pressed !== undefined) localBtn.setAttribute("aria-pressed", pressed ? "true" : "false"); }
+    async function enableLocal() {
+      const L = await lib();
+      if (!L.supported()) { setLocalLabel("⚡ no webgpu here"); localBtn.disabled = true; return; }
+      setLocalLabel("⚡ loading…", true);
+      const ok = await L.warm((r) => { const p = r && typeof r.progress === "number" ? Math.round(r.progress * 100) : null; setLocalLabel(p != null ? `⚡ loading ${p}%` : "⚡ loading…", true); });
+      if (ok && !L.isUnavailable()) { localOn = true; setLocalLabel("⚡ local: on", true); try { localStorage.setItem("rr_local", "1"); } catch {} }
+      else { localOn = false; setLocalLabel("⚡ local unavailable", false); localBtn.disabled = true; }
+    }
+    function disableLocal() { localOn = false; setLocalLabel("⚡ local mode", false); try { localStorage.removeItem("rr_local"); } catch {} }
+    if (localBtn) {
+      lib().then((L) => { if (L.supported()) { localBtn.hidden = false; let pref = false; try { pref = localStorage.getItem("rr_local") === "1"; } catch {} if (pref) enableLocal(); } });
+      localBtn.addEventListener("click", () => { if (localOn) disableLocal(); else enableLocal(); });
+    }
+
     async function send() {
       let text = sayEl.value.trim();
       if ((!text && !pendingImage) || aborter) return;
@@ -466,10 +491,29 @@ window.addEventListener("DOMContentLoaded", () => {
       const history = chatMessages.filter((m) => m !== pend && !m.pending && m.kind !== "news" && typeof m.content === "string")
         .map((m) => ({ role: m.role, content: m.content }));
 
+      // L0, in the browser. Only when local mode is warm, and never for an image
+      // turn (the local model can't see). Best-effort: any miss falls straight
+      // through to /api/argue below, exactly as if local mode were off.
+      let deviceRoute = null; // an on-device {tier,search} the server can trust, skipping its own router
+      if (localOn && !img && local) {
+        try {
+          // Trivial small talk: answer here, end to end. Nothing leaves the page.
+          if (local.looksTrivial(text)) {
+            pend.routed = { tier: "browser", by: "browser" };
+            const out = await local.answerTrivial(history, (delta) => { pend.content += delta; pend.pending = false; flush(); });
+            if (out) { pend.model = "browser"; pend.pending = false; pend.streaming = false; aborter = null; sendBtn.textContent = "send"; sendBtn.classList.remove("stopping"); draw(); persistChat(); sayEl.focus(); return; }
+            pend.content = ""; // local whiffed — clear the partial and let the cloud take it
+          }
+          // Everything else: route on-device, hand the decision to the server so it
+          // skips the cloud router. The answer still comes from Dorothy (voice held).
+          if (!local.needsFreshFacts(text)) deviceRoute = await local.route(text);
+        } catch { deviceRoute = null; }
+      }
+
       try {
         const res = await fetch("/api/argue", {
           method: "POST", headers: { "content-type": "application/json" },
-          body: JSON.stringify({ messages: history, stream: true, image: img ? { media_type: img.media_type, data: img.data } : undefined }), signal: aborter.signal,
+          body: JSON.stringify({ messages: history, stream: true, route: deviceRoute || undefined, image: img ? { media_type: img.media_type, data: img.data } : undefined }), signal: aborter.signal,
         });
         if (!res.ok || !res.body) {
           let err = "something went wrong — try again.";
