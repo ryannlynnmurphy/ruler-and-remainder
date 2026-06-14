@@ -505,6 +505,20 @@ body.chatonly .greet { flex: 0 0 auto; padding: 1.3rem 0 0.5rem; }
 .ans-act:hover { color: var(--measure); border-color: var(--measure); }
 .routed { font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.01em; color: var(--faint); }
 
+/* completion floor: an answer that was cut off, dropped, or errored says so plainly
+   and looks different from a clean one — never a finished answer in disguise. */
+.finish-note {
+  font-family: var(--mono); font-size: 0.68rem; line-height: 1.5; letter-spacing: 0.01em;
+  margin: 0.7rem 0 0.1rem; padding: 0.5rem 0.7rem; border-left: 2px solid var(--rule);
+  background: var(--paper-2); color: var(--muted); border-radius: 0 4px 4px 0;
+  overflow-wrap: break-word;
+}
+.finish-note::before { content: "⚠ "; font-weight: 700; }
+.finish-note.warn { border-left-color: #b8860b; color: #6b5418; background: color-mix(in srgb, #b8860b 9%, var(--paper)); }
+.finish-note.err { border-left-color: var(--measure); color: var(--measure); background: color-mix(in srgb, var(--measure) 8%, var(--paper)); }
+.finish-note.muted { color: var(--faint); }
+.finish-note.muted::before { content: ""; }
+
 /* receipts: the corpus passages + web pages an answer actually stood on */
 .sources { margin: 0.55rem 0 0.1rem; }
 .sources summary { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); cursor: pointer; list-style: none; outline: none; }
@@ -520,7 +534,13 @@ body.chatonly .greet { flex: 0 0 auto; padding: 1.3rem 0 0.5rem; }
 /* links, inline code, ordered lists, and quotes inside Dorothy's prose */
 .reality a { color: var(--measure); text-decoration: none; border-bottom: 1px solid currentColor; }
 .reality a:hover { color: var(--ink); }
-.reality code { font-family: var(--mono); font-size: 0.86em; background: var(--paper-2); padding: 0.05rem 0.3rem; border-radius: 2px; }
+.reality code { font-family: var(--mono); font-size: 0.86em; background: var(--paper-2); padding: 0.05rem 0.3rem; border-radius: 2px; overflow-wrap: anywhere; }
+/* fenced code blocks in chat: scroll horizontally rather than stretch the bubble;
+   on small screens, wrap so nothing overflows the viewport. */
+.reality pre { font-family: var(--mono); font-size: 0.8rem; line-height: 1.5; background: var(--ink); color: #efe9d8; padding: 0.85rem 1rem; border-radius: 6px; overflow-x: auto; margin: 0 0 0.9rem; max-width: 100%; }
+.reality pre code { background: none; padding: 0; font-size: inherit; border-radius: 0; white-space: pre; overflow-wrap: normal; }
+/* a long bare URL or token must never push the layout sideways */
+.reality a, .reality p { overflow-wrap: anywhere; }
 .reality ol { margin: 0 0 0.9rem; padding-left: 1.3rem; }
 .reality ol li { margin-bottom: 0.4rem; line-height: 1.55; }
 .reality blockquote { margin: 0 0 0.9rem; padding-left: 0.9rem; border-left: 2px solid var(--measure); color: var(--muted); }
@@ -816,7 +836,10 @@ body.agentic {
 body.agentic:has(.ws-shell.is-open) { min-height: 100dvh; }
 
 .ws-shell {
-  display: flex; flex-direction: column; height: 100dvh; position: relative;
+  /* --app-h is set from window.visualViewport on iOS so the composer rides above
+     the on-screen keyboard (iOS won't shrink 100dvh when the keyboard opens).
+     Everywhere else --app-h is unset and it falls back to 100dvh. */
+  display: flex; flex-direction: column; height: var(--app-h, 100dvh); position: relative;
   opacity: 0; transform: translateY(10px);
   transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -1054,6 +1077,9 @@ body.agentic .turn.you .who, body.agentic .turn.dram .who {
 
 /* nothing may push the layout sideways */
 body.agentic, .ws-shell, .ws-center, .ws-topbar { max-width: 100vw; overflow-x: hidden; }
+/* while the keyboard is open and the user is typing, pin the page so the composer
+   can't be scrolled out from under the thumb; page scroll (to the corpus) returns on blur. */
+body.agentic.kb-open { overflow: hidden; }
 
 @media (max-width: 720px) {
   /* touch targets: 44px+ where a thumb lands */
@@ -1061,6 +1087,8 @@ body.agentic, .ws-shell, .ws-center, .ws-topbar { max-width: 100vw; overflow-x: 
   .ws-navbtn { padding: 0.6rem 0.72rem; }
   body.agentic .ws-composer .run { padding: 0.72rem 1.05rem; font-size: 0.78rem; }
   body.agentic .ws-composer .clip { padding: 0.58rem 0.82rem; font-size: 0.62rem; }
+  /* resize handle is invisible and mis-tappable on phones — remove it */
+  #say { resize: none; }
 
   /* the nav can never break the bar — it scrolls horizontally if it must */
   .ws-nav { gap: 0.32rem; min-width: 0; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; }
@@ -1074,6 +1102,18 @@ body.agentic, .ws-shell, .ws-center, .ws-topbar { max-width: 100vw; overflow-x: 
   /* long answers, URLs, and pasted text wrap instead of overflowing */
   body.agentic .turn.you .ubody { max-width: 88%; }
   body.agentic .reality, body.agentic .ubody, body.agentic .sysbody { overflow-wrap: break-word; }
+
+  /* iOS rubber-band scroll on the thread must not bounce the whole page out from under
+     the composer — contain it to the thread's own scroll container. */
+  body.agentic .ws-thread { overscroll-behavior: contain; }
+
+  /* while the keyboard is open, --app-h already accounts for it so safe-area padding
+     at the bottom is gone (the keyboard sits where it was). When the keyboard is closed
+     the padding comes back via the normal rule above. */
+  body.agentic.kb-open .pandora-chat-root { padding-bottom: 0.5rem; }
+
+  /* last bubble must not clip behind the composer — a small extra pad gives it air */
+  body.agentic .ws-thread > :last-child { margin-bottom: 0.5rem; }
 }
 
 @media (max-width: 480px) {

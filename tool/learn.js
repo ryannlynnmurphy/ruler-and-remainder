@@ -30,9 +30,28 @@ function sourcesBlock(s) {
   const n = (s.corpus ? s.corpus.length : 0) + (s.web ? s.web.length : 0);
   return `<details class="sources"><summary>sources · ${n}</summary><ul>${items}</ul></details>`;
 }
+// The completion floor, made visible. A streamed answer is only ever presented as
+// finished when the backend said so (status:"complete"); every other terminal state
+// gets its own honest, distinct note instead of pretending the answer is whole.
+function finishNote(m) {
+  switch (m.finish) {
+    case "incomplete":
+      return `<div class="finish-note warn">Dorothy hit the length limit and stopped mid-thought — this answer is unfinished. Ask her to keep going.</div>`;
+    case "interrupted":
+      return `<div class="finish-note warn">The connection dropped before Dorothy finished. What's above is only part of the answer — try again.</div>`;
+    case "error":
+      return `<div class="finish-note err">${esc(m.errorMsg || "Something interrupted this answer.")}${m.content ? " The part above may be incomplete." : ""}</div>`;
+    case "refusal":
+      return `<div class="finish-note muted">Dorothy declined to answer that one.</div>`;
+    case "stopped":
+      return `<div class="finish-note muted">You stopped this${m.content ? " one — it's partial" : " before Dorothy answered"}.</div>`;
+    default:
+      return ""; // "complete" or a canned/welcome turn — nothing to flag
+  }
+}
 function mdToHtml(md) {
   const lines = md.split("\n");
-  let html = "", listType = null, inQuote = false;
+  let html = "", listType = null, inQuote = false, inCode = false, code = "";
   const inline = (t) => esc(t)
     .replace(/`([^`]+)`/g, "<code>$1</code>")
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
@@ -43,6 +62,15 @@ function mdToHtml(md) {
   const closeList = () => { if (listType) { html += `</${listType}>`; listType = null; } };
   const closeQuote = () => { if (inQuote) { html += "</blockquote>"; inQuote = false; } };
   for (const raw of lines) {
+    // fenced code blocks (``` … ```): raw, escaped, never inline-processed, and
+    // wrapped/scrolled by CSS so code can't break the layout on a phone. An unclosed
+    // fence (common mid-stream) still renders as code — see the flush after the loop.
+    if (raw.trim().startsWith("```")) {
+      if (inCode) { html += `<pre><code>${esc(code)}</code></pre>`; inCode = false; code = ""; }
+      else { closeList(); closeQuote(); inCode = true; code = ""; }
+      continue;
+    }
+    if (inCode) { code += (code ? "\n" : "") + raw; continue; }
     const l = raw.trim();
     let m;
     if (!l) { closeList(); closeQuote(); continue; }
@@ -53,6 +81,7 @@ function mdToHtml(md) {
     else { closeList(); closeQuote(); html += `<p>${inline(l)}</p>`; }
   }
   closeList(); closeQuote();
+  if (inCode) html += `<pre><code>${esc(code)}</code></pre>`; // unterminated fence (mid-stream)
   return html;
 }
 
@@ -340,12 +369,17 @@ function bootLearn() {
       if (m.thinking) inner += `<details class="thinkblock"${m.streaming ? " open" : ""}><summary>thinking</summary><div class="thinktext">${esc(m.thinking)}</div></details>`;
       if (m.content) inner += `<div class="reality">${mdToHtml(m.content)}</div>`;
       else if (!m.thinking && (m.pending || m.streaming)) inner += `<p class="thinking">thinking…</p>`;
-      // once a real answer has settled (m.model is set on API turns, not on the canned
-      // welcome or slash notices): copy it, see why it routed where it did, check its sources
-      if (m.content && m.model && !m.streaming && !m.pending) {
-        const why = routeWhy(m.routed);
-        inner += `<div class="ansbar"><button class="ans-act" type="button" data-copy="${i}">copy</button>` +
-          (why ? `<span class="routed">${esc(why)}</span>` : "") + `</div>` + sourcesBlock(m.sources);
+      // once the turn has settled, declare the floor it landed on: a truncated,
+      // interrupted, or errored answer is shown as visibly distinct from a clean one —
+      // the UI never lets a cut-off response pass for a finished one.
+      if (!m.streaming && !m.pending) {
+        inner += finishNote(m);
+        // copy / route-why / sources only when there's a real settled answer to stand behind
+        if (m.content && m.model) {
+          const why = routeWhy(m.routed);
+          inner += `<div class="ansbar"><button class="ans-act" type="button" data-copy="${i}">copy</button>` +
+            (why ? `<span class="routed">${esc(why)}</span>` : "") + `</div>` + sourcesBlock(m.sources);
+        }
       }
       return `<div class="turn dram"><span class="who">dorothy${tag}</span>${inner}</div>`;
     }
@@ -563,7 +597,7 @@ function bootLearn() {
         if (!res.ok || !res.body) {
           let err = "something went wrong — try again.";
           try { const d = await res.json(); if (d && d.error) err = d.error; } catch {}
-          pend.content = err;
+          pend.errorMsg = err; pend.finish = "error"; // a clean HTTP error (rate limit, config) — shown as such, not as an answer
         } else {
           const reader = res.body.getReader(), dec = new TextDecoder();
           let buf = "", streamErr = null;
@@ -596,25 +630,37 @@ function bootLearn() {
                 wsEmit("run-route", { routed: d.routed, model: d.model, search: !!(d.routed && d.routed.search) });
               }
               else if (ev === "sources") { pend.sources = d; wsEmit("run-sources", { sources: d }); }
-              else if (ev === "done") { if (d.model) pend.model = d.model; }
-              else if (ev === "error") { streamErr = d.message || "the machine hit an error."; }
+              else if (ev === "done") {
+                if (d.model) pend.model = d.model;
+                pend.stopReason = d.stop_reason || null;
+                if (pend.finish !== "error") pend.finish = d.status || "complete"; // an error already seen outranks a clean close
+              }
+              else if (ev === "error") {
+                streamErr = d.message || "the machine hit an error.";
+                pend.errorMsg = streamErr; pend.finish = "error"; // surfaced even when partial text already streamed — never swallowed
+              }
             }
           }
-          if (streamErr && !pend.content) pend.content = streamErr;
-          if (!pend.content && !pend.thinking) pend.content = "the machine returned nothing readable. try again.";
+          // completion detection: a clean stream ALWAYS ends with a `done` (or `error`)
+          // event. If we drained the reader without one, the connection was cut —
+          // keep whatever streamed and mark it interrupted rather than calling it done.
+          if (!pend.finish) pend.finish = "interrupted";
+          if (!pend.content && !pend.thinking && !streamErr) pend.content = "the machine returned nothing readable. try again.";
         }
       } catch (err) {
         if (err && err.name === "AbortError") {
-          if (!pend.content && !pend.thinking) pend.content = "_(stopped)_";
+          pend.finish = "stopped";
           wsEmit("run-stop");
         } else {
-          if (!pend.content) pend.content = "couldn't reach the dramaturg. try again in a moment.";
-          wsEmit("run-error", { message: pend.content });
+          pend.finish = "error";
+          pend.errorMsg = "couldn't reach the dramaturg. try again in a moment.";
+          wsEmit("run-error", { message: pend.errorMsg });
         }
       } finally {
         pend.pending = false; pend.streaming = false;
         aborter = null; sendBtn.textContent = "send"; sendBtn.classList.remove("stopping"); draw(); persistChat();
-        if (pend.content && pend.content !== "_(stopped)_") {
+        // only call a turn "complete" to the workstation shell when it actually finished cleanly
+        if (pend.content && pend.finish === "complete") {
           wsEmit("run-complete", { routed: pend.routed, model: pend.model, sources: pend.sources, turns: chatMessages.filter((m) => !m.pending).length });
         }
         sayEl.focus();

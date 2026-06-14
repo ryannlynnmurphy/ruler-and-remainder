@@ -126,7 +126,7 @@ function toOllamaMessages(messages, system, image) {
 // ({ message:{content}, done }), not SSE — we translate. Returns { ok, got }:
 // got=true means it produced text (keep it); ok=false means the endpoint failed.
 async function streamOllama(send, { model, messages, system, image, signal }) {
-  let got = false;
+  let got = false, reason = null;
   try {
     const r = await fetch(`${OLLAMA_URL}/api/chat`, {
       method: "POST",
@@ -134,7 +134,7 @@ async function streamOllama(send, { model, messages, system, image, signal }) {
       body: JSON.stringify({ model, stream: true, messages: toOllamaMessages(messages, system, image) }),
       signal,
     });
-    if (!r.ok || !r.body) return { ok: false, got };
+    if (!r.ok || !r.body) return { ok: false, got, reason };
     const reader = r.body.getReader();
     const dec = new TextDecoder();
     let buf = "";
@@ -149,12 +149,14 @@ async function streamOllama(send, { model, messages, system, image, signal }) {
         let d; try { d = JSON.parse(line); } catch { continue; }
         const piece = d.message && d.message.content;
         if (piece) { got = true; send("text", { delta: piece }); }
-        if (d.error) return { ok: false, got };
+        if (d.done && d.done_reason) reason = d.done_reason; // "stop" = complete, "length" = truncated
+        if (d.error) return { ok: false, got, reason };
       }
     }
-    return { ok: true, got };
+    return { ok: true, got, reason };
   } catch {
-    return { ok: false, got };
+    // a deliberate abort (timeout/budget) is not a hard failure — surface what we have
+    return { ok: false, got, reason };
   }
 }
 
@@ -180,6 +182,18 @@ HOW TO TEACH:
 - **You are the one interface — do the work here.** When someone pastes a headline, a marketing claim, or a paragraph, read it yourself, right here: find what's true in it, ground it in the corpus, name where confidence outruns reality (A vs B), tier it. Never make a person leave the chat to get an answer you can give. There are two deeper, optional pages for when someone explicitly wants a dedicated surface — the **Lens** (a single structured reading view) and the **Studio** (for working with a collected set of documents) — reachable by typing \`/lens [text]\` or \`/studio\`. Mention them rarely; default to just doing it here.
 
 VOICE: warm, real, plainspoken, funny, and cutting — light on your feet, a little grand, allergic to fog and to flattery both. Levity is your way in: a dry aside or a wink disarms faster than a lecture, and you lead with it. You read a claim clearly and you don't soften the truth to be liked. Short. Prose, not bullet-point walls. Never folksy, never corporate-neutral, never a caricature or a costume — just a real person who is very good at this and won't waste your time. Make every corpus term legible the moment you use it. You can web_search for a current fact, then tier it.
+
+GROUNDED SYNTHESIS — the discipline that keeps the method honest in this workspace:
+When a question involves current events, companies, markets, laws, regulatory language, funding, IPOs, product launches, AI claims, or public figures: **stabilize the fact pattern first, then narrate.** The failure mode this prevents is called Premature Narrative Lock-In — the machine gets a shiny premise and immediately builds a polished story on top of it before checking whether the premise is actually true. That is a CRD violation on your own output, which is embarrassing.
+
+The sequence you run internally (do not expose this as a visible list to the user unless they explicitly ask for the method):
+1. **Verify first.** Is the claim you are about to rely on [established]? If not, say so before building on it. If it is [speculative] or unverified, do not treat it as the floor.
+2. **Separate facts from inferences.** "SpaceX went public" is either a fact or it isn't. "Therefore cybersecurity companies benefit" is an inference — label it as such. The two layers are never allowed to look the same.
+3. **Decide what the user actually wants.** Analysis? A draft? Strategy? Research? Do only that. Don't deliver a LinkedIn post when they asked for a read.
+4. **Label uncertainty where it lands.** Don't front-load disclaimers — weave them in where they're needed, in Dorothy's voice. "This is the inference, not the fact" is a complete sentence. "That's [exploratory] until someone runs the numbers" is a complete sentence.
+5. **Output hygiene.** Don't expose raw planning, tool labels, reasoning traces, or unfiltered source dumps in the final answer. If you web_searched, present what you found cleanly; do not describe the search process unless it's relevant. If visuals appeared in search results, do not describe them unless the user asked about visuals.
+
+When in doubt on a strategic question, structure it: the grounded fact pattern → what it directly implies → what it only suggests → what to avoid claiming → what's actually usable.
 
 There is no wrong place to start. Begin.`;
 
@@ -260,7 +274,7 @@ async function runModel(model, messages, useWebSearch, system = SYSTEM) {
 async function pipeAnthropicStream(r, send) {
   const reader = r.body.getReader();
   const decoder = new TextDecoder();
-  let buf = "", stopReason = null, hadText = false;
+  let buf = "", stopReason = null, hadText = false, sawError = false;
   const blocks = [];
   while (true) {
     const { done, value } = await reader.read();
@@ -289,11 +303,12 @@ async function pipeAnthropicStream(r, send) {
         if (d.delta && d.delta.stop_reason) stopReason = d.delta.stop_reason;
       } else if (d.type === "error") {
         send("error", { message: (d.error && d.error.message) || "stream error" });
+        sawError = true;
       }
     }
   }
   for (const b of blocks) { if (b && b._json !== undefined) { try { b.input = JSON.parse(b._json); } catch {} delete b._json; } }
-  return { stopReason, assistantContent: blocks.filter(Boolean), hadText };
+  return { stopReason, assistantContent: blocks.filter(Boolean), hadText, sawError };
 }
 
 // Pull the web pages a web_search turn actually returned, so the answer can show
@@ -312,6 +327,24 @@ function dedupeByUrl(list) {
   const seen = new Set(), out = [];
   for (const s of list) { if (s.url && !seen.has(s.url)) { seen.add(s.url); out.push(s); } }
   return out.slice(0, 8);
+}
+
+// Map a model's terminal stop reason to the completion status the client renders.
+// This is the spine of "never present a truncated answer as a complete one":
+// the backend declares the floor the answer is standing on.
+//   complete   — the model chose to stop (end_turn / stop_sequence / ollama "stop")
+//   incomplete — hit a hard ceiling and was cut mid-thought (max_tokens / length / out of tool turns)
+//   refusal    — the model declined
+//   error      — an upstream failure interrupted the stream
+function completionStatus(stopReason, errored) {
+  if (errored) return "error";
+  switch (stopReason) {
+    case "max_tokens":
+    case "length":
+    case "pause_turn": return "incomplete";
+    case "refusal": return "refusal";
+    default: return "complete"; // end_turn, stop_sequence, ollama "stop", or unknown clean close
+  }
 }
 
 async function streamAnswer(res, { model, messages, useSearch, system, thinkingOn, effort, meta, image, local, noEscalate }) {
@@ -335,14 +368,14 @@ async function streamAnswer(res, { model, messages, useSearch, system, thinkingO
     if (out.got) {
       const corpus = (meta.grounded && meta.grounded.sources) || [];
       if (corpus.length) send("sources", { corpus, web: [] }); // local can't web_search; corpus receipts still apply
-      send("done", { model: local });
+      send("done", { model: local, stop_reason: out.reason, status: completionStatus(out.reason, false) });
       res.end();
       return;
     }
     if (!out.ok) ollamaDown = true;  // unreachable — stop probing it for the rest of this process
     if (noEscalate) { // local-only: never touch the cloud — fail closed, honestly
       send("error", { message: "local-only: the local node didn't answer. it may be offline — switch to auto to use the cloud." });
-      send("done", { model: local });
+      send("done", { model: local, status: "error" });
       res.end();
       return;
     }
@@ -359,6 +392,10 @@ async function streamAnswer(res, { model, messages, useSearch, system, thinkingO
   if (useSearch) base.tools = [{ type: "web_search_20260209", name: "web_search" }];
   const webSources = []; // the pages Dorothy actually read this turn — handed back as receipts
   let convo = withImage(messages, image); // attach the image to the last user turn for the cloud model
+  let finalStop = null, errored = false;
+  // Heartbeat: SSE comment lines keep the connection from being idle-closed by a
+  // proxy during long thinking. They carry no data, so the client parser ignores them.
+  const heartbeat = setInterval(() => { try { res.write(`: keep-alive\n\n`); } catch {} }, 15000);
   try {
     for (let turn = 0; turn < 4; turn++) {
       const r = await fetch("https://api.anthropic.com/v1/messages", {
@@ -370,21 +407,30 @@ async function streamAnswer(res, { model, messages, useSearch, system, thinkingO
         let msg = `${r.status} ${r.statusText}`;
         try { const e = await r.json(); if (e?.error?.message) msg = e.error.message; } catch {}
         send("error", { message: msg });
+        errored = true;
         break;
       }
-      const { stopReason, assistantContent } = await pipeAnthropicStream(r, send);
+      const { stopReason, assistantContent, sawError } = await pipeAnthropicStream(r, send);
+      finalStop = stopReason;
+      if (sawError) errored = true;
       collectWebSources(assistantContent, webSources);
       if (stopReason === "pause_turn") { convo = [...convo, { role: "assistant", content: assistantContent }]; continue; }
       break;
     }
   } catch (e) {
     send("error", { message: "the machine dropped the line. try again in a moment." });
+    errored = true;
+  } finally {
+    clearInterval(heartbeat);
   }
   // receipts: the corpus passages grounded in + any web pages read
   const corpus = (meta.grounded && meta.grounded.sources) || [];
   const web = dedupeByUrl(webSources);
   if (corpus.length || web.length) send("sources", { corpus, web });
-  send("done", { model });
+  // the single terminal marker: model, the raw stop reason, and the status the UI
+  // renders. Its presence is also how the client knows the stream closed cleanly
+  // (vs. a dropped connection, where no `done` ever arrives).
+  send("done", { model, stop_reason: finalStop, status: completionStatus(finalStop, errored) });
   res.end();
 }
 

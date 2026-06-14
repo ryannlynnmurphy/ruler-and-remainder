@@ -168,6 +168,26 @@
 <script src="/workstation.js"></script>
 <script>
 (function(){
+  // ---- iPhone Safari: keep the composer above the on-screen keyboard ----
+  // iOS does not shrink 100dvh when the keyboard opens, so a bottom-anchored composer
+  // slides behind it. Drive the shell height from the *visual* viewport instead, and
+  // pin the page while typing so it can't scroll the composer out of reach. Guarded:
+  // browsers without visualViewport keep the 100dvh fallback unchanged.
+  (function keyboardAwareViewport(){
+    var vv = window.visualViewport;
+    var root = document.documentElement, raf = 0;
+    if (vv) {
+      var sync = function(){ raf = 0; root.style.setProperty("--app-h", Math.round(vv.height) + "px"); };
+      var onChange = function(){ if (!raf) raf = requestAnimationFrame(sync); };
+      vv.addEventListener("resize", onChange);
+      vv.addEventListener("scroll", onChange);
+      sync();
+    }
+    // lock page scroll only while the message box is focused (keyboard up)
+    document.addEventListener("focusin", function(e){ if (e.target && e.target.id === "say") document.body.classList.add("kb-open"); });
+    document.addEventListener("focusout", function(e){ if (e.target && e.target.id === "say") document.body.classList.remove("kb-open"); });
+  })();
+
   var hist = document.getElementById("hist"), SKEY = "rr_sessions";
   function read(){ try { return JSON.parse(localStorage.getItem(SKEY)||"[]"); } catch(e){ return []; } }
   function ago(t){ var s=Math.max(0,(Date.now()-t)/1000); if(s<60)return"just now"; if(s<3600)return Math.floor(s/60)+"m"; if(s<86400)return Math.floor(s/3600)+"h"; return Math.floor(s/86400)+"d"; }
