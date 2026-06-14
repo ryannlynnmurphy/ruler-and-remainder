@@ -578,7 +578,6 @@ function bootLearn() {
       const pend = { role: "assistant", content: "", thinking: "", pending: true, streaming: true };
       chatMessages.push(pend);
       draw();
-      scrollIntoTop(".turn.you"); // bring their message to the top once; then leave the scroll to them
 
       // coalesce redraws to one per frame so a fast stream stays smooth
       let queued = false;
