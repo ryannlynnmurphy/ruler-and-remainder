@@ -881,7 +881,7 @@ body.agentic:has(.ws-shell.is-open) { min-height: 100dvh; }
 }
 .ws-navbtn:hover { border-color: #57514a; background: #262219; color: var(--paper); }
 .ws-navbtn[aria-pressed="true"], .ws-navbtn[aria-expanded="true"] { background: var(--measure); border-color: var(--measure); color: var(--paper); }
-.ws-tools-wrap { position: relative; display: inline-flex; }
+.ws-tools-wrap { position: relative; display: inline-flex; z-index: 50; }
 
 .ws-stop {
   font-family: var(--mono); font-size: 0.62rem; font-weight: 500; letter-spacing: 0.04em;
