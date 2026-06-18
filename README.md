@@ -1,4 +1,4 @@
-# Narrative Intelligence
+# Dorothy 
 
 A research corpus and book by Ryann Murphy — the study of how systems read the
 world into legible categories, what they cannot see, and who pays for what stays
